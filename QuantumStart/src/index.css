@@ -18,16 +18,23 @@ a {
   color: #1976d2;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #1565c0;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  width: 100%;
   min-height: 100vh;
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
   color: #1a1a1a;
   background-color: #f0f0f0;
 }
@@ -50,10 +57,12 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #1976d2;
   color: #1976d2;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
