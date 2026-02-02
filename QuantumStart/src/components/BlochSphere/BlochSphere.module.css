@@ -18,6 +18,7 @@
 .label {
   font-size: 0.9rem;
   font-weight: 600;
+  color: #1a1a1a;
 }
 
 .qubitSelector {
@@ -37,6 +38,7 @@
   border: 1px solid var(--qs-border, #ccc);
   border-radius: 4px;
   background: var(--qs-bg, #fff);
+  color: #1a1a1a;
   cursor: pointer;
 }
 

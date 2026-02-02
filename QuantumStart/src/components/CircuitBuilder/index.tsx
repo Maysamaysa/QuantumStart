@@ -91,7 +91,7 @@ export function CircuitBuilder({ circuit }: CircuitBuilderProps) {
         }
       }
     },
-    [addGate, moveGate]
+    [addGate, moveGate, gates.length]
   );
 
   const sortableIds = gates.map((_, i) => `circuit-${i}`);
@@ -121,12 +121,12 @@ export function CircuitBuilder({ circuit }: CircuitBuilderProps) {
         </button>
       </div>
       <div className={styles.main}>
-        <GatePalette />
         <DndContext
           sensors={sensors}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
+          <GatePalette />
           <SortableContext
             items={sortableIds}
             strategy={horizontalListSortingStrategy}

@@ -5,6 +5,7 @@
   border-radius: 6px;
   border: 1px solid var(--qs-border, #ddd);
   font-size: 0.9rem;
+  color: #1a1a1a;
 }
 
 .hint summary {
@@ -26,6 +27,7 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  color: #1a1a1a;
 }
 
 .complete a {

@@ -9,6 +9,7 @@
   margin: 0 0 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
+  color: #1a1a1a;
 }
 
 .ket {
@@ -23,6 +24,7 @@
 .ket code {
   font-size: 0.85rem;
   font-family: ui-monospace, monospace;
+  color: #1a1a1a;
 }
 
 .probs {
@@ -48,6 +50,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
+  color: #1a1a1a;
 }
 
 .basisLabel {

@@ -4,6 +4,7 @@
   margin: 0 auto;
   padding: 1.5rem;
   text-align: left;
+  color: #1a1a1a;
 }
 
 .app-header {
@@ -13,6 +14,7 @@
 .app-header h1 {
   margin: 0 0 0.25rem;
   font-size: 1.75rem;
+  color: #1a1a1a;
 }
 
 .app-header p {

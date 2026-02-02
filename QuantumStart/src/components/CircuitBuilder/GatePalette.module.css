@@ -9,6 +9,7 @@
   margin: 0 0 0.75rem;
   font-size: 0.9rem;
   font-weight: 600;
+  color: #1a1a1a;
 }
 
 .section {
@@ -39,6 +40,7 @@
   border: 1px solid var(--qs-border, #ccc);
   border-radius: 6px;
   background: var(--qs-bg, #fff);
+  color: #1a1a1a;
   cursor: grab;
   transition: box-shadow 0.15s, opacity 0.15s;
 }
