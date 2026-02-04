@@ -26,7 +26,7 @@ export function Landing() {
                 <Suspense fallback={null}>
                     {/* Lighting for the cat */}
                     <ambientLight intensity={0.8} />
-                    <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
+                    <directionalLight position={[5, 5, 5]} intensity={1.5} castShadow />
                     <pointLight position={[-5, 3, -5]} intensity={0.8} color="#8b5cf6" />
                     <pointLight position={[5, 3, 5]} intensity={0.6} color="#6366f1" />
 
@@ -40,7 +40,8 @@ export function Landing() {
                     {/* <Cat /> */}
                 </Suspense>
             </Canvas>
-            <div className={styles.hero}>
+
+            {/* <div className={styles.hero}>
                 <h1 className={styles.title}>
                     Quantum<span className={styles.highlight}>Start</span>
                 </h1>
@@ -91,7 +92,7 @@ export function Landing() {
                     <h3>Experiment</h3>
                     <p>See real-time quantum state evolution</p>
                 </div>
-            </div>
+            </div> */}
         </section >
     );
 }
