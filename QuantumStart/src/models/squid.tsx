@@ -56,7 +56,7 @@ function Squid() {
         <group ref={group} position={[0, 0, 0]}>
             <primitive
                 object={scene}
-                scale={1}
+                scale={0.5}
             />
         </group>
     )

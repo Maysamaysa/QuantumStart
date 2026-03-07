@@ -30,12 +30,12 @@ function ZBubble({ index }: { index: number }) {
         <group ref={ref}>
             <Html center>
                 <div style={{
-                    color: '#5DA7DB',
+                    color: '#ffffffff',
                     fontSize: `${1.5 + index * 0.5}rem`,
                     fontWeight: 900,
-                    opacity: 0.6,
+                    opacity: 0.8,
                     filter: 'blur(1px)',
-                    textShadow: '0 0 10px rgba(93, 167, 219, 0.4)',
+                    textShadow: '0 0 10px rgba(0, 0, 0, 0.4)',
                     fontFamily: 'Outfit, sans-serif',
                     pointerEvents: 'none',
                     userSelect: 'none'
@@ -170,6 +170,9 @@ function KoiCat({ onAnimationComplete }: KoiCatProps) {
                     // Rotate from back (PI) to front (0 or 2PI)
                     // We'll go from PI to 2PI for a clockwise turn
                     group.current.rotation.y = Math.PI + (turnEase * Math.PI)
+
+                    // float to the left a little
+                    group.current.position.x = (-turnEase * 2) + 1
 
                     // Call completion only once
                     if (awakeProgressRef.current >= 1 && onAnimationComplete) {
