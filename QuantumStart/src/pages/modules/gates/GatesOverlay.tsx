@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styles from './GatesOverlay.module.css'
 import type { GatePhase } from './GatesModule'
 import { GATES, applyGate1Q, INITIAL_STATE, formatStateString } from './gateLogic'
@@ -73,20 +74,34 @@ const GATE_DATA: Record<string, any> = {
 }
 
 // ─── Phase 1 Intro ───
-function Phase1Intro({ unlockedGates, unlockGate, selectedGate, setSelectedGate, setAnimState, onComplete }: any) {
+interface Phase1IntroProps {
+    unlockedGates: string[]
+    unlockGate: (id: string) => void
+    selectedGate: string | null
+    setSelectedGate: (v: string | null) => void
+    setAnimState: (v: State1Q) => void
+    onComplete: (p: GatePhase) => void
+}
+
+function Phase1Intro({ unlockedGates, unlockGate, selectedGate, setSelectedGate, setAnimState, onComplete }: Phase1IntroProps) {
     const [qStep, setQStep] = useState(0)
     const [msg, setMsg] = useState('Click a glowing gate to examine it!')
     const data = selectedGate ? GATE_DATA[selectedGate] : null
+    const currentStateRef = useRef<State1Q>([1, 0, 0, 0])
 
     useEffect(() => {
         if (!selectedGate) {
-            setAnimState(INITIAL_STATE)
+            const initial: State1Q = [1, 0, 0, 0]
+            currentStateRef.current = initial
+            setAnimState(initial)
             setQStep(0)
             setMsg('Click a glowing gate to examine it!')
         } else {
             setMsg(`Ah, the ${data.name} gate. What does it do?`)
             const timer = setInterval(() => {
-                setAnimState((prev: State1Q) => applyGate1Q(GATES[selectedGate as keyof typeof GATES] || GATES.H, prev))
+                const next = applyGate1Q(GATES[selectedGate as keyof typeof GATES] || GATES.H, currentStateRef.current)
+                currentStateRef.current = next
+                setAnimState(next)
             }, 3000)
             return () => clearInterval(timer)
         }
@@ -176,7 +191,19 @@ const CHALLENGES = [
     { text: "Challenge 3: Entangle two qubits", target: "Entangled", hint: "Put the first qubit in superposition, then use CNOT." }
 ]
 
-function Phase2Challenges({ challengeIdx, setChallengeIdx, wireState1, setWireState1, wireState2, setWireState2, isEntangled, setIsEntangled, onComplete }: any) {
+interface Phase2ChallengesProps {
+    challengeIdx: number
+    setChallengeIdx: (v: number) => void
+    wireState1: State1Q
+    setWireState1: (v: State1Q) => void
+    wireState2: State1Q
+    setWireState2: (v: State1Q) => void
+    isEntangled: boolean
+    setIsEntangled: (v: boolean) => void
+    onComplete: (p: GatePhase) => void
+}
+
+function Phase2Challenges({ challengeIdx, setChallengeIdx, wireState1, setWireState1, wireState2, setWireState2, isEntangled, setIsEntangled, onComplete }: Phase2ChallengesProps) {
     const [msg, setMsg] = useState(CHALLENGES[challengeIdx].hint)
     
     // reset states when challenge changes
@@ -265,7 +292,11 @@ const FINAL_QUIZ = [
     { q: "To entangle two qubits, what sequence do we typically use?", opts: ["X then Z", "Two H gates", "H then CNOT", "Measured then X"], ans: 2 }
 ]
 
-function Phase3Quiz({ onComplete }: any) {
+interface Phase3QuizProps {
+    onComplete: (p: GatePhase) => void
+}
+
+function Phase3Quiz({ onComplete }: Phase3QuizProps) {
     const [idx, setIdx] = useState(0)
     const [msg, setMsg] = useState("Final verification. Let's see if you've mastered the building blocks.")
 
@@ -311,6 +342,7 @@ function Phase3Quiz({ onComplete }: any) {
 
 // ─── Complete Summary ───
 function GatesSummary() {
+    const navigate = useNavigate()
     return (
         <div style={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className={styles.glassPanel} style={{ maxWidth: '600px', textAlign: 'center' }}>
@@ -325,7 +357,11 @@ function GatesSummary() {
                      ))}
                 </div>
 
-                <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => window.location.href = '/learn'} style={{ width: 'auto', padding: '1rem 2rem' }}>
+                <button
+                    className={`${styles.btn} ${styles.btnPrimary}`}
+                    onClick={() => navigate('/learn')}
+                    style={{ width: 'auto', padding: '1rem 2rem', pointerEvents: 'auto' }}
+                >
                     Return to Hub
                 </button>
             </div>

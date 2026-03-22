@@ -4,7 +4,7 @@ import styles from './Profile.module.css'
 
 export function Profile() {
     const navigate = useNavigate()
-    const { progress, badges, resetProgress } = useProgress()
+    const { progress, badges, resetProgress, toggleDevMode } = useProgress()
 
     const TOTAL_MODULES = 7 // qubit, superposition, bloch, gates, measurement, entanglement, algorithms
 
@@ -113,6 +113,13 @@ style = {{ width: `${amberPercent}%` }}
         <button className={ styles.resetBtn } onClick = { handleReset } >
             Reset Quantum State(Clear Progress)
                 </button>
+        <button 
+            className={`${styles.resetBtn} ${progress.devMode ? styles.devModeActive : ''}`} 
+            style={{ marginLeft: '16px', borderColor: progress.devMode ? '#4ade80' : undefined, color: progress.devMode ? '#4ade80' : undefined }}
+            onClick={toggleDevMode}
+        >
+            {progress.devMode ? 'Disable Dev Mode' : 'Enable Dev Mode (Unlock All)'}
+        </button>
                 </div>
                 </div>
     )

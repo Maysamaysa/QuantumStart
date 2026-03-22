@@ -1,21 +1,21 @@
 /**
- * Module1.tsx — Shell for Module 1 "What is a Qubit?"
- * (src/pages/module1/Module1.tsx)
+ * QubitModule.tsx — Shell for Module 1 "What is a Qubit?"
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
-import { useCat } from '../../../context/CatContext'
+import { useState, useCallback } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
+import { useCat } from '../../../context/CatContext'
 import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
+import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import QubitScene from './QubitScene'
 import { QubitOverlay } from './QubitOverlay'
 import type { Phase, Track } from './QubitScene'
 
 export function QubitModule() {
-    const { setMode, setCatPosition, setQubitState } = useCat()
+    const { setQubitState } = useCat()
     const { completeModule } = useProgress()
+    useModuleCatSetup('corner', 'idle')
 
     const [phase, setPhase] = useState<Phase>('hook')
     const [track, setTrack] = useState<Track>(null)
@@ -26,13 +26,6 @@ export function QubitModule() {
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
     const [catRetreat, setCatRetreat] = useState(false)
-
-    // Configure global cat for this page
-    useEffect(() => {
-        setMode('npc')
-        setCatPosition('corner')
-        setQubitState('idle')
-    }, [setMode, setCatPosition, setQubitState])
 
     const handleTrackSelect = useCallback((t: 'blue' | 'amber') => {
         setTrack(t)
@@ -71,25 +64,18 @@ export function QubitModule() {
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
             {/* R3F scene (lesson-specific objects) */}
-            <Canvas
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                camera={{ position: [0, 0, 11], fov: 55 }}
-                gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-                dpr={[1, 2]}
-            >
-                <Suspense fallback={null}>
-                    <QubitScene
-                        track={track}
-                        phase={phase}
-                        onCatSettled={handleCatSettled}
-                        onCoinClick={() => { /* coin flip handled inside scene */ }}
-                        onSphereClick={handleSphereClick}
-                        quizCorrect={quizCorrect}
-                        showParticles={showParticles}
-                        catRetreat={catRetreat}
-                    />
-                </Suspense>
-            </Canvas>
+            <ModuleCanvas camera={{ position: [0, 0, 11], fov: 55 }}>
+                <QubitScene
+                    track={track}
+                    phase={phase}
+                    onCatSettled={handleCatSettled}
+                    onCoinClick={() => { /* coin flip handled inside scene */ }}
+                    onSphereClick={handleSphereClick}
+                    quizCorrect={quizCorrect}
+                    showParticles={showParticles}
+                    catRetreat={catRetreat}
+                />
+            </ModuleCanvas>
 
             {/* HTML overlay */}
             <QubitOverlay

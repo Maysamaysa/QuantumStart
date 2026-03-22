@@ -1,9 +1,8 @@
-import { useState, useCallback, useEffect } from 'react'
-import * as THREE from 'three'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
+import { useState, useCallback, useRef } from 'react'
+import { ACESFilmicToneMapping } from 'three'
 import { useProgress } from '../../../context/ProgressContext'
-import { useCat } from '../../../context/CatContext'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
+import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import EntanglementScene from './EntanglementScene'
 import { EntanglementOverlay } from './EntanglementOverlay'
 
@@ -11,7 +10,7 @@ export type Phase = 'concept' | 'collapse' | 'sandbox' | 'quiz' | 'complete'
 
 export function EntanglementModule() {
     const { completeModule } = useProgress()
-    const { setMode, setCatPosition } = useCat()
+    useModuleCatSetup('hidden')
     
     const [phase, setPhase] = useState<Phase>('concept')
     const [step, setStep] = useState(1)
@@ -27,10 +26,7 @@ export function EntanglementModule() {
     const [shotsTaken, setShotsTaken] = useState(0)
     const [quizQuestion, setQuizQuestion] = useState(1)
 
-    useEffect(() => {
-        setMode('npc')
-        setCatPosition('hidden') 
-    }, [setMode, setCatPosition])
+    const run50IntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
     const handleNext = useCallback(() => {
         if (phase === 'concept') {
@@ -84,10 +80,12 @@ export function EntanglementModule() {
 
     const handleRun50 = useCallback(() => {
         handleReset()
+        if (run50IntervalRef.current) clearInterval(run50IntervalRef.current)
         let shots = 0
-        const interval = setInterval(() => {
+        run50IntervalRef.current = setInterval(() => {
             if (shots >= 50) {
-                clearInterval(interval)
+                clearInterval(run50IntervalRef.current!)
+                run50IntervalRef.current = null
                 return
             }
             const roll = Math.random() < 0.5 ? 0 : 1
@@ -111,27 +109,25 @@ export function EntanglementModule() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto', background: '#0a0a14' }}>
-            <Canvas
+            <ModuleCanvas
                 camera={{ position: [0, 0, 15], fov: 50 }}
-                gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
-                style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+                gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+                style={{ pointerEvents: 'none' }}
             >
                 <ambientLight intensity={1.2} />
                 <directionalLight position={[5, 5, 5]} intensity={1.8} />
-                <Suspense fallback={null}>
-                    <EntanglementScene 
-                        phase={phase} 
-                        step={step} 
-                        isEntangled={isEntangled}
-                        isMeasured={isMeasured}
-                        outcome={outcome}
-                        qubitA={qubitA}
-                        setQubitA={setQubitA}
-                        qubitB={qubitB}
-                        setQubitB={setQubitB}
-                    />
-                </Suspense>
-            </Canvas>
+                <EntanglementScene 
+                    phase={phase} 
+                    step={step} 
+                    isEntangled={isEntangled}
+                    isMeasured={isMeasured}
+                    outcome={outcome}
+                    qubitA={qubitA}
+                    setQubitA={setQubitA}
+                    qubitB={qubitB}
+                    setQubitB={setQubitB}
+                />
+            </ModuleCanvas>
 
             <EntanglementOverlay 
                 phase={phase}

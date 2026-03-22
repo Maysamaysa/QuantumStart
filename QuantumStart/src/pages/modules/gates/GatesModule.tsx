@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
-import { useCat } from '../../../context/CatContext'
 import { useProgress } from '../../../context/ProgressContext'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
+import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import GatesScene from './GatesScene'
 import { GatesOverlay } from './GatesOverlay'
 import type { State1Q } from './gateLogic'
@@ -11,8 +10,8 @@ import type { State1Q } from './gateLogic'
 export type GatePhase = 'phase1_intro' | 'phase2_challenges' | 'phase3_quiz' | 'complete'
 
 export function GatesModule() {
-    const { setMode, setCatPosition, setQubitState } = useCat()
     const { completeModule } = useProgress()
+    useModuleCatSetup('corner', 'idle')
 
     const [phase, setPhase] = useState<GatePhase>('phase1_intro')
     const { panelsVisible } = useCatNPCTransition(true)
@@ -41,10 +40,8 @@ export function GatesModule() {
     }, [])
 
     useEffect(() => {
-        setMode('npc')
-        setCatPosition('corner')
-        setQubitState('idle')
-    }, [setMode, setCatPosition, setQubitState])
+        // Keep panelsVisible transition behaviour consistent
+    }, [])
 
 
     const handlePhaseComplete = useCallback((completedPhase: GatePhase) => {
@@ -52,33 +49,26 @@ export function GatesModule() {
         else if (completedPhase === 'phase2_challenges') setPhase('phase3_quiz')
         else if (completedPhase === 'phase3_quiz') {
             setPhase('complete')
-            completeModule('gates', 'blue') // Assuming default track 'blue' for completion
+            completeModule('gates', 'blue')
         }
     }, [completeModule])
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
             {/* R3F scene (lesson-specific objects) */}
-            <Canvas
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                camera={{ position: [0, 0, 11], fov: 55 }}
-                gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-                dpr={[1, 2]}
-            >
-                <Suspense fallback={null}>
-                    <GatesScene
-                        phase={phase}
-                        unlockedGates={unlockedGates}
-                        selectedGate={selectedGate}
-                        onSelectGate={setSelectedGate}
-                        animState={animState}
-                        challengeIdx={challengeIdx}
-                        wireState1={wireState1}
-                        wireState2={wireState2}
-                        isEntangled={isEntangled}
-                    />
-                </Suspense>
-            </Canvas>
+            <ModuleCanvas camera={{ position: [0, 0, 11], fov: 55 }}>
+                <GatesScene
+                    phase={phase}
+                    unlockedGates={unlockedGates}
+                    selectedGate={selectedGate}
+                    onSelectGate={setSelectedGate}
+                    animState={animState}
+                    challengeIdx={challengeIdx}
+                    wireState1={wireState1}
+                    wireState2={wireState2}
+                    isEntangled={isEntangled}
+                />
+            </ModuleCanvas>
 
             {/* HTML overlay */}
             <GatesOverlay

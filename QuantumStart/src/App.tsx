@@ -17,6 +17,7 @@ import { BlochSphereModule } from './pages/modules/bloch/BlochSphereModule'
 import { MeasurementModule } from './pages/modules/measurement/MeasurementModule'
 import { EntanglementModule } from './pages/modules/entanglement/EntanglementModule'
 import { GatesModule } from './pages/modules/gates/GatesModule'
+import { AlgorithmsModule } from './pages/modules/algorithms/AlgorithmsModule'
 import './App.css'
 
 // ─── GLOBAL CAT CANVAS ────────────────────────────────────────────────────────
@@ -95,6 +96,7 @@ function AppShell() {
             <Route path="/learn/measurement" element={<MeasurementModule />} />
             <Route path="/learn/entanglement" element={<EntanglementModule />} />
             <Route path="/learn/gates" element={<GatesModule />} />
+            <Route path="/learn/algorithms" element={<AlgorithmsModule />} />
             <Route path="/playground" element={<Playground />} />
             <Route path="/tutorial/:id" element={<TutorialChallenge />} />
           </Routes>

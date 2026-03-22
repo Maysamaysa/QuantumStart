@@ -2,18 +2,17 @@
  * BlochSphereModule.tsx — Shell for Module 3 "Bloch Sphere"
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
-import { useCat } from '../../../context/CatContext'
+import { useState, useCallback } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
+import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import BlochSphereScene from './BlochSphereScene'
 import { BlochSphereOverlay } from './BlochSphereOverlay'
 
 export function BlochSphereModule() {
-    const { setMode, setCatPosition, setQubitState } = useCat()
     const { completeModule, unlockBadge } = useProgress()
+    useModuleCatSetup('hidden', 'amber')
 
     // Linear steps: 1 to 5, then 'sandbox', then 'quiz', then 'complete'
     const [step, setStep] = useState<number | 'sandbox' | 'quiz' | 'complete'>(1)
@@ -30,13 +29,6 @@ export function BlochSphereModule() {
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
     const [catRetreat, setCatRetreat] = useState(false)
-
-    // Configure global cat for this page
-    useEffect(() => {
-        setMode('npc')
-        setCatPosition('hidden') // Hide cat for Bloch Sphere
-        setQubitState('amber') // Default to technical look
-    }, [setMode, setCatPosition, setQubitState])
 
     const handleCatSettled = useCallback(() => setCatSettled(true), [])
 
@@ -105,25 +97,18 @@ export function BlochSphereModule() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
-            <Canvas
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                camera={{ position: [0, 3, 14], fov: 55 }}
-                gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-                dpr={[1, 2]}
-            >
-                <Suspense fallback={null}>
-                    <BlochSphereScene
-                        step={step}
-                        theta={theta}
-                        phi={phi}
-                        onStateChange={handleStateChange}
-                        onCatSettled={handleCatSettled}
-                        quizCorrect={quizCorrect}
-                        showParticles={showParticles}
-                        catRetreat={catRetreat}
-                    />
-                </Suspense>
-            </Canvas>
+            <ModuleCanvas camera={{ position: [0, 3, 14], fov: 55 }}>
+                <BlochSphereScene
+                    step={step}
+                    theta={theta}
+                    phi={phi}
+                    onStateChange={handleStateChange}
+                    onCatSettled={handleCatSettled}
+                    quizCorrect={quizCorrect}
+                    showParticles={showParticles}
+                    catRetreat={catRetreat}
+                />
+            </ModuleCanvas>
 
             <BlochSphereOverlay
                 panelsVisible={panelsVisible}

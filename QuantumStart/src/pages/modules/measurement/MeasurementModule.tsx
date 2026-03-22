@@ -1,16 +1,16 @@
-import { useState, useCallback } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import MeasurementScene from './MeasurementScene'
 import { MeasurementOverlay } from './MeasurementOverlay'
 import { useProgress } from '../../../context/ProgressContext'
+import { ModuleCanvas } from '../../../components/ModuleCanvas'
 
 export type Phase = 'concept' | 'collapse' | 'sandbox' | 'quiz' | 'complete'
 export type Basis = 'Z' | 'X' | 'Y'
 
 export function MeasurementModule() {
     const { completeModule } = useProgress()
-    
+    const run50IntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
     const [phase, setPhase] = useState<Phase>('concept')
     const [step, setStep] = useState(1)
     const [shotsTaken, setShotsTaken] = useState(0)
@@ -78,10 +78,12 @@ export function MeasurementModule() {
 
     const handleRun50 = useCallback(() => {
         handleReset()
+        if (run50IntervalRef.current) clearInterval(run50IntervalRef.current)
         let shots = 0
-        const interval = setInterval(() => {
+        run50IntervalRef.current = setInterval(() => {
             if (shots >= 50) {
-                clearInterval(interval)
+                clearInterval(run50IntervalRef.current!)
+                run50IntervalRef.current = null
                 return
             }
             const p0 = getProb0()
@@ -105,25 +107,22 @@ export function MeasurementModule() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto', background: '#0a0a14' }}>
-            <Canvas
+            <ModuleCanvas
                 camera={{ position: [0, 0, 10], fov: 50 }}
-                gl={{ antialias: true, alpha: true }}
-                style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+                style={{ pointerEvents: 'none' }}
             >
                 <ambientLight intensity={1.2} />
                 <directionalLight position={[5, 5, 5]} intensity={1.8} />
-                <Suspense fallback={null}>
-                    <MeasurementScene 
-                        phase={phase} 
-                        step={step} 
-                        theta={theta} 
-                        phi={phi}
-                        isMeasured={isMeasured}
-                        measuredValue={measuredValue}
-                        basis={basis}
-                    />
-                </Suspense>
-            </Canvas>
+                <MeasurementScene 
+                    phase={phase} 
+                    step={step} 
+                    theta={theta} 
+                    phi={phi}
+                    isMeasured={isMeasured}
+                    measuredValue={measuredValue}
+                    basis={basis}
+                />
+            </ModuleCanvas>
 
             <MeasurementOverlay 
                 phase={phase}

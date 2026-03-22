@@ -653,7 +653,7 @@ export function Learn() {
  onClick = {() => !finished && skip()}
  style = {{ cursor: finished ? 'default' : 'pointer' }}
                     >
-                        <p className={styles.lessonText}>
+                        <p className={styles.dialogueText}>
                             {displayed as string}
                             {!finished && <span className={styles.cursor}>▊</span>}
                         </p>

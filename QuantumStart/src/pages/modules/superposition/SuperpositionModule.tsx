@@ -1,20 +1,21 @@
 /**
- * Module2.tsx — Shell for Module 2 "Superposition"
+ * SuperpositionModule.tsx — Shell for Module 2 "Superposition"
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
-import { useCat } from '../../../context/CatContext'
+import { useState, useCallback } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
+import { useCat } from '../../../context/CatContext'
 import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
+import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import SuperpositionScene from './SuperpositionScene'
 import { SuperpositionOverlay } from './SuperpositionOverlay'
 import type { Phase, Track } from './SuperpositionScene'
 
 export function SuperpositionModule() {
-    const { setMode, setCatPosition, setQubitState } = useCat()
+    const { setQubitState } = useCat()
     const { completeModule } = useProgress()
+    useModuleCatSetup('corner', 'idle')
 
     const [phase, setPhase] = useState<Phase>('hook')
     const [track, setTrack] = useState<Track>(null)
@@ -27,13 +28,6 @@ export function SuperpositionModule() {
     const [showParticles, setShowParticles] = useState(false)
     const [catRetreat, setCatRetreat] = useState(false)
     const [perfectScore, setPerfectScore] = useState(true)
-
-    // Configure global cat for this page
-    useEffect(() => {
-        setMode('npc')
-        setCatPosition('corner')
-        setQubitState('idle')
-    }, [setMode, setCatPosition, setQubitState])
 
     const handleTrackSelect = useCallback((t: 'blue' | 'amber') => {
         setTrack(t)
@@ -77,27 +71,20 @@ export function SuperpositionModule() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
-            <Canvas
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                camera={{ position: [0, 0, 11], fov: 55 }}
-                gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-                dpr={[1, 2]}
-            >
-                <Suspense fallback={null}>
-                    <SuperpositionScene
-                        track={track}
-                        phase={phase}
-                        onCatSettled={handleCatSettled}
-                        onGateTrigger={handleGateTrigger}
-                        gateActive={gateActive}
-                        hasTransformed={hasTransformed}
-                        onTransform={() => setHasTransformed(true)}
-                        quizCorrect={quizCorrect}
-                        showParticles={showParticles}
-                        catRetreat={catRetreat}
-                    />
-                </Suspense>
-            </Canvas>
+            <ModuleCanvas camera={{ position: [0, 0, 11], fov: 55 }}>
+                <SuperpositionScene
+                    track={track}
+                    phase={phase}
+                    onCatSettled={handleCatSettled}
+                    onGateTrigger={handleGateTrigger}
+                    gateActive={gateActive}
+                    hasTransformed={hasTransformed}
+                    onTransform={() => setHasTransformed(true)}
+                    quizCorrect={quizCorrect}
+                    showParticles={showParticles}
+                    catRetreat={catRetreat}
+                />
+            </ModuleCanvas>
 
             <SuperpositionOverlay
                 panelsVisible={panelsVisible}

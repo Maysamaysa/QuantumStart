@@ -19,6 +19,7 @@ export interface ProgressData {
     completedTracks: Record<string, ('blue' | 'amber')[]> // moduleID -> list of tracks completed
     unlockedBadges: string[] // List of badge IDs
     lastPlayed: number
+    devMode?: boolean
 }
 
 interface ProgressContextValue {
@@ -28,6 +29,7 @@ interface ProgressContextValue {
     unlockBadge: (badgeId: string) => void
     isModuleLocked: (moduleId: string) => boolean
     resetProgress: () => void
+    toggleDevMode: () => void
 }
 
 // ─── BADGE DEFINITIONS ────────────────────────────────────────────────────────
@@ -124,7 +126,8 @@ const INITIAL_PROGRESS: ProgressData = {
     completedModules: [],
     completedTracks: {},
     unlockedBadges: [],
-    lastPlayed: Date.now()
+    lastPlayed: Date.now(),
+    devMode: false
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null)
@@ -225,16 +228,25 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const isModuleLocked = useCallback((moduleId: string) => {
+        if (progress.devMode) return false
+
         const moduleOrder = ['qubit', 'superposition', 'bloch', 'measurement', 'entanglement', 'gates', 'algorithms']
         const index = moduleOrder.indexOf(moduleId)
         if (index <= 0) return false // First module never locked
         
         const previousModule = moduleOrder[index - 1]
         return !progress.completedModules.includes(previousModule)
-    }, [progress.completedModules])
+    }, [progress.completedModules, progress.devMode])
 
     const resetProgress = useCallback(() => {
         setProgress(INITIAL_PROGRESS)
+    }, [])
+
+    const toggleDevMode = useCallback(() => {
+        setProgress(prev => ({
+            ...prev,
+            devMode: !prev.devMode
+        }))
     }, [])
 
     return (
@@ -244,7 +256,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             completeModule,
             unlockBadge,
             isModuleLocked,
-            resetProgress
+            resetProgress,
+            toggleDevMode
         }}>
             {children}
         </ProgressContext.Provider>
