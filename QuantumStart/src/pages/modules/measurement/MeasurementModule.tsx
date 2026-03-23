@@ -3,17 +3,18 @@ import MeasurementScene from './MeasurementScene'
 import { MeasurementOverlay } from './MeasurementOverlay'
 import { useProgress } from '../../../context/ProgressContext'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 
 export type Phase = 'concept' | 'collapse' | 'sandbox' | 'quiz' | 'complete'
 export type Basis = 'Z' | 'X' | 'Y'
 
 export function MeasurementModule() {
     const { completeModule } = useProgress()
+    useModuleCatSetup('hidden')
     const run50IntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
     const [phase, setPhase] = useState<Phase>('concept')
     const [step, setStep] = useState(1)
-    const [shotsTaken, setShotsTaken] = useState(0)
 
     const [theta, setTheta] = useState(Math.PI / 2)
     const [phi, setPhi] = useState(0)
@@ -63,7 +64,6 @@ export function MeasurementModule() {
         setMeasuredValue(outcome)
         setIsMeasured(true)
         setHistogram(prev => ({ ...prev, [outcome]: prev[outcome] + 1 }))
-        setShotsTaken(s => s + 1)
     }, [getProb0])
 
     const handleMeasure = useCallback(() => {
@@ -89,7 +89,6 @@ export function MeasurementModule() {
             const p0 = getProb0()
             const outcome = Math.random() < p0 ? 0 : 1
             setHistogram(prev => ({ ...prev, [outcome]: prev[outcome] + 1 }))
-            setShotsTaken(s => s + 1)
             shots++
         }, 30)
     }, [getProb0, handleReset])
@@ -106,10 +105,10 @@ export function MeasurementModule() {
     }, [quizQuestion, completeModule])
 
     return (
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto', background: '#0a0a14' }}>
+        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
             <ModuleCanvas
                 camera={{ position: [0, 0, 10], fov: 50 }}
-                style={{ pointerEvents: 'none' }}
+                style={{ pointerEvents: 'auto' }}
             >
                 <ambientLight intensity={1.2} />
                 <directionalLight position={[5, 5, 5]} intensity={1.8} />
@@ -136,7 +135,6 @@ export function MeasurementModule() {
                 basis={basis}
                 setBasis={setBasis}
                 histogram={histogram}
-                shotsTaken={shotsTaken}
                 quizQuestion={quizQuestion}
                 onMeasure={handleMeasure}
                 onReset={handleReset}

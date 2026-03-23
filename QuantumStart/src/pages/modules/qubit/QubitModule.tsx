@@ -2,10 +2,8 @@
  * QubitModule.tsx — Shell for Module 1 "What is a Qubit?"
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
-import { useCat } from '../../../context/CatContext'
-import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
 import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import QubitScene from './QubitScene'
@@ -13,28 +11,27 @@ import { QubitOverlay } from './QubitOverlay'
 import type { Phase, Track } from './QubitScene'
 
 export function QubitModule() {
-    const { setQubitState } = useCat()
     const { completeModule } = useProgress()
-    useModuleCatSetup('corner', 'idle')
+    useModuleCatSetup('hidden')
 
     const [phase, setPhase] = useState<Phase>('hook')
     const [track, setTrack] = useState<Track>(null)
-    const [catSettled, setCatSettled] = useState(false)
-    const { panelsVisible } = useCatNPCTransition(catSettled)
+    const [panelsVisible, setPanelsVisible] = useState(false)
+    useEffect(() => {
+        const id = setTimeout(() => setPanelsVisible(true), 500)
+        return () => clearTimeout(id)
+    }, [])
 
     const [sphereClicked, setSphereClicked] = useState(false)
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
-    const [catRetreat, setCatRetreat] = useState(false)
 
     const handleTrackSelect = useCallback((t: 'blue' | 'amber') => {
         setTrack(t)
-        setQubitState(t)
         const id = setTimeout(() => setPhase('lesson'), 2200)
         return () => clearTimeout(id)
-    }, [setQubitState])
+    }, [])
 
-    const handleCatSettled = useCallback(() => setCatSettled(true), [])
 
     const handleLessonComplete = useCallback(() => {
         setPhase('quiz')
@@ -46,8 +43,6 @@ export function QubitModule() {
         setQuizCorrect(correct)
         setShowParticles(true)
         setTimeout(() => setShowParticles(false), 1800)
-        if (!correct) { setCatRetreat(true); setTimeout(() => setCatRetreat(false), 2000) }
-        else setCatRetreat(false)
     }, [])
 
     const handleQuizComplete = useCallback(() => {
@@ -68,12 +63,10 @@ export function QubitModule() {
                 <QubitScene
                     track={track}
                     phase={phase}
-                    onCatSettled={handleCatSettled}
                     onCoinClick={() => { /* coin flip handled inside scene */ }}
                     onSphereClick={handleSphereClick}
                     quizCorrect={quizCorrect}
                     showParticles={showParticles}
-                    catRetreat={catRetreat}
                 />
             </ModuleCanvas>
 

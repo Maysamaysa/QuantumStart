@@ -1,37 +1,112 @@
-.overlay {
+.overlayContainer {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
-    z-index: 10;
 }
 
-.panel {
+.leftTitlePanel {
+    position: absolute;
+    top: 140px; /* Offset for ModuleHeader */
+    left: 40px;
+    width: 420px;
+    color: #F8F9FF;
+    font-family: 'DM Sans', sans-serif;
+    pointer-events: none;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.leftTitlePanel h1 {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1.1;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+.leftTitlePanel p {
+    font-size: 18px;
+    line-height: 1.65;
+    color: rgba(248, 249, 255, 0.65);
+    margin-bottom: 20px;
+}
+
+.bottomDialog {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(640px, calc(100vw - 48px));
+    z-index: 20;
     pointer-events: auto;
-    background: rgba(20, 20, 30, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 1.5rem;
-    max-width: 400px;
-    color: white;
 }
 
-.nextBtn {
-    margin-top: 1rem;
-    padding: 0.75rem 1.5rem;
+/* ─── FEEDBACK / DIALOG BOX ─────────────────────────────────────────────────── */
+.feedback {
+    padding: 32px 40px;
+    background: rgba(14, 15, 26, 0.85);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(255, 183, 197, 0.25);
+    border-radius: 28px;
+    box-shadow: 
+        0 24px 80px rgba(0, 0, 0, 0.8),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: center;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.feedback p {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: rgba(248, 249, 255, 0.95);
+}
+
+/* ─── ACTION BUTTON ────────────────────────────────────────────────────────── */
+.actionBtn {
+    margin-top: 10px;
+    padding: 14px 36px;
     background: linear-gradient(135deg, #FFB7C5 0%, #FF8FA3 100%);
-    color: #1a1a2e;
+    color: #0c0d12;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(255, 183, 197, 0.25);
 }
 
-.nextBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 183, 197, 0.4);
+.actionBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(255, 183, 197, 0.4);
+    filter: brightness(1.1);
+}
+
+.actionBtn:active {
+    transform: translateY(-1px);
+}
+
+/* ─── BUILDER SPECIFIC ─────────────────────────────────────────────────────── */
+.builderContainer {
+    width: 100%;
 }

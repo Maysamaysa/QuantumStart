@@ -15,7 +15,6 @@ interface Props {
     basis: Basis
     setBasis: (b: Basis) => void
     histogram: { 0: number, 1: number }
-    shotsTaken: number
     quizQuestion: number
     onMeasure: () => void
     onReset: () => void
@@ -28,7 +27,7 @@ interface Props {
 
 export function MeasurementOverlay({
     phase, step, theta, setTheta, isMeasured, measuredValue, basis, setBasis,
-    histogram, shotsTaken, quizQuestion, onMeasure, onReset, onRun50, onClearHistogram, onNext, onBack, onQuizAnswer
+    histogram, quizQuestion, onMeasure, onReset, onRun50, onClearHistogram, onNext, onBack, onQuizAnswer
 }: Props) {
     const navigate = useNavigate()
 

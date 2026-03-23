@@ -182,9 +182,16 @@ export function SuperpositionOverlay({
     panelsVisible, track, phase, hasTransformed, onTrackSelect, onLessonComplete, onQuizComplete, onQuizResult 
 }: SuperpositionOverlayProps) {
     const navigate = useNavigate()
+    const phaseIndex = phase === 'hook' ? 0 : phase === 'lesson' ? 1 : phase === 'quiz' ? 2 : 3
+
     return (
         <>
-        <ModuleHeader moduleNumber={2} moduleName="Superposition" />
+        <ModuleHeader 
+            moduleNumber={2} 
+            moduleName="Superposition" 
+            phases={['Path', 'Lesson', 'Quiz', 'Finish']}
+            currentPhase={phaseIndex}
+        />
             {phase === 'hook' && (
                 <>
                     <TrackSelector onTrackSelect={onTrackSelect} />

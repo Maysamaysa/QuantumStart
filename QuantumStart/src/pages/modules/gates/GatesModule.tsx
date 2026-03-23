@@ -11,7 +11,7 @@ export type GatePhase = 'phase1_intro' | 'phase2_challenges' | 'phase3_quiz' | '
 
 export function GatesModule() {
     const { completeModule } = useProgress()
-    useModuleCatSetup('corner', 'idle')
+    useModuleCatSetup('hidden', 'idle')
 
     const [phase, setPhase] = useState<GatePhase>('phase1_intro')
     const { panelsVisible } = useCatNPCTransition(true)

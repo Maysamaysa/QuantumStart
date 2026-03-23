@@ -108,11 +108,11 @@ export function EntanglementModule() {
     }, [quizQuestion, completeModule])
 
     return (
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto', background: '#0a0a14' }}>
+        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
             <ModuleCanvas
                 camera={{ position: [0, 0, 15], fov: 50 }}
                 gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
-                style={{ pointerEvents: 'none' }}
+                style={{ pointerEvents: 'auto' }}
             >
                 <ambientLight intensity={1.2} />
                 <directionalLight position={[5, 5, 5]} intensity={1.8} />

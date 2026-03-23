@@ -4,14 +4,16 @@ import { AlgorithmsScene } from './AlgorithmsScene'
 import { AlgorithmsOverlay } from './AlgorithmsOverlay'
 import { useProgress } from '../../../context/ProgressContext'
 import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import { simulateCircuit, type CircuitOp, getInitialState } from './circuitLogic'
 
-export type AlgoPhase = 'phase1_classical' | 'phase2_superposition' | 'phase3_oracle' | 'phase4_amplification' | 'phase5_builder' | 'complete'
+import { type AlgoPhase } from './algoTypes'
 
 export function AlgorithmsModule() {
     const { completeModule } = useProgress()
-    const [phase, setPhase] = useState<AlgoPhase>('phase1_classical')
+    useModuleCatSetup('hidden', 'idle')
+    const [phase, setPhase] = useState<AlgoPhase>('phase0_intro')
     // Get a random winning box between 0 to 3, memoized so it only happens once per mount
     const winningBox = useMemo(() => Math.floor(Math.random() * 4), [])
     
@@ -28,7 +30,8 @@ export function AlgorithmsModule() {
     const { panelsVisible } = useCatNPCTransition(true)
 
     const handlePhaseComplete = useCallback((completedPhase: AlgoPhase) => {
-        if (completedPhase === 'phase1_classical') setPhase('phase2_superposition')
+        if (completedPhase === 'phase0_intro') setPhase('phase1_classical')
+        else if (completedPhase === 'phase1_classical') setPhase('phase2_superposition')
         else if (completedPhase === 'phase2_superposition') setPhase('phase3_oracle')
         else if (completedPhase === 'phase3_oracle') setPhase('phase4_amplification')
         else if (completedPhase === 'phase4_amplification') {
@@ -37,6 +40,9 @@ export function AlgorithmsModule() {
             setQState(getInitialState())
         }
         else if (completedPhase === 'phase5_builder') {
+            setPhase('phase6_quiz')
+        }
+        else if (completedPhase === 'phase6_quiz') {
             setPhase('complete')
             completeModule('algorithms', 'blue') 
         }
@@ -54,7 +60,7 @@ export function AlgorithmsModule() {
         
         if (isCorrect) {
             setBuilderFeedback("Perfect! The measurement isolates the target state! The Cat gets the Golden Treat!")
-            setTimeout(() => setPhase('complete'), 4000)
+            setTimeout(() => setPhase('phase6_quiz'), 4000)
         } else {
             const hasOracle = steps.find(s => s.gate === 'Oracle')
             const hasAmp = steps.find(s => s.gate === 'Amplifier')
@@ -71,15 +77,15 @@ export function AlgorithmsModule() {
     }, [winningBox])
 
     return (
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', background: '#0a0a14' }}>
+        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
             <ModuleCanvas
                 camera={{ position: [0, 0, 15], fov: 50 }}
-                gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
-                style={{ pointerEvents: 'none' }}
+                gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
+                style={{ pointerEvents: 'auto' }}
             >
-                <ambientLight intensity={1.2} />
-                <directionalLight position={[5, 5, 5]} intensity={1.8} />
-                
+                <ambientLight intensity={2.5} />
+                <directionalLight position={[5, 10, 5]} intensity={3.5} />
+                <pointLight position={[-5, 5, 5]} intensity={2.0} color="#ffffff" />
                 <AlgorithmsScene 
                     phase={phase} 
                     winningBox={winningBox} 
@@ -90,7 +96,7 @@ export function AlgorithmsModule() {
                 />
             </ModuleCanvas>
 
-                <AlgorithmsOverlay 
+            <AlgorithmsOverlay 
                 phase={phase} 
                 winningBox={winningBox} 
                 guessedBox={guessedBox}

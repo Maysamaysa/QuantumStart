@@ -2,7 +2,7 @@
  * ModuleCanvas.tsx — Shared Canvas wrapper for all module pages.
  * Provides consistent Canvas defaults and wraps children in Suspense.
  */
-import { Suspense, type ReactNode, type CSSProperties } from 'react'
+import React, { Suspense, type ReactNode, type CSSProperties } from 'react'
 import { Canvas } from '@react-three/fiber'
 import type { ToneMapping } from 'three'
 
@@ -36,7 +36,7 @@ const DEFAULT_GL: GlOverride = {
     powerPreference: 'high-performance',
 }
 
-export function ModuleCanvas({ children, camera, gl, style }: ModuleCanvasProps) {
+export function ModuleCanvas({ children, camera, gl, style }: ModuleCanvasProps): React.JSX.Element {
     const mergedCamera = { ...DEFAULT_CAMERA, ...camera }
     const mergedGl = { ...DEFAULT_GL, ...gl }
 

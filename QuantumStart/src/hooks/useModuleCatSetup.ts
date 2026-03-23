@@ -1,11 +1,10 @@
 /**
  * useModuleCatSetup.ts — Shared hook to configure the global cat NPC
- * on mount for a module page. Restores cat to a visible state on unmount
- * so the cat never stays hidden when navigating back.
+ * on mount for a module page.
  *
  * Usage:
- *   useModuleCatSetup('corner', 'idle')
- *   useModuleCatSetup('hidden', 'amber')
+ *   useModuleCatSetup('corner', 'idle')   // cat visible in corner
+ *   useModuleCatSetup('hidden', 'amber')  // cat hidden during module
  */
 import { useEffect } from 'react'
 import { useCat } from '../context/CatContext'
@@ -21,16 +20,9 @@ export function useModuleCatSetup(
         setMode('npc')
         setCatPosition(position)
         setQubitState(qubitState)
-
-        // On unmount: restore cat to a visible corner state so it doesn't
-        // stay 'hidden' when navigating back to the Learn page.
-        // The Learn page will then set its own position ('center') on mount,
-        // but this ensures no flash of missing cat during the transition.
-        return () => {
-            setCatPosition('corner')
-            setQubitState('idle')
-        }
-    // Only run on mount/unmount — intentionally not re-running on prop change
+        // No cleanup here — the next page (Learn) is responsible for
+        // setting its own cat state when it mounts. Cleaning up here
+        // caused a race where the module's cleanup overwrote Learn's mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 }

@@ -13,45 +13,35 @@
 
 import { useRef, useState, useEffect, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useGLTF, useAnimations, Html, Text } from '@react-three/drei'
+import { Html, Text } from '@react-three/drei'
 import * as THREE from 'three'
-import Koi_cat from '../../../assets/koi_cat.glb'
 // import { color } from 'three/tsl'
 
 export type Phase = 'hook' | 'lesson' | 'quiz' | 'complete'
 export type Track = 'blue' | 'amber' | null
 
 // ─── SIZE CONSTANTS (edit here to resize scene objects) ───────────────────────
-const CAT_SCALE = 2.5    // overall cat NPC group scale
-const CAT_GLB_SCALE = 0.5    // koi_cat.glb primitive scale
+// ─── SIZE CONSTANTS (edit here to resize scene objects) ───────────────────────
 const COIN_RADIUS = 1.42   // classical bit coin radius
 const COIN_HEIGHT = 0.15   // coin thickness
 const QUBIT_RADIUS = 1.25   // qubit sphere radius
 const ORBIT_RADIUS = 1.7    // qubit orbit ring radius
 
 // ─── MODEL POSITIONS (edit here for X,Y) ───────────────────────
-const CAT_X = 5.5    // Cat horizontal position
-const CAT_Y = 1.8    // Cat vertical position
 const COIN_X = -5.5   // Coin horizontal position (left side)
 const COIN_Y = 0.2    // Coin vertical position
 const QUBIT_X = -0.5   // Qubit horizontal position (center)
 const QUBIT_Y = 0.2   // Qubit vertical position
 
-// Cat mouse-look tuning
-const CAT_LOOK_X = 0.65   // horizontal range radians (higher = wider pan)
-const CAT_LOOK_Y = 0.60   // vertical range radians
-const CAT_LOOK_SPEED = 0.07   // follow speed: 0.03=lazy, 0.07=default, 0.15=snappy
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 interface QubitSceneProps {
     track: Track
     phase: Phase
-    onCatSettled: () => void
     onCoinClick: () => void
     onSphereClick: () => void
     quizCorrect?: boolean | null
     showParticles?: boolean
-    catRetreat?: boolean
 }
 
 // ─── SCENE DIMMER ─────────────────────────────────────────────────────────────
@@ -378,69 +368,7 @@ function BlueShimmer({ active }: { active: boolean }) {
     )
 }
 
-// ─── CAT NPC ─────────────────────────────────────────────────────────────────
-function CatNPC({ onCatSettled, catRetreat }: { phase: Phase; onCatSettled: () => void; catRetreat?: boolean }) {
-    const catGroup = useRef<THREE.Group>(null)
-    const { scene, animations } = useGLTF(Koi_cat)
-    const { actions, mixer } = useAnimations(animations, catGroup)
-    const settled = useRef(false)
-    const walkProgress = useRef(0)
-    const START_X = -8
-    const START_Y = 2.5
-    const TARGET_X = CAT_X
-    const TARGET_Y = CAT_Y
 
-    // Normalized mouse position (-1..1)
-    const mouseX = useRef(0)
-    const mouseY = useRef(0)
-    useEffect(() => {
-        const onMove = (e: MouseEvent) => {
-            mouseX.current = (e.clientX / window.innerWidth) * 2 - 1
-            mouseY.current = -((e.clientY / window.innerHeight) * 2 - 1)
-        }
-        window.addEventListener('mousemove', onMove)
-        return () => window.removeEventListener('mousemove', onMove)
-    }, [])
-
-    const animNames = useMemo(() => Object.keys(actions ?? {}), [actions])
-    useEffect(() => {
-        if (!actions || animNames.length === 0) return
-        const first = actions[animNames[0]]
-        if (first) first.reset().play()
-    }, [actions, animNames])
-
-    useFrame((_s, delta) => {
-        if (!catGroup.current) return
-        if (mixer) mixer.update(delta)
-
-        // Walk in from upper-left to top-right
-        if (!settled.current) {
-            walkProgress.current = Math.min(walkProgress.current + delta * 0.55, 1)
-            const ease = 1 - Math.pow(1 - walkProgress.current, 3)
-            catGroup.current.position.x = START_X + (TARGET_X - START_X) * ease
-            catGroup.current.position.y = START_Y + (TARGET_Y - START_Y) * ease
-            if (walkProgress.current >= 1 && !settled.current) { settled.current = true; onCatSettled() }
-        } else {
-            // Settled: gentle bob at target position
-            const t = _s.clock.getElapsedTime()
-            catGroup.current.position.x += (TARGET_X - catGroup.current.position.x) * delta * 4
-            const bobY = TARGET_Y + Math.sin(t * 0.7) * 0.06 + (catRetreat ? -0.8 : 0)
-            catGroup.current.position.y += (bobY - catGroup.current.position.y) * delta * 4
-        }
-
-        // Mouse look — lerp rotation toward mouse
-        const tRotY = mouseX.current * CAT_LOOK_X
-        const tRotX = -mouseY.current * CAT_LOOK_Y
-        catGroup.current.rotation.y += (tRotY - catGroup.current.rotation.y) * CAT_LOOK_SPEED
-        catGroup.current.rotation.x += (tRotX - catGroup.current.rotation.x) * CAT_LOOK_SPEED
-    })
-
-    return (
-        <group ref= { catGroup } position = { [START_X, START_Y, 0]} scale = { CAT_SCALE } >
-            <primitive object={ scene } scale = { CAT_GLB_SCALE } />
-                </group>
-    )
-}
 
 // ─── CAMERA CONTROLLER ────────────────────────────────────────────────────────
 function CameraController({ phase }: { phase: Phase }) {
@@ -454,7 +382,7 @@ function CameraController({ phase }: { phase: Phase }) {
 }
 
 // ─── MODULE 1 SCENE (main export) ─────────────────────────────────────────────
-export default function QubitScene({ track, phase, onCatSettled, onCoinClick, onSphereClick, quizCorrect = null, showParticles = false, catRetreat = false }: QubitSceneProps) {
+export default function QubitScene({ track, phase, onCoinClick, onSphereClick, quizCorrect = null, showParticles = false }: QubitSceneProps) {
     const isQuiz = phase === 'quiz'
     const showBraket = track === 'amber' && phase === 'lesson'
     return (
@@ -466,11 +394,10 @@ export default function QubitScene({ track, phase, onCatSettled, onCoinClick, on
                     <pointLight position={ [4, 2, 4] } intensity = { 1.0} color = "#C4955A" />
                         <SceneDimmer active={ isQuiz } />
                             < CoinMesh onClick = { onCoinClick } />
-                                <QubitSphere track={ track } onClick = { onSphereClick } isQuizTarget = { isQuiz } />
-                                    { showBraket && <BraketLabels />
-}
-<CatNPC phase={ phase } onCatSettled = { onCatSettled } catRetreat = { catRetreat } />
-    <LotusParticleBurst active={ showParticles && quizCorrect === true } color = "#FFB7C5" />
+        <QubitSphere track={ track } onClick = { onSphereClick } isQuizTarget = { isQuiz } />
+        { showBraket && <BraketLabels /> }
+        {/* Cat removed for consistency across modules and per user request */}
+        <LotusParticleBurst active={ showParticles && quizCorrect === true } color = "#FFB7C5" />
         <BlueShimmer active={ showParticles && quizCorrect === false } />
             </>
     )

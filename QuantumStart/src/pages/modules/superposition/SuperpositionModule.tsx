@@ -15,7 +15,7 @@ import type { Phase, Track } from './SuperpositionScene'
 export function SuperpositionModule() {
     const { setQubitState } = useCat()
     const { completeModule } = useProgress()
-    useModuleCatSetup('corner', 'idle')
+    useModuleCatSetup('hidden', 'idle')
 
     const [phase, setPhase] = useState<Phase>('hook')
     const [track, setTrack] = useState<Track>(null)

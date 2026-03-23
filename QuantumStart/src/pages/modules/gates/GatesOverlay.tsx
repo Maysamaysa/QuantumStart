@@ -132,12 +132,6 @@ function Phase1Intro({ unlockedGates, unlockGate, selectedGate, setSelectedGate,
 
     return (
         <div style={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'relative' }}>
-            <div className={styles.topBar} style={{ position: 'absolute', top: '2rem', width: '100%' }}>
-                <div style={{ background: 'rgba(0,0,0,0.5)', padding: '0.5rem 1rem', borderRadius: '12px' }}>
-                    Phase 1: Gate Intuition
-                </div>
-            </div>
-
             {selectedGate && data && (
                 <>
                     <div className={`${styles.glassPanel} ${styles.gatePanel}`}>

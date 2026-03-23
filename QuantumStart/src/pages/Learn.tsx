@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Canvas, useFrame } from '@react-three/fiber'
-import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react'
+import React, { Suspense, useRef, useState, useLayoutEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { Html } from '@react-three/drei'
 import styles from './Learn.module.css'
@@ -563,12 +563,15 @@ export function Learn() {
     const [dialogueText, setDialogueText] = useState('')
     const [confirming, setConfirming] = useState(false)
 
-    // On mount: configure cat for NPC center mode (hub layout)
-    useEffect(() => {
+    // useLayoutEffect fires synchronously before paint, ensuring the cat
+    // is always restored to 'center' when navigating back from any module —
+    // even if that module's cleanup fires afterwards (which it won't in strict mode,
+    // but this guards against any race with PageTransition unmount timing).
+    useLayoutEffect(() => {
         setMode('npc')
         setCatPosition('center')
         setCatQubit('idle')
-    }, [setMode, setCatPosition, setCatQubit])
+    })
 
     const selectedModule = MODULE_DATA.find(m => m.id === selectedId) ?? null
 
