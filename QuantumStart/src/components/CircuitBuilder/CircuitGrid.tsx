@@ -5,12 +5,13 @@ import type { Gate, TwoQubitGateType } from '../../lib/circuit/types';
 import { isTwoQubitGate } from '../../lib/circuit/types';
 import styles from './CircuitGrid.module.css';
 
-function GateBox({ gate, onRemove }: { gate: Gate; onRemove: () => void }) {
+function GateBox({ gate, onRemove, isActive }: { gate: Gate; onRemove: () => void; isActive?: boolean }) {
   const isTwo = isTwoQubitGate(gate.type);
   const control = gate.controls?.[0];
   const target = gate.targets[0];
   return (
-    <div className={styles.gateBox} data-two-qubit={isTwo || undefined}>
+    <div className={styles.gateBox} data-two-qubit={isTwo || undefined} data-active={isActive || undefined}>
+      {isActive && <span className={styles.activeIndicator}>▶</span>}
       <span className={styles.gateLabel}>{gate.type}</span>
       {isTwo && (
         <span className={styles.gateSub}>
@@ -37,6 +38,7 @@ interface SortableGateColumnProps {
   index: number;
   qubitCount: number;
   onRemove: () => void;
+  isActive?: boolean;
 }
 
 function SortableGateColumn({
@@ -44,6 +46,7 @@ function SortableGateColumn({
   index,
   qubitCount,
   onRemove,
+  isActive,
 }: SortableGateColumnProps) {
   const {
     attributes,
@@ -75,6 +78,7 @@ function SortableGateColumn({
       }}
       className={styles.gateColumn}
       data-dragging={isDragging || undefined}
+      data-active={isActive || undefined}
       {...attributes}
       {...listeners}
     >
@@ -82,33 +86,33 @@ function SortableGateColumn({
         if (isTwoQubitGate(gate.type) && control !== undefined) {
           if (q === control) {
             return (
-              <div key={q} className={styles.cell}>
-                <div className={styles.controlDot} title="Control" />
+              <div key={q} className={styles.cell} data-active={isActive || undefined}>
+                <div className={styles.controlDot} />
               </div>
             );
           }
           if (q === target) {
             return (
-              <div key={q} className={styles.cell}>
-                <GateBox gate={gate} onRemove={onRemove} />
+              <div key={q} className={styles.cell} data-active={isActive || undefined}>
+                <GateBox gate={gate} onRemove={onRemove} isActive={isActive} />
               </div>
             );
           }
           return (
-            <div key={q} className={styles.cell}>
+            <div key={q} className={styles.cell} data-active={isActive || undefined}>
               <div className={styles.wireSegment} />
             </div>
           );
         }
         if (q === target) {
           return (
-            <div key={q} className={styles.cell}>
-              <GateBox gate={gate} onRemove={onRemove} />
+            <div key={q} className={styles.cell} data-active={isActive || undefined}>
+              <GateBox gate={gate} onRemove={onRemove} isActive={isActive} />
             </div>
           );
         }
         return (
-          <div key={q} className={styles.cell}>
+          <div key={q} className={styles.cell} data-active={isActive || undefined}>
             <div className={styles.wireSegment} />
           </div>
         );
@@ -124,6 +128,7 @@ export interface CircuitGridProps {
   pendingTwoQubitGate?: { type: TwoQubitGateType; target: number } | null;
   onControlSelection?: (controlQubit: number) => void;
   onCancelSelection?: () => void;
+  currentStepIndex?: number;
 }
 
 // Individual drop zone for each qubit row
@@ -152,6 +157,7 @@ export function CircuitGrid({
   pendingTwoQubitGate,
   onControlSelection,
   onCancelSelection,
+  currentStepIndex,
 }: CircuitGridProps) {
   return (
     <div className={styles.grid}>
@@ -199,6 +205,7 @@ export function CircuitGrid({
             index={i}
             qubitCount={qubitCount}
             onRemove={() => onRemoveGate(i)}
+            isActive={currentStepIndex !== undefined && currentStepIndex >= 0 && i === currentStepIndex}
           />
         ))}
         {/* Create drop zones for each qubit row */}

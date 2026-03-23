@@ -218,3 +218,43 @@
   border: 2px solid #ddd;
   opacity: 0.5;
 }
+
+/* ---------- Active gate column indicator ---------- */
+.cell[data-active] {
+  background: rgba(93, 167, 219, 0.08);
+  border-radius: var(--radius-md);
+  outline: 1.5px solid rgba(93, 167, 219, 0.35);
+  outline-offset: -1px;
+}
+
+.gateBox[data-active] {
+  border-color: #5DA7DB;
+  background: rgba(93, 167, 219, 0.07);
+  box-shadow:
+    0 0 0 3px rgba(93, 167, 219, 0.2),
+    0 4px 14px rgba(93, 167, 219, 0.3);
+  animation: gatePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes gatePulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(93, 167, 219, 0.2), 0 4px 14px rgba(93, 167, 219, 0.3); }
+  50%       { box-shadow: 0 0 0 5px rgba(93, 167, 219, 0.35), 0 6px 20px rgba(93, 167, 219, 0.45); }
+}
+
+.activeIndicator {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #5DA7DB;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  animation: indicatorBounce 1.2s ease-in-out infinite;
+}
+
+@keyframes indicatorBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0);   }
+  50%       { transform: translateX(-50%) translateY(-3px); }
+}

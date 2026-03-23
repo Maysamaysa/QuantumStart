@@ -1,62 +1,75 @@
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { useRef, useMemo, useState, Suspense } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Sphere, Line, Text, OrbitControls } from '@react-three/drei';
+import * as THREE from 'three';
 import type { Complex } from '../../lib/simulator/stateVector';
 import { stateToBlochVector } from '../../lib/simulator/bloch';
 import styles from './BlochSphere.module.css';
 
-const RADIUS = 1.2;
+const SPHERE_RADIUS = 1.35;
 
-function SphereAndAxes() {
+/** ── Animated State Vector Arrow ── */
+function AnimatedArrow({ bloch }: { bloch: { x: number; y: number; z: number; length: number } }) {
+  const [points, setPoints] = useState<[number, number, number][]>([[0, 0, 0], [0, SPHERE_RADIUS, 0]]);
+  const targetPos = useMemo(() => {
+    // Mapping Bloch coordinates to Scene coordinates:
+    // Bloch X -> Scene X
+    // Bloch Y -> Scene Z
+    // Bloch Z -> Scene Y (Vertical)
+    return new THREE.Vector3(
+      bloch.x * SPHERE_RADIUS,
+      bloch.z * SPHERE_RADIUS,
+      bloch.y * SPHERE_RADIUS
+    );
+  }, [bloch.x, bloch.y, bloch.z]);
+
+  const currentPos = useRef(new THREE.Vector3(0, SPHERE_RADIUS, 0));
+
+  useFrame((_state, delta) => {
+    // Smoothly interpolate the position
+    currentPos.current.lerp(targetPos, Math.min(delta * 12, 1));
+    
+    // Check if we need to update the points to avoid unnecessary state updates
+    if (currentPos.current.distanceTo(new THREE.Vector3(...points[1])) > 0.001) {
+      setPoints([
+        [0, 0, 0],
+        [currentPos.current.x, currentPos.current.y, currentPos.current.z]
+      ]);
+    }
+  });
+
   return (
-    <>
-      <mesh>
-        <sphereGeometry args={[RADIUS, 32, 24]} />
-        <meshPhongMaterial
-          color="#C1E1C1"
-          wireframe
-          transparent
-          opacity={0.4}
-          shininess={100}
-        />
+    <group>
+      <Line 
+        points={points} 
+        color="#A67B5B" 
+        lineWidth={6} 
+      />
+      <mesh position={points[1]}>
+        <sphereGeometry args={[0.09, 16, 16]} />
+        <meshBasicMaterial color="#A67B5B" />
+        <pointLight intensity={2} distance={3} color="#A67B5B" />
       </mesh>
-      <axesHelper args={[RADIUS * 1.1]} />
-    </>
-  );
-}
-
-function BlochArrow({ x, y, z, length }: { x: number; y: number; z: number; length: number }) {
-  const arrowLength = Math.min(length * RADIUS * 0.9, RADIUS * 0.95);
-  const len = Math.sqrt(x * x + y * y + z * z) || 1;
-  const dx = x / len;
-  const dy = y / len;
-  const dz = z / len;
-  const pitch = -Math.acos(Math.max(-1, Math.min(1, dy)));
-  const yaw = Math.atan2(dx, dz);
-  const coneHeight = 0.15;
-  const coneRad = 0.08;
-  const cylinderHeight = Math.max(0.01, arrowLength - coneHeight);
-  const cylinderRad = 0.03;
-
-  return (
-    <group rotation={[pitch, yaw, 0]}>
-      {cylinderHeight > 0.01 && (
-        <mesh position={[0, cylinderHeight / 2, 0]}>
-          <cylinderGeometry args={[cylinderRad, cylinderRad, cylinderHeight, 16]} />
-          <meshPhongMaterial color="#FFB7C5" />
-        </mesh>
-      )}
-      {arrowLength > 0.1 && (
-        <mesh position={[0, arrowLength, 0]}>
-          <coneGeometry args={[coneRad, coneHeight, 16]} />
-          <meshPhongMaterial color="#FFB7C5" />
-        </mesh>
-      )}
+      
+      {/* Projections to equatorial plane */}
+      <Line
+        points={[[points[1][0], 0, points[1][2]], points[1]]}
+        color="#ffffff"
+        lineWidth={1}
+        transparent
+        opacity={0.3}
+        dashed
+      />
+      <mesh position={[points[1][0], 0, points[1][2]]}>
+        <sphereGeometry args={[0.04]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.4} />
+      </mesh>
     </group>
   );
 }
 
-
-function Scene({
+/** ── Specialized Bloch Scene with Cage and Labels ── */
+function DetailedScene({
   state,
   nQubits,
   selectedQubit,
@@ -69,13 +82,75 @@ function Scene({
 
   return (
     <>
-      <SphereAndAxes />
-      <BlochArrow
-        x={bloch.x}
-        y={bloch.y}
-        z={bloch.z}
-        length={bloch.length}
-      />
+      <ambientLight intensity={0.9} />
+      <pointLight position={[5, 10, 5]} intensity={2} color="#ffffff" />
+      
+      {/* The Central Sphere (Invisible depth filler) */}
+      <Sphere args={[SPHERE_RADIUS, 32, 24]}>
+        <meshBasicMaterial transparent opacity={0.06} color="#ffffff" depthWrite={false} />
+      </Sphere>
+
+      {/* Lat/Lon Cage (Visual) */}
+      <group>
+        {/* Longitude Lines */}
+        {Array.from({ length: 8 }).map((_, i) => {
+          const angle = (i / 8) * Math.PI;
+          return (
+            <Line 
+              key={`lon-${i}`}
+              points={Array.from({length: 65}).map((_, j) => {
+                const a = (j / 64) * Math.PI * 2;
+                const x = Math.cos(a) * SPHERE_RADIUS;
+                const y = Math.sin(a) * SPHERE_RADIUS;
+                return [x * Math.cos(angle), y, x * Math.sin(angle)];
+              })} 
+              color="#ffffff" 
+              lineWidth={1} 
+              transparent 
+              opacity={0.15} 
+            />
+          );
+        })}
+        {/* Equator */}
+        <Line 
+          points={Array.from({length: 33}).map((_, i) => [
+            SPHERE_RADIUS * Math.cos((i / 32) * Math.PI * 2),
+            0,
+            SPHERE_RADIUS * Math.sin((i / 32) * Math.PI * 2)
+          ])} 
+          color="#5DA7DB" 
+          lineWidth={2} 
+          transparent 
+          opacity={0.4} 
+        />
+      </group>
+
+      {/* AXES with Labels */}
+      {/* Z Axis (|0> to |1>) */}
+      <group>
+        <Line points={[[0, -SPHERE_RADIUS * 1.25, 0], [0, SPHERE_RADIUS * 1.25, 0]]} color="#ffffff" lineWidth={2} transparent opacity={0.4} />
+        <Text position={[0, SPHERE_RADIUS * 1.5, 0]} fontSize={0.25} color="#ffffff" fontWeight="bold">|0⟩</Text>
+        <Text position={[0, -SPHERE_RADIUS * 1.5, 0]} fontSize={0.25} color="#ffffff" fontWeight="bold">|1⟩</Text>
+        <mesh position={[0, SPHERE_RADIUS, 0]}><sphereGeometry args={[0.07]} /><meshBasicMaterial color="#5DA7DB" /></mesh>
+        <mesh position={[0, -SPHERE_RADIUS, 0]}><sphereGeometry args={[0.07]} /><meshBasicMaterial color="#FFB7C5" /></mesh>
+      </group>
+
+      {/* X Axis (|+> to |->) */}
+      <group>
+        <Line points={[[-SPHERE_RADIUS * 1.25, 0, 0], [SPHERE_RADIUS * 1.25, 0, 0]]} color="#ff6666" lineWidth={2} transparent opacity={0.4} />
+        <Text position={[SPHERE_RADIUS * 1.6, 0.1, 0]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|+⟩</Text>
+        <Text position={[-SPHERE_RADIUS * 1.6, 0.1, 0]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|-⟩</Text>
+      </group>
+
+      {/* Y Axis (|i> to |-i>) */}
+      <group>
+        <Line points={[[0, 0, -SPHERE_RADIUS * 1.25], [0, 0, SPHERE_RADIUS * 1.25]]} color="#66ff66" lineWidth={2} transparent opacity={0.4} />
+        <Text position={[0.1, 0.1, SPHERE_RADIUS * 1.6]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|i⟩</Text>
+        <Text position={[0.1, 0.1, -SPHERE_RADIUS * 1.6]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|-i⟩</Text>
+      </group>
+
+      {/* The Animated Arrow */}
+      <AnimatedArrow bloch={bloch} />
     </>
   );
 }
@@ -115,23 +190,28 @@ export function BlochSphere({
         </div>
       </div>
       {!bloch.isPure && (
-        <p className={styles.mixedNote}>Mixed state (arrow length &lt; 1)</p>
+        <p className={styles.mixedNote}>Mixed state (amplitude &lt; 1)</p>
       )}
       <div className={styles.canvasWrap}>
         <Canvas
-          camera={{ position: [2.5, 2, 2.5], fov: 45 }}
-          gl={{ antialias: true }}
+          camera={{ position: [2.8, 2, 2.8], fov: 38 }}
+          gl={{ antialias: true, alpha: true }}
         >
-          <ambientLight intensity={1.5} />
-          <pointLight position={[5, 5, 5]} intensity={1} color="#FFB7C5" />
-          <Scene
-            state={state}
-            nQubits={nQubits}
-            selectedQubit={selectedQubitIndex}
+          <Suspense fallback={null}>
+            <DetailedScene
+              state={state}
+              nQubits={nQubits}
+              selectedQubit={selectedQubitIndex}
+            />
+          </Suspense>
+          <OrbitControls 
+            enableDamping 
+            dampingFactor={0.1} 
+            enablePan={false}
+            minDistance={4}
+            maxDistance={12}
           />
-          <OrbitControls enableDamping dampingFactor={0.05} />
         </Canvas>
-
       </div>
     </div>
   );

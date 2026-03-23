@@ -25,6 +25,7 @@ import styles from './CircuitBuilder.module.css';
 
 export interface CircuitBuilderProps {
   circuit: UseCircuitReturn;
+  currentStepIndex?: number;
 }
 
 function parseGateType(type: string, targetQubit: number, qubitCount: number): Gate | null {
@@ -40,7 +41,7 @@ function parseGateType(type: string, targetQubit: number, qubitCount: number): G
   return null;
 }
 
-export function CircuitBuilder({ circuit }: CircuitBuilderProps) {
+export function CircuitBuilder({ circuit, currentStepIndex }: CircuitBuilderProps) {
   const {
     qubitCount,
     setQubitCount,
@@ -181,6 +182,7 @@ export function CircuitBuilder({ circuit }: CircuitBuilderProps) {
               pendingTwoQubitGate={pendingTwoQubitGate}
               onControlSelection={handleControlSelection}
               onCancelSelection={cancelControlSelection}
+              currentStepIndex={currentStepIndex}
             />
           </SortableContext>
           <DragOverlay>

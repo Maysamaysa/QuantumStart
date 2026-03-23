@@ -36,6 +36,11 @@ export function Landing() {
         setTimeout(() => navigate('/learn'), 350)
     }
 
+    const handleGoToPlayground = () => {
+        setCatPosition('corner')
+        setMode('npc')
+        setTimeout(() => navigate('/playground'), 350)
+    }
 
     return (
         <section
@@ -87,6 +92,14 @@ export function Landing() {
                                         onClick={handleBeginJourney}
                                     >
                                         ✨ Begin Journey
+                                    </button>
+                                    <button
+                                        className={`${styles.choiceBtn} ${styles.amberChoice}`}
+                                        onMouseEnter={() => setHoveredChoice('B')}
+                                        onMouseLeave={() => setHoveredChoice(null)}
+                                        onClick={handleGoToPlayground}
+                                    >
+                                        🧪 Go to Playground
                                     </button>
                                 </>
                             )}

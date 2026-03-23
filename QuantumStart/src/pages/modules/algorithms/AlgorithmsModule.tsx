@@ -77,11 +77,10 @@ export function AlgorithmsModule() {
     }, [winningBox])
 
     return (
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
+        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
             <ModuleCanvas
                 camera={{ position: [0, 0, 15], fov: 50 }}
                 gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
-                style={{ pointerEvents: 'auto' }}
             >
                 <ambientLight intensity={2.5} />
                 <directionalLight position={[5, 10, 5]} intensity={3.5} />
