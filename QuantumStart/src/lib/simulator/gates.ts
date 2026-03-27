@@ -39,6 +39,10 @@ export const gateMatrices: Record<string, Matrix2x2> = {
     [one(), zero()],
     [zero(), complex(Math.SQRT1_2, Math.SQRT1_2)],
   ],
+  Measure: [
+    [one(), zero()],
+    [zero(), one()],
+  ],
 };
 
 /** CNOT: control 0 → target 1. 4x4 matrix (row-major). */

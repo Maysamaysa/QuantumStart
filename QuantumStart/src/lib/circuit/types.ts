@@ -3,7 +3,7 @@
  * Single-qubit: H, X, Y, Z, S, T
  * Two-qubit: CNOT, CZ
  */
-export type SingleQubitGateType = 'H' | 'X' | 'Y' | 'Z' | 'S' | 'T';
+export type SingleQubitGateType = 'H' | 'X' | 'Y' | 'Z' | 'S' | 'T' | 'Measure';
 export type TwoQubitGateType = 'CNOT' | 'CZ';
 export type GateType = SingleQubitGateType | TwoQubitGateType;
 

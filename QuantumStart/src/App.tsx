@@ -86,7 +86,7 @@ function AppShell() {
            Each page's interactive HTML elements set pointer-events:auto themselves. */}
       <div style={{ position: 'relative', zIndex: 1, width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'none' }}>
         <PageTransition>
-          <Routes>
+          <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Landing />} />
             <Route path="/learn" element={<Learn />} />
             <Route path="/profile" element={<Profile />} />

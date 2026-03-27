@@ -12,17 +12,41 @@ import { ModuleHeader } from '../../../components/ModuleHeader'
 
 // ─── LESSON CONTENT ───────────────────────────────────────────────────────────
 const BLUE_PANELS = [
-    { text: "A classical bit is like a coin — heads (1) or tails (0). Always one or the other.", hint: "Click the coin on the left to flip it." },
-    { text: "A qubit lives in between. Before you look, it's both 0 and 1 simultaneously.", hint: "Click the glowing sphere to witness superposition." },
-    { text: "This isn't a trick — it's how the universe works at the quantum scale.", hint: null },
-    { text: "The moment you measure a qubit, the universe makes a choice. Until then — infinite possibility.", hint: "Try clicking the sphere again and watch the chaos." },
+    { 
+        text: "Meet the Classical Bit. Like this coin, it's always in one of two states: Heads (0) or Tails (1). Deterministic, simple, and limited.", 
+        hint: "Flip the coin on the left. See how it's always definitively 0 or 1?" 
+    },
+    { 
+        text: "Now, look at the Qubit. While the coin is stuck in one state, the Qubit explores both possibilities at once. This is Superposition.", 
+        hint: "The 'ghost' spheres around the qubit show it taking all paths simultaneously." 
+    },
+    { 
+        text: "A qubit isn't 'somewhere in between' 0 and 1. It is a mathematical combination of both, existing in a cloud of probability.", 
+        hint: "Click the qubit to witness its 'collapse' into a single classical state." 
+    },
+    { 
+        text: "In the quantum world, we don't just choose a path. We explore all of them until the moment of measurement.", 
+        hint: "Try resetting the qubit and collapsing it again. Notice the randomness?" 
+    },
 ]
 
 const AMBER_PANELS = [
-    { text: "A classical bit: x ∈ {0,1}. Deterministic and binary.", math: null, hint: "Click the coin repeatedly — always 0 or 1." },
-    { text: "A qubit state is described by the following superposition:", math: "|ψ⟩ = α|0⟩ + β|1⟩   where α, β ∈ ℂ and |α|² + |β|² = 1", hint: null },
-    { text: "α and β are probability amplitudes. |α|² is the probability of measuring |0⟩, and |β|² for |1⟩.", math: "P(0) = |α|²     P(1) = |β|²", hint: null },
-    { text: "The bra-ket labels |0⟩ and |1⟩ appear on the sphere. Explore the state space directly.", math: null, hint: "Click the sphere to evolve its state." },
+    { 
+        text: "Mathematically, we describe a qubit's state |ψ⟩ as a vector in a complex Hilbert space. Let's break down the superposition equation.",
+        hint: "Look at the floating equation above the qubit."
+    },
+    { 
+        text: "The state |ψ⟩ is a linear combination of the basis states |0⟩ and |1⟩. These are the fixed 'poles' of our quantum world.",
+        hint: "The coefficients α and β are what make quantum computing so powerful."
+    },
+    { 
+        text: "α (Alpha) and β (Beta) are probability amplitudes. They aren't just probabilities—they are complex numbers that can interfere with each other.",
+        hint: "The probability of measuring |0⟩ is |α|², and for |1⟩ it's |β|²."
+    },
+    { 
+        text: "The constraint |α|² + |β|² = 1 ensures that when we measure, we always find the qubit in *some* state. Total probability must be 1.",
+        hint: "Click the qubit to see it collapse. The equation will disappear as the state becomes definite."
+    },
 ]
 
 // ─── QUIZ CONTENT ─────────────────────────────────────────────────────────────
@@ -37,31 +61,31 @@ interface QuizQuestion {
 
 const QUIZ_QUESTIONS: QuizQuestion[] = [
     {
-        question: "What makes a qubit different from a classical bit?",
+        question: "What is the key visual difference between the coin and the qubit in this scene?",
         answers: [
-            { label: "A) It can only be 0", correct: false },
-            { label: "B) It can be 0 and 1 at the same time", correct: true },
-            { label: "C) It stores more memory", correct: false },
-            { label: "D) It is faster", correct: false },
+            { label: "A) The coin is larger", correct: false },
+            { label: "B) The qubit shows multiple 'ghost' paths at once", correct: true },
+            { label: "C) The coin is made of gold", correct: false },
+            { label: "D) There is no difference", correct: false },
         ],
-        explanation: "A qubit can exist in a superposition of 0 and 1 simultaneously — this is the core quantum property that makes quantum computing powerful.",
+        explanation: "The 'ghost' trail represents superposition—the qubit's ability to explore all paths simultaneously, unlike the classical coin which is always in one state.",
         tracks: ['blue', 'amber'],
     },
     {
-        question: "In |ψ⟩ = α|0⟩ + β|1⟩, what constraint must hold?",
+        question: "In the equation |ψ⟩ = α|0⟩ + β|1⟩, what does |α|² represent?",
         answers: [
-            { label: "A) α + β = 1", correct: false },
-            { label: "B) |α|² + |β|² = 1", correct: true },
-            { label: "C) α = β", correct: false },
-            { label: "D) α and β must be real", correct: false },
+            { label: "A) The speed of the qubit", correct: false },
+            { label: "B) The probability of measuring the state |0⟩", correct: true },
+            { label: "C) The phase of the qubit", correct: false },
+            { label: "D) A random constant", correct: false },
         ],
-        explanation: "The normalization constraint |α|² + |β|² = 1 ensures the total probability of measuring any outcome sums to 1.",
+        explanation: "The square of the absolute value of the coefficient α gives the probability of the qubit collapsing into the |0⟩ state upon measurement.",
         tracks: ['amber'],
     },
     {
-        question: "Click the object in superposition.",
+        question: "Click the object that demonstrates 'Quantum Parallelism' by being in two states at once.",
         isObserver: true,
-        explanation: "The glowing sphere is your qubit — it holds a superposition of |0⟩ and |1⟩ until measured. The coin is always classical: either 0 or 1.",
+        explanation: "The glowing sphere is your qubit—it holds a superposition until measured. The coin is always classical: either 0 or 1.",
         tracks: ['blue', 'amber'],
     },
 ]
@@ -69,26 +93,28 @@ const QUIZ_QUESTIONS: QuizQuestion[] = [
 // ─── TRACK SELECTOR ───────────────────────────────────────────────────────────
 function TrackSelector({ panelsVisible, onTrackSelect }: { panelsVisible: boolean; onTrackSelect: (t: 'blue' | 'amber') => void }) {
     return (
-        <div className= {`${styles.panel} ${styles.trackSelector} ${panelsVisible ? styles.panelVisible : ''}`
-}>
-    <p className={ styles.trackTitle }> What is a Qubit ? </p>
-        < h2 className = { styles.trackHeadline } > Choose your learning path </h2>
-            < div className = { styles.trackBtnRow } >
+        <div className={`${styles.panel} ${styles.trackSelector} ${panelsVisible ? styles.panelVisible : ''}`}>
+            <p className={styles.trackTitle}>Module 1: Foundations</p>
+            <h2 className={styles.trackHeadline}>What is a Qubit?</h2>
+            <p className={styles.trackDescription}>Choose how you'd like to explore the quantum world.</p>
+            <div className={styles.trackBtnRow}>
                 <button className={`${styles.trackBtn} ${styles.trackBtnBlue}`} onClick={() => onTrackSelect('blue')} id="track-blue-btn">
                     <div className={styles.pathSphere} /> Intuition
+                    <span className={styles.btnSub}>Visual & Concepts</span>
                 </button>
                 <button className={`${styles.trackBtn} ${styles.trackBtnAmber}`} onClick={() => onTrackSelect('amber')} id="track-amber-btn">
                     <div className={styles.pathSphere} /> Technical
+                    <span className={styles.btnSub}>Math & Vectors</span>
                 </button>
-                                </div>
-                                </div>
+            </div>
+        </div>
     )
 }
 
 // ─── CAT DIALOGUE BUBBLE ─────────────────────────────────────────────────────
 const TRACK_DIALOGUE: Record<'blue' | 'amber', string> = {
-    blue: "Let's collapse this wave function together.",
-    amber: "Good. You want the equations. The cat approves.",
+    blue: "Classical coins are boring. Let's see some quantum chaos.",
+    amber: "Mathematics is the language of the universe. Let's start with the vector space.",
 }
 
 function CatDialogueBubble({ track, panelsVisible }: { track: Track; panelsVisible: boolean }) {
@@ -100,7 +126,7 @@ function CatDialogueBubble({ track, panelsVisible }: { track: Track; panelsVisib
             onClick={() => !finished && skip()}
             style={{ cursor: finished ? 'default' : 'pointer' }}
         >
-            <div className={styles.catLabel}>Qubit Cat:</div>
+            <div className={styles.catLabel}>Quantum Cat:</div>
             <div className={styles.catText}>
                 {displayed}
                 {!finished && <span className={styles.cursor}>▊</span>}
@@ -110,54 +136,75 @@ function CatDialogueBubble({ track, panelsVisible }: { track: Track; panelsVisib
 }
 
 // ─── LESSON PANELS ────────────────────────────────────────────────────────────
-function LessonPanels({ track, panelsVisible, onComplete }: { track: Track; panelsVisible: boolean; onComplete: () => void }) {
+function LessonPanels({ track, panelsVisible, onComplete, setEquationStep }: { 
+    track: Track; panelsVisible: boolean; onComplete: () => void; setEquationStep: (s: number) => void 
+}) {
     const [panelIndex, setPanelIndex] = useState(0)
+    
     const panels = track === 'amber' ? AMBER_PANELS : BLUE_PANELS
     const current = panels[panelIndex]
     const isLast = panelIndex >= panels.length - 1
-    useEffect(() => { setPanelIndex(0) }, [track])
+    const isAmber = track === 'amber'
+
+    useEffect(() => { 
+        setPanelIndex(0)
+        setEquationStep(-1)
+    }, [track, setEquationStep])
+
+    useEffect(() => {
+        // Map panelIndex to equation steps for Amber track
+        if (isAmber) {
+            if (panelIndex === 0) setEquationStep(0) // |psi>
+            else if (panelIndex === 1) setEquationStep(3) // |0>
+            else if (panelIndex === 2) setEquationStep(5) // beta
+            else if (panelIndex === 3) setEquationStep(6) // |1>
+        } else {
+            setEquationStep(-1)
+        }
+    }, [panelIndex, isAmber, setEquationStep])
+
     const { displayed, finished, skip } = useTypewriter(current?.text ?? '', 32, panelsVisible)
-    const handleNext = () => isLast ? onComplete() : setPanelIndex(i => i + 1)
+    
+    const handleNext = () => {
+        if (isLast) {
+            setEquationStep(-1)
+            onComplete()
+        } else {
+            setPanelIndex(i => i + 1)
+        }
+    }
 
     if (!track) return null
     return (
-        <div className= {`${styles.panel} ${styles.lessonPanel} ${panelsVisible ? styles.panelVisible : ''}`
-}>
-    <div className={ styles.lessonHeader }>
-        <span className={ styles.lessonStep }> LESSON { panelIndex + 1 } / {panels.length}</span >
-            <span className={ `${styles.lessonTrackBadge} ${track === 'amber' ? styles.amberBadge : styles.blueBadge}` }>
-                { track === 'blue' ? '🔵 Intuition' : '🟡 Technical'}
-</span>
-    </div>
-    <div 
-        onClick={() => !finished && skip()}
-        style={{ cursor: finished ? 'default' : 'pointer' }}
-    >
-        <p className={styles.lessonText}>
-            {displayed as string}
-            {!finished && <span className={styles.cursor}>▊</span>}
-        </p>
-    </div>
-{
-    track === 'amber' && 'math' in current && (current as any).math && (
-        <code className={ styles.lessonMath }> { (current as any).math } </code>
-            )
-}
-{
-    current.hint && (
-        <p style={ { fontSize: '12px', color: 'rgba(255,183,197,0.6)', fontFamily: 'DM Sans, sans-serif', marginBottom: '14px', fontStyle: 'italic' } }>
-                    💡 { current.hint }
-    </p>
-            )
-}
-<div className={ styles.lessonNav }>
-    <div className={ styles.navDots }>
-        { panels.map((_, i) => <div key={ i } className = {`${styles.navDot} ${i === panelIndex ? styles.navDotActive : ''}`} />)}
-</div>
-    < button className = { styles.nextBtn } onClick = { handleNext } id = {`lesson-next-${panelIndex}`}>
-        { isLast? 'Take the Quiz →': 'Next →' }
-        </button>
-        </div>
+        <div className={`${styles.panel} ${styles.lessonPanel} ${panelsVisible ? styles.panelVisible : ''}`}>
+            <div className={styles.lessonHeader}>
+                <span className={styles.lessonStep}> STEP {panelIndex + 1} / {panels.length}</span>
+                <span className={`${styles.lessonTrackBadge} ${track === 'amber' ? styles.amberBadge : styles.blueBadge}`}>
+                    {track === 'blue' ? '🔵 Intuition' : '🟡 Technical'}
+                </span>
+            </div>
+            <div 
+                onClick={() => !finished && skip()}
+                style={{ cursor: finished ? 'default' : 'pointer', minHeight: '80px' }}
+            >
+                <p className={styles.lessonText}>
+                    {displayed as string}
+                    {!finished && <span className={styles.cursor}>▊</span>}
+                </p>
+            </div>
+            {current.hint && (
+                <p className={styles.lessonHint}>
+                    <span className={styles.hintIcon}>💡</span> {current.hint}
+                </p>
+            )}
+            <div className={styles.lessonNav}>
+                <div className={styles.navDots}>
+                    {panels.map((_, i) => <div key={i} className={`${styles.navDot} ${i === panelIndex ? styles.navDotActive : ''}`} />)}
+                </div>
+                <button className={styles.nextBtn} onClick={handleNext} id={`lesson-next-${panelIndex}`}>
+                    {isLast ? 'Take the Quiz →' : 'Continue →'}
+                </button>
+            </div>
         </div>
     )
 }
@@ -204,46 +251,33 @@ function QuizPanel({ track, panelsVisible, onComplete, onAllCorrect, sphereClick
     const isCorrect = selected !== null && currentQ.answers?.[selected]?.correct === true
 
     return (
-        <div className= {`${styles.panel} ${styles.quizPanel} ${panelsVisible ? styles.panelVisible : ''}`
-}>
-    <div className={ styles.quizLabel }> QUIZ · Q{ qIndex + 1 } of { questions.length } </div>
-        < p className = { styles.quizQuestion } > { currentQ.question } </p>
-{
-    currentQ.answers && (
-        <div className={ styles.quizOptions }>
-        {
-            currentQ.answers.map((opt, i) => {
-                let cls = styles.quizOption
-                if (selected === i) cls += opt.correct ? ` ${styles.quizOptionCorrect}` : ` ${styles.quizOptionWrong}`
-                else if (answered && opt.correct) cls += ` ${styles.quizOptionCorrect}`
-                return <button key={ i } className = { cls } onClick = {() => handleAnswer(i)
-            } disabled = { answered } id = {`quiz-option-${qIndex}-${i}`} > { opt.label } </button>
-})}
-</div>
+        <div className={`${styles.panel} ${styles.quizPanel} ${panelsVisible ? styles.panelVisible : ''}`}>
+            <div className={styles.quizLabel}>KNOWLEDGE CHECK · {qIndex + 1} / {questions.length} </div>
+            <p className={styles.quizQuestion}>{currentQ.question}</p>
+            {currentQ.answers && (
+                <div className={styles.quizOptions}>
+                    {currentQ.answers.map((opt, i) => {
+                        let cls = styles.quizOption
+                        if (selected === i) cls += opt.correct ? ` ${styles.quizOptionCorrect}` : ` ${styles.quizOptionWrong}`
+                        else if (answered && opt.correct) cls += ` ${styles.quizOptionCorrect}`
+                        return <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={answered} id={`quiz-option-${qIndex}-${i}`}> {opt.label} </button>
+                    })}
+                </div>
             )}
-{ currentQ.isObserver && !answered && <p className={ styles.clickHint }>👁️ Click the correct object in the scene below to answer.</p> }
-{
-    currentQ.isObserver && observerResult !== null && (
-        <div className={ `${styles.quizFeedback} ${observerResult ? styles.feedbackCorrect : styles.feedbackWrong}` }>
-            { observerResult? "✓ Correct — the glowing sphere is in superposition!": "✗ That's the classical bit — try the glowing sphere." }
-            </div>
-            )
-}
-{
-    !currentQ.isObserver && answered && (
-        <div className={ `${styles.quizFeedback} ${isCorrect ? styles.feedbackCorrect : styles.feedbackWrong}` }>
-            { isCorrect? "✓ The universe agrees: you're a natural.": "✗ Ooh, a glitch in the matrix! Let's try another timeline." }
-            </div>
-            )
-}
-{
-    !answered && retries > 0 && retries < MAX_RETRIES && (
-        <p className={ styles.retriesLeft }> { MAX_RETRIES - retries
-} attempt{ MAX_RETRIES - retries > 1 ? 's' : '' } remaining </p>
+            {currentQ.isObserver && !answered && <div className={styles.observerPrompt}><span className={styles.eyeIcon}>👁️</span> Interact with the correct model in the scene to answer.</div>}
+            {currentQ.isObserver && observerResult !== null && (
+                <div className={`${styles.quizFeedback} ${observerResult ? styles.feedbackCorrect : styles.feedbackWrong}`}>
+                    {observerResult ? "✓ Correct! Notice how the qubit's paths overlap." : "✗ That's the classical bit. Try the one with multiple paths!"}
+                </div>
             )}
-{ showExplanation && <div className={ styles.explanationBox }>📖 { currentQ.explanation } </div> }
-{ answered && <button className={ styles.nextQuizBtn } onClick = { handleNext } id = {`quiz-next-${qIndex}` }> { isLastQ? 'See Results →': 'Next Question →' } </button>}
-</div>
+            {!currentQ.isObserver && answered && (
+                <div className={`${styles.quizFeedback} ${isCorrect ? styles.feedbackCorrect : styles.feedbackWrong}`}>
+                    {isCorrect ? "✓ Masterfully observed. The quantum world reveals its secrets." : "✗ A temporary decoherence! Let's examine the reality again."}
+                </div>
+            )}
+            {showExplanation && <div className={styles.explanationBox}><span className={styles.bookIcon}>📖</span> {currentQ.explanation} </div>}
+            {answered && <button className={styles.nextQuizBtn} onClick={handleNext} id={`quiz-next-${qIndex}`}> {isLastQ ? 'Claim your Badge →' : 'Next Question →'} </button>}
+        </div>
     )
 }
 
@@ -251,18 +285,17 @@ function QuizPanel({ track, panelsVisible, onComplete, onAllCorrect, sphereClick
 function CompletionPanel({ track, panelsVisible }: { track: Track; panelsVisible: boolean }) {
     const navigate = useNavigate()
     const badge = track === 'amber'
-        ? { emoji: '🟡', label: 'State |1⟩ Scholar', color: '#C4955A' }
-        : { emoji: '🔵', label: 'State |0⟩ Initiate', color: '#5DA7DB' }
+        ? { emoji: '🟡', label: 'Quantum Analyst', color: '#C4955A' }
+        : { emoji: '🔵', label: 'Quantum Explorer', color: '#5DA7DB' }
     return (
-        <div className= {`${styles.panel} ${styles.completionPanel} ${panelsVisible ? styles.panelVisible : ''}`
-}>
-    <div className={ styles.badgeGlow }> { badge.emoji } </div>
-        < h2 className = { styles.badgeName } > { badge.label } </h2>
-            < p className = { styles.badgeSubtitle } style = {{ color: badge.color }}> Module 1 Complete ✦ What is a Qubit ? </p>
-                < button className = { styles.continueBtn } onClick = {() => navigate('/learn')} id = "completion-continue-btn" >
-                    Continue to Hub →
-</button>
-    </div>
+        <div className={`${styles.panel} ${styles.completionPanel} ${panelsVisible ? styles.panelVisible : ''}`}>
+            <div className={styles.badgeGlow}>{badge.emoji}</div>
+            <h2 className={styles.badgeName}>{badge.label} Unlocked</h2>
+            <p className={styles.badgeSubtitle} style={{ color: badge.color }}>You've mastered the fundamentals of the Qubit.</p>
+            <button className={styles.continueBtn} onClick={() => navigate('/learn')} id="completion-continue-btn">
+                Return to Modules
+            </button>
+        </div>
     )
 }
 
@@ -272,22 +305,22 @@ export interface QubitOverlayProps {
     onTrackSelect: (t: 'blue' | 'amber') => void
     onLessonComplete: () => void; onQuizComplete: () => void
     onQuizResult: (correct: boolean) => void; sphereClicked: boolean
+    setEquationStep: (s: number) => void
 }
 
-export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLessonComplete, onQuizComplete, onQuizResult, sphereClicked }: QubitOverlayProps) {
+export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLessonComplete, onQuizComplete, onQuizResult, sphereClicked, setEquationStep }: QubitOverlayProps) {
     return (
         <>
-        <ModuleHeader moduleNumber={1} moduleName="What is a Qubit?" />
-{
-    phase === 'hook' && (
-        <>
-        <TrackSelector panelsVisible={ panelsVisible } onTrackSelect = { onTrackSelect } />
-            { track && <CatDialogueBubble track={ track } panelsVisible = { panelsVisible } />}
-</>
+            <ModuleHeader moduleNumber={1} moduleName="What is a Qubit?" />
+            {phase === 'hook' && (
+                <>
+                    <TrackSelector panelsVisible={panelsVisible} onTrackSelect={onTrackSelect} />
+                    {track && <CatDialogueBubble track={track} panelsVisible={panelsVisible} />}
+                </>
             )}
-{ phase === 'lesson' && <LessonPanels track={ track } panelsVisible = { panelsVisible } onComplete = { onLessonComplete } />}
-{ phase === 'quiz' && <QuizPanel track={ track } panelsVisible = { panelsVisible } onComplete = { onQuizResult } onAllCorrect = { onQuizComplete } sphereClicked = { sphereClicked } />}
-{ phase === 'complete' && <CompletionPanel track={ track } panelsVisible = { panelsVisible } />}
-</>
+            {phase === 'lesson' && <LessonPanels track={track} panelsVisible={panelsVisible} onComplete={onLessonComplete} setEquationStep={setEquationStep} />}
+            {phase === 'quiz' && <QuizPanel track={track} panelsVisible={panelsVisible} onComplete={onQuizResult} onAllCorrect={onQuizComplete} sphereClicked={sphereClicked} />}
+            {phase === 'complete' && <CompletionPanel track={track} panelsVisible={panelsVisible} />}
+        </>
     )
 }

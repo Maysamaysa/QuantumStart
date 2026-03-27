@@ -4,7 +4,7 @@ import styles from './GatePalette.module.css';
 
 export type PaletteGateType = SingleQubitGateType | TwoQubitGateType;
 
-const SINGLE_GATES: SingleQubitGateType[] = ['H', 'X', 'Y', 'Z', 'S', 'T'];
+const SINGLE_GATES: SingleQubitGateType[] = ['H', 'X', 'Y', 'Z', 'S', 'T', 'Measure'];
 const TWO_GATES: TwoQubitGateType[] = ['CNOT', 'CZ'];
 
 function DraggableGate({ id, label }: { id: string; label: string }) {

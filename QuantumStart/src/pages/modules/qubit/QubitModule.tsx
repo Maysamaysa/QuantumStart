@@ -25,6 +25,7 @@ export function QubitModule() {
     const [sphereClicked, setSphereClicked] = useState(false)
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
+    const [equationStep, setEquationStep] = useState(-1)
 
     const handleTrackSelect = useCallback((t: 'blue' | 'amber') => {
         setTrack(t)
@@ -67,6 +68,7 @@ export function QubitModule() {
                     onSphereClick={handleSphereClick}
                     quizCorrect={quizCorrect}
                     showParticles={showParticles}
+                    equationStep={equationStep}
                 />
             </ModuleCanvas>
 
@@ -80,6 +82,7 @@ export function QubitModule() {
                 onQuizComplete={handleQuizComplete}
                 onQuizResult={handleQuizResult}
                 sphereClicked={sphereClicked}
+                setEquationStep={setEquationStep}
             />
         </div>
     )
