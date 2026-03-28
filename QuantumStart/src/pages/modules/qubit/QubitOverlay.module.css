@@ -591,11 +591,20 @@
 
 /* ─── COMPARE PANEL ───────────────────────────────────────────────────────── */
 .comparePanel {
-    top: 32px;
+    bottom: 24px;
+    top: auto;
     left: 50%;
-    transform: translateX(-50%) translateY(-24px);
-    width: min(480px, calc(100vw - 48px));
+    transform: translateX(-50%) translateY(24px);
+    width: min(520px, calc(100vw - 48px));
+    padding: 20px 28px;
     border-color: rgba(93, 167, 219, 0.4);
+}
+
+.compareLayout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
 .comparePanel.panelVisible {
@@ -603,18 +612,37 @@
 }
 
 .compareText {
-    font-size: 15px;
+    font-size: 14px;
     font-family: 'DM Sans', sans-serif;
     color: rgba(248, 249, 255, 0.85);
     line-height: 1.5;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    grid-column: 1 / -1;
 }
 
 .checkboxList {
+    position: absolute;
+    top: 32px;
+    right: 32px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-bottom: 24px;
+    background: rgba(20, 24, 40, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    z-index: 50;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.checkboxListVisible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
 }
 
 .checkboxRow {
@@ -665,4 +693,44 @@
     background: rgba(248, 249, 255, 0.1) !important;
     border-color: rgba(248, 249, 255, 0.2) !important;
     color: rgba(248, 249, 255, 0.4) !important;
+}
+
+.mazeControls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.mazeBtn {
+    background: rgba(248, 249, 255, 0.05);
+    border: 1px solid rgba(248, 249, 255, 0.15);
+    border-radius: 12px;
+    color: rgba(248, 249, 255, 0.7);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.mazeBtn:hover {
+    background: rgba(248, 249, 255, 0.1);
+    color: #F8F9FF;
+    transform: translateY(-2px);
+}
+
+.mazeBtnActiveCls {
+    background: rgba(196, 149, 90, 0.15);
+    border-color: rgba(196, 149, 90, 0.5);
+    color: #ffdaaa;
+    box-shadow: 0 4px 20px rgba(196, 149, 90, 0.15);
+}
+
+.mazeBtnActiveQtm {
+    background: rgba(93, 167, 219, 0.15);
+    border-color: rgba(93, 167, 219, 0.5);
+    color: #b0d8f5;
+    box-shadow: 0 4px 20px rgba(93, 167, 219, 0.15);
 }

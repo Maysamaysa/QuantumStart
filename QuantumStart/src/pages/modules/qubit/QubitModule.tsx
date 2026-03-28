@@ -23,6 +23,7 @@ export function QubitModule() {
     }, [])
 
     const [sphereClicked, setSphereClicked] = useState(false)
+    const [mazeMode, setMazeMode] = useState<'idle' | 'classical' | 'quantum'>('idle')
     const [coinClickedCompare, setCoinClickedCompare] = useState(false)
     const [qubitClickedCompare, setQubitClickedCompare] = useState(false)
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
@@ -38,6 +39,7 @@ export function QubitModule() {
 
     const handleLessonComplete = useCallback(() => {
         setPhase('compare')
+        setMazeMode('idle')
         setCoinClickedCompare(false)
         setQubitClickedCompare(false)
     }, [])
@@ -77,6 +79,7 @@ export function QubitModule() {
                 <QubitScene
                     track={track}
                     phase={phase}
+                    mazeMode={mazeMode}
                     onCoinClick={handleCoinClick}
                     onSphereClick={handleSphereClick}
                     quizCorrect={quizCorrect}
@@ -96,6 +99,8 @@ export function QubitModule() {
                 onQuizComplete={handleQuizComplete}
                 onQuizResult={handleQuizResult}
                 sphereClicked={sphereClicked}
+                mazeMode={mazeMode}
+                setMazeMode={setMazeMode}
                 coinClickedCompare={coinClickedCompare}
                 qubitClickedCompare={qubitClickedCompare}
                 setEquationStep={setEquationStep}

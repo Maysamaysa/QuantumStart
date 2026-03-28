@@ -13,7 +13,7 @@
 
 import { useRef, useState, useEffect, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Html, Text } from '@react-three/drei'
+import { Html, Line, Text } from '@react-three/drei'
 import * as THREE from 'three'
 // import { color } from 'three/tsl'
 
@@ -40,6 +40,7 @@ interface QubitSceneProps {
     onSphereClick: () => void
     quizCorrect?: boolean | null
     showParticles?: boolean
+    mazeMode?: 'idle' | 'classical' | 'quantum'
 }
 
 // ─── INTERACTIVE LABEL ────────────────────────────────────────────────────────
@@ -133,12 +134,12 @@ function FloatingEquation({ active, step }: { active: boolean; step: number }) {
 }
 
 // ─── SCENE DIMMER ─────────────────────────────────────────────────────────────
-function SceneDimmer({ active }: { active: boolean }) {
+function SceneDimmer({ active, opacity = 0.55 }: { active: boolean; opacity?: number }) {
     const meshRef = useRef<THREE.Mesh>(null)
     useFrame((_s, delta) => {
         if (!meshRef.current) return
         const mat = meshRef.current.material as THREE.MeshBasicMaterial
-        const target = active ? 0.55 : 0
+        const target = active ? opacity : 0
         mat.opacity += (target - mat.opacity) * delta * 3
     })
     return (
@@ -146,6 +147,155 @@ function SceneDimmer({ active }: { active: boolean }) {
             <planeGeometry args={[100, 100]} />
             <meshBasicMaterial color="#080912" transparent opacity={0} depthTest={false} />
         </mesh>
+    )
+}
+
+// ─── COMPARE SPOTLIGHTS ───────────────────────────────────────────────────────
+function CompareSpotlights({ active }: { active: boolean }) {
+    const pt1 = useRef<THREE.PointLight>(null)
+    const pt2 = useRef<THREE.PointLight>(null)
+    
+    useFrame((_s, delta) => {
+        const targetPoint = active ? 4 : 0
+        if (pt1.current) pt1.current.intensity += (targetPoint - pt1.current.intensity) * delta * 4
+        if (pt2.current) pt2.current.intensity += (targetPoint - pt2.current.intensity) * delta * 4
+    })
+
+    return (
+        <>
+            <pointLight ref={pt1} position={[COIN_X, 2.5, 1]} distance={8} color="#ffffff" decay={2} intensity={0} />
+            <pointLight ref={pt2} position={[QUBIT_X, 2.5, 1]} distance={8} color="#ffffff" decay={2} intensity={0} />
+        </>
+    )
+}
+
+// ─── MAZE VISUAL ──────────────────────────────────────────────────────────────
+function MazeVisual({ mode, active }: { mode: 'idle' | 'classical' | 'quantum'; active: boolean }) {
+    const { nodes, edges } = useMemo(() => {
+        const _nodes: THREE.Vector3[] = []
+        const _edges: { from: number; to: number; layer: number }[] = []
+        _nodes.push(new THREE.Vector3(0, 1.8, 0))
+        let lastLayer = [0]
+        for (let d = 1; d <= 3; d++) {
+            const currLayer = []
+            const count = Math.pow(2, d)
+            const spacing = 5.0 / count
+            const startX = -2.5 + spacing / 2
+            for (let i = 0; i < count; i++) {
+                _nodes.push(new THREE.Vector3(startX + i * spacing, 1.8 - d * 1.3, 0))
+                const newIdx = _nodes.length - 1
+                currLayer.push(newIdx)
+                _edges.push({ from: lastLayer[Math.floor(i / 2)], to: newIdx, layer: d })
+            }
+            lastLayer = currLayer
+        }
+        return { nodes: _nodes, edges: _edges }
+    }, [])
+
+    const dotsRef = useRef<THREE.InstancedMesh>(null)
+    const classicalDotRef = useRef<THREE.Mesh>(null)
+    const t = useRef(0)
+    
+    const [classPath] = useState(() => {
+        const p = []
+        p.push(0, 1, 3, 7, 3, 1, 0)
+        p.push(0, 2, 5, 11, 5, 2, 0)
+        p.push(0, 1, 4, 9, 4, 1, 0)
+        p.push(0, 2, 6, 14, 14, 14, 14, 14, 14) // target hold
+        return p
+    })
+
+    const dummy = useMemo(() => new THREE.Object3D(), [])
+
+    useFrame((_s, delta) => {
+        if (!active) return
+
+        if (mode === 'classical') {
+            t.current += delta * 3.5 
+            const cycle = t.current % classPath.length
+            const idx = Math.floor(cycle)
+            const nextIdx = Math.min(idx + 1, classPath.length - 1)
+            const frac = cycle - idx
+            
+            if (classicalDotRef.current) {
+                classicalDotRef.current.position.lerpVectors(nodes[classPath[idx]], nodes[classPath[nextIdx]], frac)
+                classicalDotRef.current.visible = true
+            }
+            if (dotsRef.current) dotsRef.current.visible = false
+            
+        } else if (mode === 'quantum') {
+            t.current += delta * 0.5 
+            const progress = t.current % 1.0
+            
+            if (dotsRef.current) {
+                dotsRef.current.visible = true
+                edges.forEach((e, i) => {
+                    const startP = (e.layer - 1) * 0.333
+                    const endP = e.layer * 0.333
+                    if (progress >= startP && progress <= endP) {
+                        const localFrac = (progress - startP) / 0.333
+                        dummy.position.lerpVectors(nodes[e.from], nodes[e.to], localFrac)
+                        dummy.scale.setScalar(1.0)
+                    } else if (progress > endP) {
+                        dummy.position.copy(nodes[e.to])
+                        dummy.scale.setScalar(Math.max(0, 1.0 - (progress - endP) * 3))
+                    } else {
+                        dummy.scale.setScalar(0)
+                    }
+                    dummy.updateMatrix()
+                    dotsRef.current!.setMatrixAt(i, dummy.matrix)
+                    dotsRef.current!.setColorAt(i, new THREE.Color("#5DA7DB"))
+                })
+                dotsRef.current.instanceMatrix.needsUpdate = true
+                dotsRef.current.instanceColor!.needsUpdate = true
+            }
+            if (classicalDotRef.current) classicalDotRef.current.visible = false
+        } else {
+            if (classicalDotRef.current) classicalDotRef.current.visible = false
+            if (dotsRef.current) dotsRef.current.visible = false
+        }
+    })
+
+    if (!active) return null
+
+    return (
+        <group position={[0, 1.2, 0]} scale={1.6}>
+            <Html center position={[0, 2.5, 0]}>
+                <div style={{ color: mode === 'classical' ? '#C4955A' : mode === 'quantum' ? '#5DA7DB' : 'rgba(10,10,20,0.8)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', background: 'rgba(255,255,255,0.6)', padding: '4px 12px', borderRadius: '12px', border: `1px solid ${mode === 'classical' ? '#C4955A' : mode === 'quantum' ? '#5DA7DB' : '#555'}`, transition: 'all 0.3s', backdropFilter: 'blur(4px)' }}>
+                    {mode === 'classical' ? 'CLASSICAL TRIAL & ERROR' : mode === 'quantum' ? 'QUANTUM PARALLELISM' : 'MAZE ALGORITHM'}
+                </div>
+            </Html>
+
+            {edges.map((e, idx) => (
+                <Line
+                    key={idx}
+                    points={[nodes[e.from], nodes[e.to]]}
+                    color={mode === 'quantum' ? "#5DA7DB" : mode === 'classical' ? "#C4955A" : "#111111"}
+                    lineWidth={3.5}
+                    transparent
+                    opacity={mode === 'idle' ? 0.4 : 0.7}
+                />
+            ))}
+
+            <mesh position={nodes[14]}>
+                <sphereGeometry args={[0.08, 16, 16]} />
+                <meshStandardMaterial color="#3ac878" emissive="#3ac878" emissiveIntensity={2} />
+            </mesh>
+            <mesh position={nodes[14]}>
+                <sphereGeometry args={[0.15, 16, 16]} />
+                <meshStandardMaterial color="#3ac878" emissive="#3ac878" emissiveIntensity={0.5} transparent opacity={0.4} wireframe />
+            </mesh>
+
+            <mesh ref={classicalDotRef} visible={false}>
+                <sphereGeometry args={[0.14, 16, 16]} />
+                <meshStandardMaterial color="#C4955A" emissive="#C4955A" emissiveIntensity={3} />
+            </mesh>
+
+            <instancedMesh ref={dotsRef} args={[undefined, undefined, edges.length]} visible={false}>
+                <sphereGeometry args={[0.09, 16, 16]} />
+                <meshStandardMaterial color="#5DA7DB" emissive="#5DA7DB" emissiveIntensity={3} />
+            </instancedMesh>
+        </group>
     )
 }
 
@@ -287,20 +437,6 @@ function QubitSphere({ track, phase, onClick, isQuizTarget }: { track: Track; ph
     return (
         <group position={[QUBIT_X, QUBIT_Y, 0]}>
             <InteractiveLabel position={[0, QUBIT_RADIUS + 0.5, 0]} text={collapsed ? "Click to reset" : "Click to collapse"} active={phase === 'lesson' || phase === 'compare'} />
-            
-            {/* Quantum ghost trail (all paths at once) */}
-            {!collapsed && !superposing && (phase === 'lesson' || phase === 'compare') && (
-                <>
-                    <mesh scale={1.05} rotation={[0, Math.PI / 4, 0]}>
-                        <sphereGeometry args={[QUBIT_RADIUS, 16, 16]} />
-                        <meshStandardMaterial color="#5DA7DB" transparent opacity={0.15} wireframe />
-                    </mesh>
-                    <mesh scale={1.1} rotation={[0, -Math.PI / 4, 0]}>
-                        <sphereGeometry args={[QUBIT_RADIUS, 12, 12]} />
-                        <meshStandardMaterial color="#FFB7C5" transparent opacity={0.1} wireframe />
-                    </mesh>
-                </>
-            )}
 
             {isQuizTarget && (
                 <mesh>
@@ -430,35 +566,37 @@ function BlueShimmer({ active }: { active: boolean }) {
 }
 
 // ─── CAMERA CONTROLLER ────────────────────────────────────────────────────────
-function CameraController({ phase }: { phase: Phase }) {
+function CameraController({ phase, mazeMode }: { phase: Phase, mazeMode?: string }) {
     const { camera } = useThree()
     const targetZ = useRef(11)
     useEffect(() => {
-        // Zoom in slightly for 'compare' phase
-        targetZ.current = phase === 'quiz' ? 9 : phase === 'compare' ? 10.5 : phase === 'complete' ? 10 : 13
-    }, [phase])
+        // Zoom out slightly to see the maze during compare phase
+        targetZ.current = phase === 'quiz' ? 9 : phase === 'compare' ? 12.5 : phase === 'complete' ? 10 : 13
+    }, [phase, mazeMode])
     useFrame((_s, delta) => { camera.position.z += (targetZ.current - camera.position.z) * delta * 1.5 })
     return null
 }
 
 // ─── MODULE 1 SCENE (main export) ─────────────────────────────────────────────
-export default function QubitScene({ track, phase, onCoinClick, onSphereClick, quizCorrect = null, showParticles = false, equationStep = -1 }: QubitSceneProps & { equationStep?: number }) {
+export default function QubitScene({ track, phase, onCoinClick, onSphereClick, quizCorrect = null, showParticles = false, equationStep = -1, mazeMode = 'idle' }: QubitSceneProps & { equationStep?: number }) {
     const isQuiz = phase === 'quiz'
     const showBraket = track === 'amber' && phase === 'lesson'
     const showEquation = track === 'amber' && phase === 'lesson'
 
     return (
         <>
-            <CameraController phase={phase} />
+            <CameraController phase={phase} mazeMode={mazeMode} />
             <ambientLight intensity={isQuiz ? 0.5 : 0.8} />
             <directionalLight position={[5, 10, 5]} intensity={isQuiz ? 1.0 : 2.5} />
             <pointLight position={[-8, 4, -4]} intensity={2.5} color="#5DA7DB" />
             <pointLight position={[8, 4, 4]} intensity={2.0} color="#C4955A" />
             
-            <SceneDimmer active={isQuiz || phase === 'compare'} />
+            <SceneDimmer active={isQuiz} opacity={0.65} />
+            <CompareSpotlights active={phase === 'compare'} />
             
             <CoinMesh onClick={onCoinClick} phase={phase} />
             <QubitSphere track={track} phase={phase} onClick={onSphereClick} isQuizTarget={isQuiz} />
+            <MazeVisual mode={mazeMode} active={phase === 'compare'} />
             
             {showBraket && <BraketLabels />}
             <FloatingEquation active={showEquation} step={equationStep} />

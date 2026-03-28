@@ -17,12 +17,12 @@ const BLUE_PANELS = [
         hint: "Flip the coin on the left. See how it's always definitively 0 or 1?" 
     },
     { 
-        text: "Now, look at the Qubit. While the coin is stuck in one state, the Qubit explores both possibilities at once. This is Superposition.", 
-        hint: "The 'ghost' spheres around the qubit show it taking all paths simultaneously." 
+        text: "Now, look at the Qubit. While the coin is stuck in one state, the Qubit explores multiple possibilities at once. This is Superposition.", 
+        hint: "We will visualize this with the Maze Algorithm in the next step." 
     },
     { 
         text: "A qubit isn't 'somewhere in between' 0 and 1. It is a mathematical combination of both, existing in a cloud of probability.", 
-        hint: "Click the qubit to witness its 'collapse' into a single classical state." 
+        hint: "A classical bit tries paths one-by-one. A qubit floods all paths simultaneously." 
     },
     { 
         text: "In the quantum world, we don't just choose a path. We explore all of them until the moment of measurement.", 
@@ -61,14 +61,14 @@ interface QuizQuestion {
 
 const QUIZ_QUESTIONS: QuizQuestion[] = [
     {
-        question: "What is the key visual difference between the coin and the qubit in this scene?",
+        question: "How does the Qubit solve the maze differently from the Classical Coin?",
         answers: [
-            { label: "A) The coin is larger", correct: false },
-            { label: "B) The qubit shows multiple 'ghost' paths at once", correct: true },
-            { label: "C) The coin is made of gold", correct: false },
+            { label: "A) It solves it much slower but more accurately", correct: false },
+            { label: "B) It splits and traverses all possible paths at exactly the same time", correct: true },
+            { label: "C) It uses a single path but travels at the speed of light", correct: false },
             { label: "D) There is no difference", correct: false },
         ],
-        explanation: "The 'ghost' trail represents superposition—the qubit's ability to explore all paths simultaneously, unlike the classical coin which is always in one state.",
+        explanation: "Quantum parallelism allows the qubit to compute all possible paths through the maze simultaneously, rather than checking them one-by-one like a classical algorithm.",
         tracks: ['blue', 'amber'],
     },
     {
@@ -210,42 +210,56 @@ function LessonPanels({ track, panelsVisible, onComplete, setEquationStep }: {
 }
 
 // ─── COMPARE PANEL ────────────────────────────────────────────────────────────
-function ComparePanel({ panelsVisible, onCompareComplete, coinClicked, qubitClicked }: {
-    panelsVisible: boolean, onCompareComplete: () => void, coinClicked: boolean, qubitClicked: boolean
+function ComparePanel({ panelsVisible, onCompareComplete, mazeMode, setMazeMode, coinClicked, qubitClicked }: {
+    panelsVisible: boolean, onCompareComplete: () => void, mazeMode: 'idle' | 'classical' | 'quantum', setMazeMode: (m: 'idle' | 'classical' | 'quantum') => void, coinClicked: boolean, qubitClicked: boolean
 }) {
     const bothClicked = coinClicked && qubitClicked;
+    
     return (
+        <>
         <div className={`${styles.panel} ${styles.comparePanel} ${panelsVisible ? styles.panelVisible : ''}`}>
             <div className={styles.lessonHeader}>
                 <span className={styles.lessonStep}>INTERACTIVE SANDBOX</span>
             </div>
-            <p className={styles.compareText}>
-                Let's put them side-by-side. The Classical Coin is grounded in one state (either 0 or 1). 
-                The Quantum Qubit explores both 0 & 1 simultaneously in a state of <strong>Superposition</strong> until measured.
-            </p>
-            <div className={styles.checkboxList}>
-                <div className={`${styles.checkboxRow} ${coinClicked ? styles.checkboxRowChecked : ''}`}>
-                    <div className={`${styles.checkboxSquare} ${coinClicked ? styles.checkboxSquareChecked : ''}`}>
-                        {coinClicked ? '✓' : ''}
-                    </div>
-                    <span className={styles.checkboxLabel}>Flip the Classical Bit (Coin)</span>
-                </div>
-                <div className={`${styles.checkboxRow} ${qubitClicked ? styles.checkboxRowChecked : ''}`}>
-                    <div className={`${styles.checkboxSquare} ${qubitClicked ? styles.checkboxSquareChecked : ''}`}>
-                        {qubitClicked ? '✓' : ''}
-                    </div>
-                    <span className={styles.checkboxLabel}>Measure the Quantum Qubit</span>
+            <div className={styles.compareLayout}>
+                <p className={styles.compareText}>
+                    Let's watch them solve a maze! The <strong>Classical Bit</strong> is purely deterministic—it must try one path, hit a dead end, backtrack, and try the next.
+                    The <strong>Quantum Qubit</strong> enters Superposition, splitting memory and exploring all possible paths simultaneously to find the target instantly.
+                </p>
+                
+                <div className={styles.mazeControls}>
+                    <button className={`${styles.mazeBtn} ${mazeMode === 'classical' ? styles.mazeBtnActiveCls : ''}`} onClick={() => setMazeMode('classical')}>
+                        🔬 Simulate Classical Search
+                    </button>
+                    <button className={`${styles.mazeBtn} ${mazeMode === 'quantum' ? styles.mazeBtnActiveQtm : ''}`} onClick={() => setMazeMode('quantum')}>
+                        ⚡ Simulate Quantum Search
+                    </button>
                 </div>
             </div>
             <button 
                 className={`${styles.nextBtn} ${!bothClicked ? styles.compareBtnDisabled : ''}`} 
                 onClick={() => bothClicked && onCompareComplete()} 
                 disabled={!bothClicked}
-                id="compare-next-btn"
             >
-                {bothClicked ? 'Continue to Knowledge Check →' : 'Click both to continue'}
+                {bothClicked ? 'Continue to Knowledge Check →' : 'Interact with the coin and qubit above!'}
             </button>
         </div>
+
+        <div className={`${styles.checkboxList} ${panelsVisible ? styles.checkboxListVisible : ''}`}>
+            <div className={`${styles.checkboxRow} ${coinClicked ? styles.checkboxRowChecked : ''}`}>
+                <div className={`${styles.checkboxSquare} ${coinClicked ? styles.checkboxSquareChecked : ''}`}>
+                    {coinClicked ? '✓' : ''}
+                </div>
+                <span className={styles.checkboxLabel}>Flip the Classical Bit (Coin)</span>
+            </div>
+            <div className={`${styles.checkboxRow} ${qubitClicked ? styles.checkboxRowChecked : ''}`}>
+                <div className={`${styles.checkboxSquare} ${qubitClicked ? styles.checkboxSquareChecked : ''}`}>
+                    {qubitClicked ? '✓' : ''}
+                </div>
+                <span className={styles.checkboxLabel}>Click to Collapse the Qubit</span>
+            </div>
+        </div>
+        </>
     )
 }
 
@@ -345,11 +359,12 @@ export interface QubitOverlayProps {
     onTrackSelect: (t: 'blue' | 'amber') => void
     onLessonComplete: () => void; onCompareComplete: () => void; onQuizComplete: () => void
     onQuizResult: (correct: boolean) => void; sphereClicked: boolean
+    mazeMode: 'idle' | 'classical' | 'quantum'; setMazeMode: (m: 'idle' | 'classical' | 'quantum') => void;
     coinClickedCompare: boolean; qubitClickedCompare: boolean
     setEquationStep: (s: number) => void
 }
 
-export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLessonComplete, onCompareComplete, onQuizComplete, onQuizResult, sphereClicked, coinClickedCompare, qubitClickedCompare, setEquationStep }: QubitOverlayProps) {
+export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLessonComplete, onCompareComplete, onQuizComplete, onQuizResult, sphereClicked, mazeMode, setMazeMode, coinClickedCompare, qubitClickedCompare, setEquationStep }: QubitOverlayProps) {
     return (
         <>
             <ModuleHeader moduleNumber={1} moduleName="What is a Qubit?" />
@@ -360,7 +375,9 @@ export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLes
                 </>
             )}
             {phase === 'lesson' && <LessonPanels track={track} panelsVisible={panelsVisible} onComplete={onLessonComplete} setEquationStep={setEquationStep} />}
-            {phase === 'compare' && <ComparePanel panelsVisible={panelsVisible} onCompareComplete={onCompareComplete} coinClicked={coinClickedCompare} qubitClicked={qubitClickedCompare} />}
+            {phase === 'compare' && (
+                <ComparePanel panelsVisible={panelsVisible} onCompareComplete={onCompareComplete} mazeMode={mazeMode} setMazeMode={setMazeMode} coinClicked={coinClickedCompare} qubitClicked={qubitClickedCompare} />
+            )}
             {phase === 'quiz' && <QuizPanel track={track} panelsVisible={panelsVisible} onComplete={onQuizResult} onAllCorrect={onQuizComplete} sphereClicked={sphereClicked} />}
             {phase === 'complete' && <CompletionPanel track={track} panelsVisible={panelsVisible} />}
         </>
