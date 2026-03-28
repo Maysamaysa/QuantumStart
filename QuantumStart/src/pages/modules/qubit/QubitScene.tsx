@@ -17,7 +17,7 @@ import { Html, Text } from '@react-three/drei'
 import * as THREE from 'three'
 // import { color } from 'three/tsl'
 
-export type Phase = 'hook' | 'lesson' | 'quiz' | 'complete'
+export type Phase = 'hook' | 'lesson' | 'compare' | 'quiz' | 'complete'
 export type Track = 'blue' | 'amber' | null
 
 // ─── SIZE CONSTANTS (edit here to resize scene objects) ───────────────────────
@@ -189,7 +189,7 @@ function CoinMesh({ onClick, phase }: { onClick: () => void; phase: Phase }) {
 
     return (
         <group position={[COIN_X, COIN_Y, 0]}>
-            <InteractiveLabel position={[0, COIN_RADIUS + 0.5, 0]} text="Click to flip" active={phase === 'lesson'} />
+            <InteractiveLabel position={[0, COIN_RADIUS + 0.5, 0]} text="Click to flip" active={phase === 'lesson' || phase === 'compare'} />
             <group ref={ref}>
                 <mesh onClick={handleClick}
                     onPointerEnter={() => { setHovered(true); document.body.style.cursor = 'pointer' }}
@@ -286,10 +286,10 @@ function QubitSphere({ track, phase, onClick, isQuizTarget }: { track: Track; ph
 
     return (
         <group position={[QUBIT_X, QUBIT_Y, 0]}>
-            <InteractiveLabel position={[0, QUBIT_RADIUS + 0.5, 0]} text={collapsed ? "Click to reset" : "Click to collapse"} active={phase === 'lesson'} />
+            <InteractiveLabel position={[0, QUBIT_RADIUS + 0.5, 0]} text={collapsed ? "Click to reset" : "Click to collapse"} active={phase === 'lesson' || phase === 'compare'} />
             
             {/* Quantum ghost trail (all paths at once) */}
-            {!collapsed && !superposing && phase === 'lesson' && (
+            {!collapsed && !superposing && (phase === 'lesson' || phase === 'compare') && (
                 <>
                     <mesh scale={1.05} rotation={[0, Math.PI / 4, 0]}>
                         <sphereGeometry args={[QUBIT_RADIUS, 16, 16]} />
@@ -343,7 +343,8 @@ function QubitSphere({ track, phase, onClick, isQuizTarget }: { track: Track; ph
                             <div style={{ width: collapsed ? (collapsedVal === 0 ? '100%' : '0%') : '50%', height: '100%', background: '#5DA7DB', transition: 'width 0.4s cubic-bezier(0.23, 1, 0.32, 1)' }} />
                             <div style={{ width: collapsed ? (collapsedVal === 1 ? '100%' : '0%') : '50%', height: '100%', background: '#FFB7C5', transition: 'width 0.4s cubic-bezier(0.23, 1, 0.32, 1)' }} />
                         </div>
-                        {!collapsed && <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>BOTH PATHS ACTIVE</div>}
+                        {!collapsed && <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>Exploring both 0 & 1 at once!</div>}
+                        {collapsed && phase === 'compare' && <div style={{ fontSize: '9px', color: '#FFB7C5', marginTop: '4px' }}>It collapsed! (More on this later)</div>}
                     </div>
                 </Html>
             )}
@@ -433,7 +434,8 @@ function CameraController({ phase }: { phase: Phase }) {
     const { camera } = useThree()
     const targetZ = useRef(11)
     useEffect(() => {
-        targetZ.current = phase === 'quiz' ? 9 : phase === 'complete' ? 10 : 13
+        // Zoom in slightly for 'compare' phase
+        targetZ.current = phase === 'quiz' ? 9 : phase === 'compare' ? 10.5 : phase === 'complete' ? 10 : 13
     }, [phase])
     useFrame((_s, delta) => { camera.position.z += (targetZ.current - camera.position.z) * delta * 1.5 })
     return null
@@ -453,7 +455,7 @@ export default function QubitScene({ track, phase, onCoinClick, onSphereClick, q
             <pointLight position={[-8, 4, -4]} intensity={2.5} color="#5DA7DB" />
             <pointLight position={[8, 4, 4]} intensity={2.0} color="#C4955A" />
             
-            <SceneDimmer active={isQuiz} />
+            <SceneDimmer active={isQuiz || phase === 'compare'} />
             
             <CoinMesh onClick={onCoinClick} phase={phase} />
             <QubitSphere track={track} phase={phase} onClick={onSphereClick} isQuizTarget={isQuiz} />

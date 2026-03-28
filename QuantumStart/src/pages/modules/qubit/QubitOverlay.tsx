@@ -209,6 +209,46 @@ function LessonPanels({ track, panelsVisible, onComplete, setEquationStep }: {
     )
 }
 
+// ─── COMPARE PANEL ────────────────────────────────────────────────────────────
+function ComparePanel({ panelsVisible, onCompareComplete, coinClicked, qubitClicked }: {
+    panelsVisible: boolean, onCompareComplete: () => void, coinClicked: boolean, qubitClicked: boolean
+}) {
+    const bothClicked = coinClicked && qubitClicked;
+    return (
+        <div className={`${styles.panel} ${styles.comparePanel} ${panelsVisible ? styles.panelVisible : ''}`}>
+            <div className={styles.lessonHeader}>
+                <span className={styles.lessonStep}>INTERACTIVE SANDBOX</span>
+            </div>
+            <p className={styles.compareText}>
+                Let's put them side-by-side. The Classical Coin is grounded in one state (either 0 or 1). 
+                The Quantum Qubit explores both 0 & 1 simultaneously in a state of <strong>Superposition</strong> until measured.
+            </p>
+            <div className={styles.checkboxList}>
+                <div className={`${styles.checkboxRow} ${coinClicked ? styles.checkboxRowChecked : ''}`}>
+                    <div className={`${styles.checkboxSquare} ${coinClicked ? styles.checkboxSquareChecked : ''}`}>
+                        {coinClicked ? '✓' : ''}
+                    </div>
+                    <span className={styles.checkboxLabel}>Flip the Classical Bit (Coin)</span>
+                </div>
+                <div className={`${styles.checkboxRow} ${qubitClicked ? styles.checkboxRowChecked : ''}`}>
+                    <div className={`${styles.checkboxSquare} ${qubitClicked ? styles.checkboxSquareChecked : ''}`}>
+                        {qubitClicked ? '✓' : ''}
+                    </div>
+                    <span className={styles.checkboxLabel}>Measure the Quantum Qubit</span>
+                </div>
+            </div>
+            <button 
+                className={`${styles.nextBtn} ${!bothClicked ? styles.compareBtnDisabled : ''}`} 
+                onClick={() => bothClicked && onCompareComplete()} 
+                disabled={!bothClicked}
+                id="compare-next-btn"
+            >
+                {bothClicked ? 'Continue to Knowledge Check →' : 'Click both to continue'}
+            </button>
+        </div>
+    )
+}
+
 // ─── QUIZ PANEL ───────────────────────────────────────────────────────────────
 function QuizPanel({ track, panelsVisible, onComplete, onAllCorrect, sphereClicked }: {
     track: Track; panelsVisible: boolean; onComplete: (correct: boolean) => void; onAllCorrect: () => void; sphereClicked?: boolean
@@ -303,12 +343,13 @@ function CompletionPanel({ track, panelsVisible }: { track: Track; panelsVisible
 export interface QubitOverlayProps {
     panelsVisible: boolean; track: Track; phase: Phase
     onTrackSelect: (t: 'blue' | 'amber') => void
-    onLessonComplete: () => void; onQuizComplete: () => void
+    onLessonComplete: () => void; onCompareComplete: () => void; onQuizComplete: () => void
     onQuizResult: (correct: boolean) => void; sphereClicked: boolean
+    coinClickedCompare: boolean; qubitClickedCompare: boolean
     setEquationStep: (s: number) => void
 }
 
-export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLessonComplete, onQuizComplete, onQuizResult, sphereClicked, setEquationStep }: QubitOverlayProps) {
+export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLessonComplete, onCompareComplete, onQuizComplete, onQuizResult, sphereClicked, coinClickedCompare, qubitClickedCompare, setEquationStep }: QubitOverlayProps) {
     return (
         <>
             <ModuleHeader moduleNumber={1} moduleName="What is a Qubit?" />
@@ -319,6 +360,7 @@ export function QubitOverlay({ panelsVisible, track, phase, onTrackSelect, onLes
                 </>
             )}
             {phase === 'lesson' && <LessonPanels track={track} panelsVisible={panelsVisible} onComplete={onLessonComplete} setEquationStep={setEquationStep} />}
+            {phase === 'compare' && <ComparePanel panelsVisible={panelsVisible} onCompareComplete={onCompareComplete} coinClicked={coinClickedCompare} qubitClicked={qubitClickedCompare} />}
             {phase === 'quiz' && <QuizPanel track={track} panelsVisible={panelsVisible} onComplete={onQuizResult} onAllCorrect={onQuizComplete} sphereClicked={sphereClicked} />}
             {phase === 'complete' && <CompletionPanel track={track} panelsVisible={panelsVisible} />}
         </>

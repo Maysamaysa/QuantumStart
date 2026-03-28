@@ -1,6 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { SingleQubitGateType, TwoQubitGateType } from '../../lib/circuit/types';
-import { SINGLE_GATES, TWO_GATES } from '../../../config/gates';
+import { SINGLE_GATES, TWO_GATES } from '../../config/gates';
 import styles from './GatePalette.module.css';
 
 export type PaletteGateType = SingleQubitGateType | TwoQubitGateType;

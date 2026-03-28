@@ -23,6 +23,8 @@ export function QubitModule() {
     }, [])
 
     const [sphereClicked, setSphereClicked] = useState(false)
+    const [coinClickedCompare, setCoinClickedCompare] = useState(false)
+    const [qubitClickedCompare, setQubitClickedCompare] = useState(false)
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
     const [equationStep, setEquationStep] = useState(-1)
@@ -35,6 +37,12 @@ export function QubitModule() {
 
 
     const handleLessonComplete = useCallback(() => {
+        setPhase('compare')
+        setCoinClickedCompare(false)
+        setQubitClickedCompare(false)
+    }, [])
+
+    const handleCompareComplete = useCallback(() => {
         setPhase('quiz')
         setSphereClicked(false)
         setQuizCorrect(null)
@@ -54,7 +62,12 @@ export function QubitModule() {
     }, [completeModule, track])
 
     const handleSphereClick = useCallback(() => {
+        if (phase === 'compare') setQubitClickedCompare(true)
         if (phase === 'quiz') setSphereClicked(true)
+    }, [phase])
+
+    const handleCoinClick = useCallback(() => {
+        if (phase === 'compare') setCoinClickedCompare(true)
     }, [phase])
 
     return (
@@ -64,7 +77,7 @@ export function QubitModule() {
                 <QubitScene
                     track={track}
                     phase={phase}
-                    onCoinClick={() => { /* coin flip handled inside scene */ }}
+                    onCoinClick={handleCoinClick}
                     onSphereClick={handleSphereClick}
                     quizCorrect={quizCorrect}
                     showParticles={showParticles}
@@ -79,9 +92,12 @@ export function QubitModule() {
                 phase={phase}
                 onTrackSelect={handleTrackSelect}
                 onLessonComplete={handleLessonComplete}
+                onCompareComplete={handleCompareComplete}
                 onQuizComplete={handleQuizComplete}
                 onQuizResult={handleQuizResult}
                 sphereClicked={sphereClicked}
+                coinClickedCompare={coinClickedCompare}
+                qubitClickedCompare={qubitClickedCompare}
                 setEquationStep={setEquationStep}
             />
         </div>
