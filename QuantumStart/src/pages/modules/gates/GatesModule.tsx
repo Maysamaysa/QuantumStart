@@ -5,9 +5,11 @@ import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import GatesScene from './GatesScene'
 import { GatesOverlay } from './GatesOverlay'
+import PortalCanvas2D from './PortalCanvas2D'
 import type { State1Q } from './gateLogic'
 
 export type GatePhase = 'phase1_intro' | 'phase2_challenges' | 'phase3_quiz' | 'complete'
+export type IntroStage = 'choice' | 'primer' | 'palette'
 
 export function GatesModule() {
     const { completeModule } = useProgress()
@@ -17,6 +19,7 @@ export function GatesModule() {
     const { panelsVisible } = useCatNPCTransition(true)
 
     // Shared state for 3D and UI
+    const [introStage, setIntroStage] = useState<IntroStage>('choice')
     const [selectedGate, setSelectedGate] = useState<string | null>(null)
     const [animState, setAnimState] = useState<State1Q>([1, 0, 0, 0])
     const [challengeIdx, setChallengeIdx] = useState(0)
@@ -53,28 +56,38 @@ export function GatesModule() {
         }
     }, [completeModule])
 
+    const showCanvas2D = phase === 'phase1_intro' && introStage === 'primer'
+
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
-            {/* R3F scene (lesson-specific objects) */}
-            <ModuleCanvas camera={{ position: [0, 0, 11], fov: 55 }}>
-                <GatesScene
-                    phase={phase}
-                    unlockedGates={unlockedGates}
-                    selectedGate={selectedGate}
-                    onSelectGate={setSelectedGate}
-                    animState={animState}
-                    challengeIdx={challengeIdx}
-                    wireState1={wireState1}
-                    wireState2={wireState2}
-                    isEntangled={isEntangled}
-                />
-            </ModuleCanvas>
+            {/* R3F scene — hidden during primer (2D canvas takes over) */}
+            <div style={{ opacity: showCanvas2D ? 0 : 1, transition: 'opacity 0.4s ease', position: 'absolute', inset: 0 }}>
+                <ModuleCanvas camera={{ position: [0, 0, 11], fov: 55 }}>
+                    <GatesScene
+                        phase={phase}
+                        introStage={introStage}
+                        unlockedGates={unlockedGates}
+                        selectedGate={selectedGate}
+                        onSelectGate={setSelectedGate}
+                        animState={animState}
+                        challengeIdx={challengeIdx}
+                        wireState1={wireState1}
+                        wireState2={wireState2}
+                        isEntangled={isEntangled}
+                    />
+                </ModuleCanvas>
+            </div>
+
+            {/* 2D Canvas — visible only during primer */}
+            {showCanvas2D && <PortalCanvas2D />}
 
             {/* HTML overlay */}
             <GatesOverlay
                 panelsVisible={panelsVisible}
                 phase={phase}
                 onPhaseComplete={handlePhaseComplete}
+                introStage={introStage}
+                setIntroStage={setIntroStage}
                 unlockedGates={unlockedGates}
                 unlockGate={unlockGate}
                 selectedGate={selectedGate}

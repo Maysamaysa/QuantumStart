@@ -167,19 +167,62 @@ function QuizPanel({ track, panelsVisible, onQuizResult, onQuizComplete }: { tra
     )
 }
 
+function SandboxPanel({ panelsVisible, hasTransformed, hasPassedSecondGate, onCompareComplete }: { panelsVisible: boolean, hasTransformed: boolean, hasPassedSecondGate: boolean, onCompareComplete: () => void }) {
+    return (
+        <>
+        <div className={`${styles.panel} ${styles.comparePanel} ${panelsVisible ? styles.panelVisible : ''}`}>
+            <div className={styles.lessonHeader}>
+                <span className={styles.lessonStep}>INTERACTIVE SANDBOX</span>
+            </div>
+            <div className={styles.compareLayout}>
+                <p className={styles.compareText}>
+                    A classical coin flipped twice is completely random. But look at what happens to a Qubit's precise mathematical wave!
+                    <br/><br/>
+                    <strong>Drag the Probability Wave Cloud through the H-Gate again to see interference in action.</strong>
+                </p>
+            </div>
+            <button 
+                className={`${styles.nextBtn} ${!hasPassedSecondGate ? styles.compareBtnDisabled : ''}`} 
+                onClick={() => hasPassedSecondGate && onCompareComplete()} 
+                disabled={!hasPassedSecondGate}
+            >
+                {hasPassedSecondGate ? 'Continue to Knowledge Check →' : 'Complete the checklist above'}
+            </button>
+        </div>
+
+        <div className={`${styles.checkboxList} ${panelsVisible ? styles.checkboxListVisible : ''}`}>
+            <div className={`${styles.checkboxRow} ${hasTransformed ? styles.checkboxRowChecked : ''}`}>
+                <div className={`${styles.checkboxSquare} ${hasTransformed ? styles.checkboxSquareChecked : ''}`}>
+                    {hasTransformed ? '✓' : ''}
+                </div>
+                <span className={styles.checkboxLabel}>Create Superposition Wave</span>
+            </div>
+            <div className={`${styles.checkboxRow} ${hasPassedSecondGate ? styles.checkboxRowChecked : ''}`}>
+                <div className={`${styles.checkboxSquare} ${hasPassedSecondGate ? styles.checkboxSquareChecked : ''}`}>
+                    {hasPassedSecondGate ? '✓' : ''}
+                </div>
+                <span className={styles.checkboxLabel}>Interfere with H-Gate again</span>
+            </div>
+        </div>
+        </>
+    )
+}
+
 interface SuperpositionOverlayProps {
     panelsVisible: boolean
     track: Track
     phase: Phase
     hasTransformed: boolean
+    hasPassedSecondGate: boolean
     onTrackSelect: (t: 'blue' | 'amber') => void
     onLessonComplete: () => void
+    onCompareComplete: () => void
     onQuizComplete: () => void
     onQuizResult: (correct: boolean) => void
 }
 
 export function SuperpositionOverlay({ 
-    panelsVisible, track, phase, hasTransformed, onTrackSelect, onLessonComplete, onQuizComplete, onQuizResult 
+    panelsVisible, track, phase, hasTransformed, hasPassedSecondGate, onTrackSelect, onLessonComplete, onCompareComplete, onQuizComplete, onQuizResult 
 }: SuperpositionOverlayProps) {
     const navigate = useNavigate()
     const phaseIndex = phase === 'hook' ? 0 : phase === 'lesson' ? 1 : phase === 'quiz' ? 2 : 3
@@ -199,6 +242,7 @@ export function SuperpositionOverlay({
                 </>
             )}
             {phase === 'lesson' && <LessonPanels track={track} panelsVisible={panelsVisible} hasTransformed={hasTransformed} onComplete={onLessonComplete} phase={phase} />}
+            {phase === 'sandbox' && <SandboxPanel panelsVisible={panelsVisible} hasTransformed={hasTransformed} hasPassedSecondGate={hasPassedSecondGate} onCompareComplete={onCompareComplete} />}
             {phase === 'quiz' && <QuizPanel track={track} panelsVisible={panelsVisible} onQuizResult={onQuizResult} onQuizComplete={onQuizComplete} />}
             {phase === 'complete' && (
                  <div className={`${styles.panel} ${styles.completionPanel} ${styles.panelVisible}`}>

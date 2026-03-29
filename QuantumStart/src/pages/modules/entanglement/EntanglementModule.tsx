@@ -15,8 +15,8 @@ export function EntanglementModule() {
     const [phase, setPhase] = useState<Phase>('concept')
     const [step, setStep] = useState(1)
 
-    const [qubitA, setQubitA] = useState<{ x: number }>({ x: -1 })
-    const [qubitB, setQubitB] = useState<{ x: number }>({ x: 1 })
+    const [qubitA, setQubitA] = useState<{ x: number, y: number }>({ x: -2.5, y: 0 })
+    const [qubitB, setQubitB] = useState<{ x: number, y: number }>({ x: 2.5, y: 0 })
     
     const [isEntangled, setIsEntangled] = useState(false)
     const [isMeasured, setIsMeasured] = useState(false)

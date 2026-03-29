@@ -4,11 +4,10 @@
 
 import { useRef, useState, useEffect, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useGLTF, useAnimations, Html } from '@react-three/drei'
+import { Html } from '@react-three/drei'
 import * as THREE from 'three'
-import Koi_cat from '../../../assets/koi_cat.glb'
 
-export type Phase = 'hook' | 'lesson' | 'quiz' | 'complete'
+export type Phase = 'hook' | 'lesson' | 'sandbox' | 'quiz' | 'complete'
 export type Track = 'blue' | 'amber' | null
 
 // ─── PARTICLE BURST ───────────────────────────────────────────────────────────
@@ -73,27 +72,17 @@ function BlueShimmer({ active }: { active: boolean }) {
     )
 }
 
-const CAT_SCALE = 2.5
-const CAT_GLB_SCALE = 0.5
-const CAT_X = 5.5
-const CAT_Y = 1.8
-
-const MACHINE_X = -0.5
-const MACHINE_Y = 0.2
-
-const CAT_LOOK_SPEED = 0.07
-
 interface SuperpositionSceneProps {
     track: Track
     phase: Phase
-    onCatSettled: () => void
     onGateTrigger: () => void
     gateActive: boolean
-    hasTransformed: boolean
-    onTransform: () => void
+    hasTransformed: boolean // Past Gate 1
+    onTransform: () => void // Trigger Gate 1 pass
+    hasPassedSecondGate: boolean // Past Gate 2
+    onSecondGatePass: () => void // Trigger Gate 2 pass
     quizCorrect?: boolean | null
     showParticles?: boolean
-    catRetreat?: boolean
 }
 
 function SceneDimmer({ active }: { active: boolean }) {
@@ -112,94 +101,200 @@ function SceneDimmer({ active }: { active: boolean }) {
     )
 }
 
-// ─── H-GATE TUNNEL ───────────────────────────────────────────────────────────
-function HGate({ active: _ }: { active: boolean }) {
-    const group = useRef<THREE.Group>(null)
-    const field = useRef<THREE.Mesh>(null)
+function HGate({ position, active }: { position: [number, number, number], active: boolean }) {
+    const portal = useRef<THREE.Mesh>(null)
+    const floatGroup = useRef<THREE.Group>(null)
 
     useFrame((state) => {
-        if (!field.current) return
         const t = state.clock.getElapsedTime()
-        field.current.scale.setScalar(1 + Math.sin(t * 3) * 0.05)
-        const mat = field.current.material as THREE.MeshStandardMaterial
-        mat.emissiveIntensity = 0.5 + Math.sin(t * 2) * 0.3
+        if (floatGroup.current) {
+            floatGroup.current.position.y = Math.sin(t * 2) * 0.1
+        }
+        if (portal.current) {
+            portal.current.scale.y = 1 + Math.sin(t * 3) * 0.05
+            const mat = portal.current.material as THREE.MeshStandardMaterial
+            mat.emissiveIntensity = 0.5 + Math.sin(t * 2) * 0.3
+            mat.opacity = active ? 0.4 + Math.sin(t * 5) * 0.15 : 0.05
+        }
     })
 
     return (
-        <group position={[1.5, 0, 0]} ref={group}>
-            {/* Frame */}
+        <group position={position}>
+            <group ref={floatGroup}>
+                {/* Left Pillar */}
+                <mesh position={[-0.9, 0, 0]}>
+                    <cylinderGeometry args={[0.08, 0.08, 3.2, 16]} />
+                    <meshStandardMaterial color="#222" metalness={0.9} roughness={0.1} />
+                </mesh>
+                {/* Right Pillar */}
+                <mesh position={[0.9, 0, 0]}>
+                    <cylinderGeometry args={[0.08, 0.08, 3.2, 16]} />
+                    <meshStandardMaterial color="#222" metalness={0.9} roughness={0.1} />
+                </mesh>
+                
+                {/* Top Arch Piece */}
+                <mesh position={[0, 1.6, 0]}>
+                    <boxGeometry args={[2.0, 0.2, 0.3]} />
+                    <meshStandardMaterial color="#111" metalness={0.8} />
+                </mesh>
+                <mesh position={[0, 1.6, 0.16]}>
+                    <boxGeometry args={[1.8, 0.05, 0.05]} />
+                    <meshStandardMaterial color="#FFB7C5" emissive="#FFB7C5" emissiveIntensity={1} />
+                </mesh>
+                <mesh position={[0, 1.6, -0.16]}>
+                    <boxGeometry args={[1.8, 0.05, 0.05]} />
+                    <meshStandardMaterial color="#FFB7C5" emissive="#FFB7C5" emissiveIntensity={1} />
+                </mesh>
+
+                {/* Bottom Arch Piece */}
+                <mesh position={[0, -1.6, 0]}>
+                    <boxGeometry args={[2.0, 0.2, 0.3]} />
+                    <meshStandardMaterial color="#111" metalness={0.8} />
+                </mesh>
+                
+                {/* Inner Energy Portal */}
+                <mesh ref={portal}>
+                    <planeGeometry args={[1.65, 3.1]} />
+                    <meshStandardMaterial 
+                        color="#5DA7DB" 
+                        emissive="#5DA7DB" 
+                        transparent 
+                        opacity={0.15} 
+                        emissiveIntensity={0.5} 
+                        depthWrite={false}
+                        side={THREE.DoubleSide}
+                        blending={THREE.AdditiveBlending}
+                    />
+                </mesh>
+
+                {/* H label projected dynamically */}
+                <Html position={[0, 2.3, 0]} center zIndexRange={[100, 0]}>
+                    <div style={{
+                        color: '#FFF',
+                        fontSize: '44px',
+                        fontWeight: 900,
+                        fontFamily: 'Space Mono, monospace',
+                        textShadow: '0 0 20px #FFB7C5, 0 0 40px #FFB7C5'
+                    }}>H</div>
+                </Html>
+            </group>
+        </group>
+    )
+}
+
+// ─── PROBABILITY WAVE (RHYTHMIC / OSCILLATING) ───────────────────────────────
+function ProbabilityWave({ color }: { color: string }) {
+    const inner = useRef<THREE.Mesh>(null)
+    const mid = useRef<THREE.Mesh>(null)
+    const outer = useRef<THREE.Mesh>(null)
+    
+    useFrame((state) => {
+        const t = state.clock.getElapsedTime()
+        
+        // Rhythmic, precise mathematical oscillation
+        if (inner.current) {
+            inner.current.scale.setScalar(0.7 + Math.sin(t * 4) * 0.1)
+            ;(inner.current.material as THREE.MeshStandardMaterial).opacity = 0.5 + Math.sin(t * 4) * 0.3
+        }
+        if (mid.current) {
+            mid.current.scale.setScalar(1.1 + Math.sin(t * 4 - 1.5) * 0.15)
+            ;(mid.current.material as THREE.MeshStandardMaterial).opacity = 0.3 + Math.sin(t * 4 - 1.5) * 0.2
+        }
+        if (outer.current) {
+            outer.current.scale.setScalar(1.5 + Math.sin(t * 4 - 3.0) * 0.2)
+            ;(outer.current.material as THREE.MeshStandardMaterial).opacity = 0.15 + Math.sin(t * 4 - 3.0) * 0.1
+        }
+    })
+
+    return (
+        <group>
+            {/* Core dot mimicking the underlying classical mass */}
             <mesh>
-                <torusGeometry args={[1.5, 0.08, 16, 4]} />
-                <meshStandardMaterial color="#333" metalness={0.8} roughness={0.2} />
+                <sphereGeometry args={[0.3, 16, 16]} />
+                <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} />
             </mesh>
-            {/* Glow field */}
-            <mesh ref={field}>
-                <cylinderGeometry args={[0.02, 0.02, 3, 32]} />
-                <meshStandardMaterial 
-                    color="#FFB7C5" 
-                    emissive="#FFB7C5" 
-                    transparent 
-                    opacity={0.15} 
-                    emissiveIntensity={0.5} 
-                />
+            <mesh ref={inner}>
+                <sphereGeometry args={[1, 32, 32]} />
+                <meshStandardMaterial color={color} emissive={color} transparent depthTest={false} blending={THREE.AdditiveBlending} />
             </mesh>
-            {/* H label */}
-            <Html position={[0, 1.8, 0]} center>
-                <div style={{
-                    color: '#FFB7C5',
-                    fontSize: '32px',
-                    fontWeight: 900,
-                    fontFamily: 'Space Mono, monospace',
-                    textShadow: '0 0 15px rgba(255,183,197,0.8)'
-                }}>H</div>
-            </Html>
+            <mesh ref={mid}>
+                <sphereGeometry args={[1, 32, 32]} />
+                <meshStandardMaterial color={color} emissive={color} transparent depthTest={false} blending={THREE.AdditiveBlending} />
+            </mesh>
+            <mesh ref={outer}>
+                <sphereGeometry args={[1, 32, 32]} />
+                <meshStandardMaterial color={color} emissive={color} transparent depthTest={false} blending={THREE.AdditiveBlending} wireframe />
+            </mesh>
         </group>
     )
 }
 
 // ─── DRAGGABLE QUBIT ──────────────────────────────────────────────────────────
-function DraggableQubit({ hasTransformed, onTransform, track }: { hasTransformed: boolean; onTransform: () => void; track: Track }) {
+function DraggableQubit({ hasTransformed, onTransform, hasPassedSecondGate, onSecondGatePass, track, phase }: { 
+    hasTransformed: boolean, onTransform: () => void, hasPassedSecondGate: boolean, onSecondGatePass: () => void, track: Track, phase: Phase 
+}) {
     const group = useRef<THREE.Group>(null)
     const [dragging, setDragging] = useState(false)
-    // const [pos, setPos] = useState(new THREE.Vector3(-4, 0, 0))
     const { viewport } = useThree()
-    const waveRef = useRef<THREE.Mesh>(null)
+
+    // Key horizontal positions
+    const START_X = 3
+    const GATE_X = 0
+    const MID_REST_X = -3
+    const END_REST_X = 3
 
     useFrame((state) => {
         if (!group.current) return
         const t = state.clock.getElapsedTime()
 
+        // Idle floating 
+        if (!dragging) {
+            group.current.position.y += (Math.sin(t * 1.5) * 0.2 - group.current.position.y) * 0.05
+        }
+
+        const currX = group.current.position.x
+
         if (!hasTransformed) {
-            // Idle bobbing if not transformed
+            // Drag leftwards: passing Center
+            if (currX <= GATE_X) {
+                onTransform()
+            }
+            if (!dragging && currX > GATE_X) {
+                group.current.position.x += (START_X - currX) * 0.05
+            }
+            // Cannot drag right of start
+            if (currX > START_X + 1) group.current.position.x = START_X + 1
+        } else if (!hasPassedSecondGate) {
+            // Wait on the left
             if (!dragging) {
-                group.current.position.y += Math.sin(t * 1.5) * 0.002
+                group.current.position.x += (MID_REST_X - currX) * 0.05
+            }
+
+            // Drag rightwards: passing Center
+            if (phase === 'sandbox' && currX >= GATE_X) {
+                onSecondGatePass()
             }
             
-            // Interaction check: check if qubit passed through H-Gate (around X=1.5)
-            if (group.current.position.x > 0.8 && group.current.position.x < 2.2) {
-                onTransform()
-                setDragging(false)
+            // Restrict dragging past the gate BEFORE sandbox
+            if (phase !== 'sandbox' && currX > GATE_X) {
+                group.current.position.x = GATE_X
             }
         } else {
-            // Post-transformation: float to center and stay there as a wave
-            const targetX = -0.5
-            group.current.position.x += (targetX - group.current.position.x) * 0.05
-            group.current.position.y += (0 - group.current.position.y) * 0.05
-            
-            if (waveRef.current) {
-                const scale = 1.2 + Math.sin(t * 2) * 0.1
-                waveRef.current.scale.setScalar(scale)
-                const mat = waveRef.current.material as THREE.MeshStandardMaterial
-                mat.emissiveIntensity = 1 + Math.sin(t * 3) * 0.5
+            // After second pass, relax back to END_REST_X (right side)
+            if (!dragging) {
+                group.current.position.x += (END_REST_X - currX) * 0.05
+            }
+            // Restrict dragging back left through the gate
+            if (currX < GATE_X) {
+                 group.current.position.x = GATE_X
             }
         }
     })
 
     const handlePointerDown = (e: any) => {
-        if (hasTransformed) return
+        if (hasTransformed && phase !== 'sandbox' && !hasPassedSecondGate) return // Locked before sandbox
         e.stopPropagation()
         setDragging(true)
-        // Set cursor
         document.body.style.cursor = 'grabbing'
     }
 
@@ -209,12 +304,11 @@ function DraggableQubit({ hasTransformed, onTransform, track }: { hasTransformed
     }
 
     const handlePointerMove = (e: any) => {
-        if (!dragging || hasTransformed) return
+        if (!dragging) return
         // Map pointer to world space
         const x = (e.clientX / window.innerWidth) * 2 - 1
         const y = -(e.clientY / window.innerHeight) * 2 + 1
         
-        // Use viewport to size the drag correctly
         const newX = (x * viewport.width) / 2
         const newY = (y * viewport.height) / 2
         
@@ -223,142 +317,116 @@ function DraggableQubit({ hasTransformed, onTransform, track }: { hasTransformed
 
     const col = track === 'amber' ? '#C4955A' : '#5DA7DB'
 
+    const isWave = hasTransformed && !hasPassedSecondGate
+
     return (
         <group 
             ref={group} 
-            position={[-4, 0, 0]}
+            position={[START_X, 0, 0]}
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
             onPointerMove={handlePointerMove}
-            onPointerLeave={handlePointerUp}
+            onPointerOut={handlePointerUp}
         >
-            {!hasTransformed ? (
+            {/* Invisible large sphere to ensure continuous raycasting while dragging */}
+            <mesh visible={false}>
+                <sphereGeometry args={[1.6, 16, 16]} />
+                <meshBasicMaterial transparent opacity={0} depthTest={false} />
+            </mesh>
+            {!isWave ? (
                 <>
-                    {/* |1⟩ Silver Qubit */}
-                    <mesh onPointerEnter={() => !hasTransformed && (document.body.style.cursor = 'grab')} onPointerLeave={() => (document.body.style.cursor = 'auto')}>
+                    {/* |0⟩ Solid Qubit */}
+                    <mesh 
+                        onPointerEnter={() => !hasPassedSecondGate && (document.body.style.cursor = 'grab')} 
+                        onPointerLeave={() => (document.body.style.cursor = 'auto')}
+                    >
                         <sphereGeometry args={[0.7, 32, 32]} />
-                        <meshStandardMaterial color="#A0A0A0" emissive="#A0A0A0" emissiveIntensity={0.5} roughness={0.1} metalness={0.8} />
+                        <meshStandardMaterial color={col} emissive={col} emissiveIntensity={0.2} roughness={0.1} metalness={0.8} />
                     </mesh>
-                    <Html center position={[0, -1, 0]}>
-                        <div style={{ color: '#fff', fontSize: '10px', whiteSpace: 'nowrap', opacity: 0.6 }}>DRAG ME →</div>
-                    </Html>
+                    {/* Label */}
+                    {!hasPassedSecondGate ? (
+                         <Html center position={[0, -1.2, 0]}>
+                            <div style={{ color: '#fff', fontSize: '10px', whiteSpace: 'nowrap', opacity: 0.6, fontWeight: 700, letterSpacing: '2px' }}>
+                                {!hasTransformed ? '← DRAG LEFT' : (phase === 'sandbox' ? 'DRAG RIGHT →' : '')}
+                            </div>
+                        </Html>
+                    ) : (
+                        <Html center position={[0, -1.2, 0]}>
+                            <div style={{ color: '#3ac878', fontSize: '11px', fontWeight: 800, whiteSpace: 'nowrap', textTransform: 'uppercase' }}>Reconstructed: |0⟩</div>
+                        </Html>
+                    )}
                 </>
             ) : (
-                /* Wavy Superposition Field */
-                <mesh ref={waveRef}>
-                    <icosahedronGeometry args={[1.4, 2]} />
-                    <meshStandardMaterial 
-                        color={col} 
-                        emissive={col} 
-                        emissiveIntensity={1} 
-                        wireframe 
-                        transparent 
-                        opacity={0.6} 
-                    />
-                </mesh>
+        <group onPointerEnter={() => !hasPassedSecondGate && (document.body.style.cursor = 'grab')} onPointerLeave={() => (document.body.style.cursor = 'auto')}>
+                    <ProbabilityWave color={col} />
+                </group>
             )}
         </group>
     )
 }
 
 // ─── AMBER TRACK MATH VISUALIZER ───────────────────────────────────────────────
-function MathOverlay({ active }: { active: boolean }) {
+function MathOverlay({ active, hasTransformed, hasPassedSecondGate }: { active: boolean, hasTransformed: boolean, hasPassedSecondGate: boolean }) {
     if (!active) return null
+
+    let title = "INITIAL CLASSICAL STATE"
+    let eq = "   |ψ⟩ = |0⟩   "
+    
+    if (hasPassedSecondGate) {
+        title = "QUANTUM INTERFERENCE"
+        eq = " H |+⟩ = |0⟩ "
+    } else if (hasTransformed) {
+        title = "HADAMARD TRANSFORMATION"
+        eq = "H |0⟩ = 1/√2 (|0⟩ + |1⟩) = |+⟩"
+    }
+
     return (
-        <Html position={[MACHINE_X, MACHINE_Y - 2.5, 0]} center>
+        <Html position={[0, 3.2, 0]} center zIndexRange={[100, 0]}>
             <div style={{
-                background: 'rgba(14, 15, 26, 0.8)',
+                background: 'rgba(14, 15, 26, 0.85)',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(196, 149, 90, 0.4)',
                 borderRadius: '12px',
                 padding: '16px 24px',
                 color: '#e0b87a',
                 fontFamily: 'Space Mono, monospace',
-                fontSize: '14px',
+                fontSize: '15px',
                 textAlign: 'center',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                whiteSpace: 'nowrap',
+                fontWeight: 700
             }}>
-                <div style={{ marginBottom: '8px', opacity: 0.6, fontSize: '11px' }}>HADAMARD TRANSFORMATION</div>
-                H |0⟩ = 1/√2 (|0⟩ + |1⟩)
+                <div style={{ marginBottom: '8px', opacity: 0.6, fontSize: '11px', letterSpacing: '1px' }}>{title}</div>
+                {eq}
             </div>
         </Html>
     )
 }
 
-function CatNPC({ onCatSettled, catRetreat }: { onCatSettled: () => void; catRetreat?: boolean }) {
-    const catGroup = useRef<THREE.Group>(null)
-    const { scene, animations } = useGLTF(Koi_cat)
-    const { actions, mixer } = useAnimations(animations, catGroup)
-    const settled = useRef(false)
-    const walkProgress = useRef(0)
-    
-    const mouseX = useRef(0)
-    const mouseY = useRef(0)
-
-    useEffect(() => {
-        const onMove = (e: MouseEvent) => {
-            mouseX.current = (e.clientX / window.innerWidth) * 2 - 1
-            mouseY.current = -((e.clientY / window.innerHeight) * 2 - 1)
-        }
-        window.addEventListener('mousemove', onMove)
-        return () => window.removeEventListener('mousemove', onMove)
-    }, [])
-
-    const animNames = useMemo(() => Object.keys(actions ?? {}), [actions])
-    useEffect(() => {
-        if (!actions || animNames.length === 0) return
-        const first = actions[animNames[0]]
-        if (first) first.reset().play()
-    }, [actions, animNames])
-
-    useFrame((_s, delta) => {
-        if (!catGroup.current || !mixer) return
-        mixer.update(delta)
-
-        if (!settled.current) {
-            walkProgress.current = Math.min(walkProgress.current + delta * 0.55, 1)
-            const ease = 1 - Math.pow(1 - walkProgress.current, 3)
-            catGroup.current.position.x = -8 + (CAT_X + 8) * ease
-            catGroup.current.position.y = 2.5 + (CAT_Y - 2.5) * ease
-            if (walkProgress.current >= 1) { 
-                settled.current = true
-                onCatSettled() 
-            }
-        } else {
-            const t = _s.clock.getElapsedTime()
-            catGroup.current.position.x += (CAT_X - catGroup.current.position.x) * delta * 4
-            const bobY = CAT_Y + Math.sin(t * 0.7) * 0.06 + (catRetreat ? -0.8 : 0)
-            catGroup.current.position.y += (bobY - catGroup.current.position.y) * delta * 4
-        }
-
-        catGroup.current.rotation.y += (mouseX.current * 0.65 - catGroup.current.rotation.y) * CAT_LOOK_SPEED
-        catGroup.current.rotation.x += (-mouseY.current * 0.60 - catGroup.current.rotation.x) * CAT_LOOK_SPEED
-    })
-
-    return (
-        <group ref={catGroup} position={[-8, 2.5, 0]} scale={CAT_SCALE}>
-            <primitive object={scene} scale={CAT_GLB_SCALE} />
-        </group>
-    )
-}
-
-function CameraController({ phase }: { phase: Phase }) {
+function CameraController({ phase, hasPassedSecondGate }: { phase: Phase, hasPassedSecondGate: boolean }) {
     const { camera } = useThree()
-    const targetZ = useRef(11)
+    const targetZ = useRef(10)
+    const targetX = useRef(0)
+    
     useEffect(() => {
-        targetZ.current = phase === 'quiz' ? 9 : phase === 'complete' ? 10 : 11
-    }, [phase])
+        targetZ.current = phase === 'quiz' ? 8 : (phase === 'sandbox' ? 9.5 : 8.5)
+        targetX.current = 0 
+    }, [phase, hasPassedSecondGate])
+    
     useFrame((_s, delta) => { 
         camera.position.z += (targetZ.current - camera.position.z) * delta * 2 
+        camera.position.x += (targetX.current - camera.position.x) * delta * 2
     })
     return null
 }
 
-export default function SuperpositionScene({ track, phase, onCatSettled, hasTransformed, onTransform, quizCorrect = null, showParticles = false, catRetreat = false }: SuperpositionSceneProps) {
+export default function SuperpositionScene({ 
+    track, phase, hasTransformed, onTransform, hasPassedSecondGate, onSecondGatePass, quizCorrect = null, showParticles = false
+}: SuperpositionSceneProps) {
     const isQuiz = phase === 'quiz'
     return (
         <>
-            <CameraController phase={phase} />
+            <CameraController phase={phase} hasPassedSecondGate={hasPassedSecondGate} />
             <ambientLight intensity={isQuiz ? 0.5 : 1.1} />
             <directionalLight position={[5, 5, 5]} intensity={isQuiz ? 1.0 : 2.0} />
             <pointLight position={[-4, 2, -4]} intensity={1.2} color="#5DA7DB" />
@@ -366,12 +434,23 @@ export default function SuperpositionScene({ track, phase, onCatSettled, hasTran
             
             <SceneDimmer active={isQuiz} />
             
-            {!isQuiz && <HGate active={hasTransformed} />}
-            <DraggableQubit track={track} hasTransformed={hasTransformed} onTransform={onTransform} />
+            {/* Main Interactive Gate */}
+            {!isQuiz && <HGate position={[0, 0, 0]} active={hasTransformed && phase === 'sandbox'} />}
+
+            <DraggableQubit 
+                track={track} 
+                phase={phase}
+                hasTransformed={hasTransformed} 
+                onTransform={onTransform} 
+                hasPassedSecondGate={hasPassedSecondGate} 
+                onSecondGatePass={onSecondGatePass} 
+            />
             
-            <MathOverlay active={track === 'amber' && phase === 'lesson' && hasTransformed} />
-            
-            <CatNPC onCatSettled={onCatSettled} catRetreat={catRetreat} />
+            <MathOverlay 
+                active={track === 'amber' && !isQuiz}
+                hasTransformed={hasTransformed} 
+                hasPassedSecondGate={hasPassedSecondGate}
+            />
             
             <LotusParticleBurst active={showParticles && quizCorrect === true} color="#FFB7C5" />
             <BlueShimmer active={showParticles && quizCorrect === false} />

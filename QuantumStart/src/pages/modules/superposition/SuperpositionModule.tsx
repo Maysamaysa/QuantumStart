@@ -4,8 +4,6 @@
 
 import { useState, useCallback } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
-import { useCat } from '../../../context/CatContext'
-import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
 import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import SuperpositionScene from './SuperpositionScene'
@@ -13,32 +11,33 @@ import { SuperpositionOverlay } from './SuperpositionOverlay'
 import type { Phase, Track } from './SuperpositionScene'
 
 export function SuperpositionModule() {
-    const { setQubitState } = useCat()
     const { completeModule } = useProgress()
     useModuleCatSetup('hidden', 'idle')
 
     const [phase, setPhase] = useState<Phase>('hook')
     const [track, setTrack] = useState<Track>(null)
-    const [catSettled, setCatSettled] = useState(false)
-    const { panelsVisible } = useCatNPCTransition(catSettled)
 
     const [hasTransformed, setHasTransformed] = useState(false)
+    const [hasPassedSecondGate, setHasPassedSecondGate] = useState(false)
     const [gateActive, setGateActive] = useState(false)
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
-    const [catRetreat, setCatRetreat] = useState(false)
     const [perfectScore, setPerfectScore] = useState(true)
+
+    // Ensure dialog panels can show instantly since there's no cat
+    const panelsVisible = true
 
     const handleTrackSelect = useCallback((t: 'blue' | 'amber') => {
         setTrack(t)
-        setQubitState(t)
         const id = setTimeout(() => setPhase('lesson'), 2200)
         return () => clearTimeout(id)
-    }, [setQubitState])
-
-    const handleCatSettled = useCallback(() => setCatSettled(true), [])
+    }, [])
 
     const handleLessonComplete = useCallback(() => {
+        setPhase('sandbox')
+    }, [])
+    
+    const handleCompareComplete = useCallback(() => {
         setPhase('quiz')
         setQuizCorrect(null)
         setPerfectScore(true)
@@ -49,12 +48,6 @@ export function SuperpositionModule() {
         if (!correct) setPerfectScore(false)
         setShowParticles(true)
         setTimeout(() => setShowParticles(false), 1800)
-        if (!correct) { 
-            setCatRetreat(true)
-            setTimeout(() => setCatRetreat(false), 2000) 
-        } else {
-            setCatRetreat(false)
-        }
     }, [])
 
     const handleQuizComplete = useCallback(() => {
@@ -75,14 +68,14 @@ export function SuperpositionModule() {
                 <SuperpositionScene
                     track={track}
                     phase={phase}
-                    onCatSettled={handleCatSettled}
                     onGateTrigger={handleGateTrigger}
                     gateActive={gateActive}
                     hasTransformed={hasTransformed}
                     onTransform={() => setHasTransformed(true)}
+                    hasPassedSecondGate={hasPassedSecondGate}
+                    onSecondGatePass={() => setHasPassedSecondGate(true)}
                     quizCorrect={quizCorrect}
                     showParticles={showParticles}
-                    catRetreat={catRetreat}
                 />
             </ModuleCanvas>
 
@@ -91,8 +84,10 @@ export function SuperpositionModule() {
                 track={track}
                 phase={phase}
                 hasTransformed={hasTransformed}
+                hasPassedSecondGate={hasPassedSecondGate}
                 onTrackSelect={handleTrackSelect}
                 onLessonComplete={handleLessonComplete}
+                onCompareComplete={handleCompareComplete}
                 onQuizComplete={handleQuizComplete}
                 onQuizResult={handleQuizResult}
             />

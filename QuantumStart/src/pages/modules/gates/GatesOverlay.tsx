@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './GatesOverlay.module.css'
-import type { GatePhase } from './GatesModule'
+import type { GatePhase, IntroStage } from './GatesModule'
 import { applyGate1Q, INITIAL_STATE, formatStateString } from './gateLogic'
 import { GATES } from '../../../config/gates'
 import type { State1Q } from './gateLogic'
@@ -11,6 +11,8 @@ interface GatesOverlayProps {
     panelsVisible: boolean
     phase: GatePhase
     onPhaseComplete: (p: GatePhase) => void
+    introStage: IntroStage
+    setIntroStage: (v: IntroStage) => void
     unlockedGates: string[]
     unlockGate: (id: string) => void
     selectedGate: string | null
@@ -83,9 +85,11 @@ interface Phase1IntroProps {
     setSelectedGate: (v: string | null) => void
     setAnimState: (v: State1Q) => void
     onComplete: (p: GatePhase) => void
+    introStage: IntroStage
+    setIntroStage: (v: IntroStage) => void
 }
 
-function Phase1Intro({ unlockedGates, unlockGate, selectedGate, setSelectedGate, setAnimState, onComplete }: Phase1IntroProps) {
+function Phase1Intro({ unlockedGates, unlockGate, selectedGate, setSelectedGate, setAnimState, onComplete, introStage, setIntroStage }: Phase1IntroProps) {
     const [qStep, setQStep] = useState(0)
     const [msg, setMsg] = useState('Click a glowing gate to examine it!')
     const data = selectedGate ? GATE_DATA[selectedGate] : null
@@ -131,51 +135,171 @@ function Phase1Intro({ unlockedGates, unlockGate, selectedGate, setSelectedGate,
         }
     }
 
+    const [narrationStep, setNarrationStep] = useState(0)
+    const narrationTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const NARRATION = [
+        "A gate transforms information. You walk in as one thing, walk out as another.",
+        "On the left: a classical gate. Watch the orb — it enters, hits the barrier, and shatters. The original information is destroyed. There is no way back.",
+        "On the right: a quantum gate. The orb enters, transforms — notice the color and size shift — then reverses perfectly. Every quantum gate is reversible by design.",
+    ]
+
+    useEffect(() => {
+        if (introStage === 'primer') {
+            setNarrationStep(0)
+        }
+        return () => {
+            if (narrationTimer.current) clearTimeout(narrationTimer.current)
+        }
+    }, [introStage])
+
+    useEffect(() => {
+        if (introStage !== 'primer') return
+        if (narrationStep < NARRATION.length - 1) {
+            narrationTimer.current = setTimeout(() => {
+                setNarrationStep(prev => prev + 1)
+            }, 5000)
+            return () => {
+                if (narrationTimer.current) clearTimeout(narrationTimer.current)
+            }
+        }
+    }, [narrationStep, introStage])
+
     return (
         <div style={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'relative' }}>
-            {selectedGate && data && (
-                <>
-                    <div className={`${styles.glassPanel} ${styles.gatePanel}`}>
-                        <h2 className={styles.title}>{data.name} Gate</h2>
-                        <div className={styles.matrixBox}>
-                            {data.matrix.map((row: any[], i: number) => (
-                                <div key={i} className={styles.matrixRow}>
-                                    {row.map((val: string, j: number) => <span key={j}>{val}</span>)}
-                                </div>
-                            ))}
-                        </div>
-                        <p style={{ marginBottom: '1rem' }}>{data.desc}</p>
-                        <div className={styles.analogyCard}>
-                            "{data.analogy}"
-                        </div>
-                    </div>
-
-                    <div className={`${styles.glassPanel} ${styles.quizPanel}`}>
-                        <h3 className={styles.subtitle}>Micro-Quiz {qStep + 1}/2</h3>
-                        <p style={{ marginBottom: '1.5rem', fontWeight: 600 }}>
-                            {qStep === 0 ? data.q1.text : data.q2.text}
+            {introStage === 'choice' && (
+                <div style={{ 
+                    position: 'absolute', top: '50%', left: '50%', 
+                    transform: 'translate(-50%, -50%)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: '1.2rem', pointerEvents: 'auto',
+                    animation: 'fadeIn 0.8s ease-out'
+                }}>
+                    <div className={styles.glassPanel} style={{ 
+                        maxWidth: '460px', textAlign: 'center', padding: '2.5rem'
+                    }}>
+                        <h2 className={styles.title} style={{ fontSize: '1.6rem', marginBottom: '1rem' }}>
+                            ⚡ Quantum Gates
+                        </h2>
+                        <p style={{ marginBottom: '2rem', lineHeight: 1.6, opacity: 0.85 }}>
+                            Gates are the building blocks of quantum computation — 
+                            they transform qubits in precise, reversible ways.
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                            {(qStep === 0 ? data.q1.options : data.q2.options).map((opt: string, i: number) => (
-                                <button key={i} className={styles.btn} onClick={() => handleAnswer(i)}>
-                                    {opt}
-                                </button>
+                            <button 
+                                className={`${styles.btn} ${styles.btnPrimary}`} 
+                                onClick={() => setIntroStage('primer')}
+                            >
+                                ↔ Show me the Visual Primer
+                            </button>
+                            <button className={styles.btn} onClick={() => setIntroStage('palette')}>
+                                → Take me straight to the Gates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {introStage === 'primer' && (
+                <div style={{ 
+                    position: 'absolute', bottom: '2rem', left: '50%', 
+                    transform: 'translateX(-50%)', 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                    pointerEvents: 'auto', gap: '1rem',
+                    maxWidth: '600px', width: '90%'
+                }}>
+                    <div className={styles.glassPanel} style={{ 
+                        width: '100%', textAlign: 'center', padding: '1.5rem 2rem'
+                    }}>
+                        {/* Progress dots */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                            {NARRATION.map((_, i) => (
+                                <div key={i} style={{
+                                    width: 8, height: 8, borderRadius: '50%',
+                                    background: i <= narrationStep ? '#FFB7C5' : 'rgba(255,255,255,0.2)',
+                                    boxShadow: i <= narrationStep ? '0 0 8px #FFB7C5' : 'none',
+                                    transition: 'all 0.3s ease'
+                                }} />
                             ))}
                         </div>
+                        
+                        <p style={{ 
+                            fontSize: '1.05rem', lineHeight: 1.7, minHeight: '3rem',
+                            transition: 'opacity 0.4s ease'
+                        }}>
+                            {NARRATION[narrationStep]}
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1.2rem', justifyContent: 'center' }}>
+                            {narrationStep < NARRATION.length - 1 ? (
+                                <button 
+                                    className={styles.btn}
+                                    onClick={() => setNarrationStep(prev => prev + 1)}
+                                    style={{ width: 'auto', padding: '0.6rem 1.5rem' }}
+                                >
+                                    Next →
+                                </button>
+                            ) : (
+                                <button 
+                                    className={`${styles.btn} ${styles.btnPrimary}`}
+                                    onClick={() => setIntroStage('palette')}
+                                    style={{ width: 'auto', padding: '0.8rem 2rem' }}
+                                >
+                                    Continue to Gates →
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {introStage === 'palette' && (
+                <>
+                    {selectedGate && data && (
+                        <>
+                            <div className={`${styles.glassPanel} ${styles.gatePanel}`}>
+                                <h2 className={styles.title}>{data.name} Gate</h2>
+                                <div className={styles.matrixBox}>
+                                    {data.matrix.map((row: any[], i: number) => (
+                                        <div key={i} className={styles.matrixRow}>
+                                            {row.map((val: string, j: number) => <span key={j}>{val}</span>)}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p style={{ marginBottom: '1rem' }}>{data.desc}</p>
+                                <div className={styles.analogyCard}>
+                                    "{data.analogy}"
+                                </div>
+                            </div>
+
+                            <div className={`${styles.glassPanel} ${styles.quizPanel}`}>
+                                <h3 className={styles.subtitle}>Micro-Quiz {qStep + 1}/2</h3>
+                                <p style={{ marginBottom: '1.5rem', fontWeight: 600 }}>
+                                    {qStep === 0 ? data.q1.text : data.q2.text}
+                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    {(qStep === 0 ? data.q1.options : data.q2.options).map((opt: string, i: number) => (
+                                        <button key={i} className={styles.btn} onClick={() => handleAnswer(i)}>
+                                            {opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    <div className={styles.bottomPanel}>
+                        <div className={styles.speechBubble}>
+                            🐱 {msg}
+                        </div>
+                        {selectedGate && (
+                            <button className={styles.btn} onClick={() => setSelectedGate(null)} style={{ pointerEvents: 'auto', width: 'auto' }}>
+                                ← Back to Palette
+                            </button>
+                        )}
                     </div>
                 </>
             )}
-
-            <div className={styles.bottomPanel}>
-                <div className={styles.speechBubble}>
-                    🐱 {msg}
-                </div>
-                {selectedGate && (
-                    <button className={styles.btn} onClick={() => setSelectedGate(null)} style={{ pointerEvents: 'auto', width: 'auto' }}>
-                        ← Back to Palette
-                    </button>
-                )}
-            </div>
         </div>
     )
 }

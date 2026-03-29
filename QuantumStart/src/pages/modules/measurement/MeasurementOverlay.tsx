@@ -26,7 +26,7 @@ interface Props {
 }
 
 export function MeasurementOverlay({
-    phase, step, theta, setTheta, isMeasured, measuredValue, basis, setBasis,
+    phase, step, theta, setTheta, phi, setPhi, isMeasured, measuredValue, basis, setBasis,
     histogram, quizQuestion, onMeasure, onReset, onRun50, onClearHistogram, onNext, onBack, onQuizAnswer
 }: Props) {
     const navigate = useNavigate()
@@ -120,9 +120,15 @@ export function MeasurementOverlay({
     }
 
     const renderSandbox = () => {
-        const p0 = Math.pow(Math.cos(theta/2), 2) * 100
+        let p0 = 0
+        if (basis === 'Z') p0 = Math.pow(Math.cos(theta/2), 2) * 100
+        else if (basis === 'X') p0 = 0.5 * (1 + Math.sin(theta) * Math.cos(phi)) * 100
+        else if (basis === 'Y') p0 = 0.5 * (1 + Math.sin(theta) * Math.sin(phi)) * 100
+
         const alpha = Math.cos(theta/2).toFixed(2)
         const beta = Math.sin(theta/2).toFixed(2)
+        const phiDeg = Math.round((phi / Math.PI) * 180)
+        
         const total = histogram[0] + histogram[1]
 
         return (
@@ -130,33 +136,52 @@ export function MeasurementOverlay({
                 <span className={styles.stepText}>Phase 3 — Born Rule & Basis</span>
                 <h2 className={styles.title}>Probability Sandbox</h2>
                 
-                <div style={{ background: 'rgba(0,0,0,0.2)', padding: 12, borderRadius: 12, marginBottom: 16 }}>
-                    <div style={{ fontFamily: 'Space Mono', color: '#5DA7DB', marginBottom: 8 }}>|ψ⟩ = {alpha}|0⟩ + {beta}|1⟩</div>
-                    <div style={{ fontSize: '0.85rem', color: '#ccc', marginBottom: 8 }}>P(0) = |α|² = {p0.toFixed(1)}%</div>
+                <p style={{fontSize: '0.8rem', color: '#ffb7c5', marginBottom: 8}}>
+                    <strong>Step 1: Rotate the Qubit State Vector</strong>
+                </p>
+                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: 12, marginBottom: 16 }}>
+                    <div style={{ fontFamily: 'Space Mono', color: '#5DA7DB', marginBottom: 4, fontSize: '0.85rem' }}>
+                        |ψ⟩ = {alpha}|0⟩ + e^({phiDeg}i°){beta}|1⟩
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: 12 }}>
+                        Prob({basis === 'Z' ? '0' : basis === 'X' ? '+' : '+i'}) = {p0.toFixed(1)}%
+                    </div>
                     
-                    <input 
-                        type="range" 
-                        min="0" max="100" 
-                        value={100 - (theta / Math.PI) * 100} 
-                        onChange={(e) => {
-                            setTheta(Math.PI * (1 - parseInt(e.target.value)/100))
-                            onClearHistogram()
-                            onReset()
-                        }}
-                        style={{ width: '100%' }}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: 4, color: '#888' }}>
-                        <span>100% |1⟩</span>
-                        <span>100% |0⟩</span>
+                    <div style={{ marginTop: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#ccc', marginBottom: 4 }}>
+                            <span>Amplitude (θ tilt: up/down)</span>
+                        </div>
+                        <input 
+                            type="range" min="0" max="100" 
+                            value={100 - (theta / Math.PI) * 100} 
+                            onChange={(e) => { setTheta(Math.PI * (1 - parseInt(e.target.value)/100)); onClearHistogram(); onReset(); }}
+                            style={{ width: '100%' }}
+                        />
+                    </div>
+
+                    <div style={{ marginTop: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#ccc', marginBottom: 4 }}>
+                            <span>Phase (φ rotation: left/right)</span>
+                        </div>
+                        <input 
+                            type="range" min="0" max="360" 
+                            value={phiDeg} 
+                            onChange={(e) => { setPhi(parseInt(e.target.value) * (Math.PI / 180)); onClearHistogram(); onReset(); }}
+                            style={{ width: '100%' }}
+                        />
                     </div>
                 </div>
 
+                <p style={{fontSize: '0.8rem', color: '#5DA7DB', marginBottom: 8}}>
+                    <strong>Step 2: Choose Measurement Axis</strong>
+                    <br/><span style={{opacity: 0.7, fontSize: '0.7rem'}}>This doesn't move the qubit—it just alters the perspective we measure from!</span>
+                </p>
                 <div className={styles.btnRow} style={{ marginBottom: 16, background: 'rgba(0,0,0,0.2)', padding: 4, borderRadius: 12 }}>
                     {(['Z', 'X', 'Y'] as Basis[]).map(b => (
                         <button 
                             key={b}
                             className={`${styles.optionBtn} ${basis === b ? styles.active : ''}`}
-                            style={{ background: basis === b ? 'rgba(255,255,255,0.2)' : 'transparent', border: 'none' }}
+                            style={{ background: basis === b ? 'rgba(255,255,255,0.2)' : 'transparent', border: 'none', fontWeight: basis === b ? 'bold' : 'normal' }}
                             onClick={() => { setBasis(b); onClearHistogram(); onReset(); }}
                         >
                             {b}-Basis
@@ -248,7 +273,7 @@ export function MeasurementOverlay({
             }
         />
 
-            <div className={styles.sidebar}>
+            <div className={phase === 'concept' ? styles.centerBottom : styles.sidebar}>
                 {phase === 'concept' && renderConcept()}
                 {phase === 'collapse' && renderCollapse()}
                 {phase === 'sandbox' && renderSandbox()}

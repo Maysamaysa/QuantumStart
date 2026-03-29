@@ -46,6 +46,18 @@
     pointer-events: auto;
 }
 
+.centerBottom {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: auto;
+}
+
 .instructionPanel {
     background: rgba(20, 21, 35, 0.85);
     border: 1px solid rgba(248, 249, 255, 0.12);
