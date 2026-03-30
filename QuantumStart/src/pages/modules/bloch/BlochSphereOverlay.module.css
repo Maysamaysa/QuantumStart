@@ -202,6 +202,60 @@
 .coord b { color: var(--state-0); }
 .coord i { color: var(--accent-pink); }
 
+/* SLIDERS */
+.sliderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sliderItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rangeInput {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.05);
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--state-1);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(166, 123, 91, 0.4);
+  transition: transform 0.2s;
+}
+
+.rangeInput::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.sliderIcon {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.3);
+  width: 16px;
+  text-align: center;
+}
+
+.sliderLabel {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--state-1);
+  width: 12px;
+}
+
 .mathState {
   font-size: 16px;
   font-weight: 500;

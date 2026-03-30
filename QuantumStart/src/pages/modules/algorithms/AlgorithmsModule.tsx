@@ -94,13 +94,19 @@ export function AlgorithmsModule() {
       saveState(1, 3);
       return;
     }
-    if (step > 2) {
+    if (step > 5) return;
+    if (step === 5) {
       completeModule('algorithms', 'blue', true);
-      return;
     }
     setCurrentStep(step);
     saveState(2, step);
   };
+
+  const handleReset = useCallback(() => {
+    localStorage.removeItem('qm7_v3');
+    setPhase(0);
+    setCurrentStep(0);
+  }, []);
 
   const handlePhaseChange = (newPhase: number) => {
     setPhase(newPhase);
@@ -108,7 +114,7 @@ export function AlgorithmsModule() {
   };
 
   return (
-    <div className={styles.moduleContainer}>
+    <div className={styles.overlayContainer}>
       <ModuleHeader 
         moduleNumber={7} 
         moduleName="Quantum Programs"
@@ -152,6 +158,7 @@ export function AlgorithmsModule() {
         <ExampleOverlay
           currentStep={currentStep}
           onStepChange={handleTaskStepChange}
+          onReset={handleReset}
         />
       )}
     </div>

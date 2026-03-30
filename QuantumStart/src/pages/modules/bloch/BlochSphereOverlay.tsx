@@ -45,7 +45,7 @@ const QUIZ = {
 }
 
 export function BlochSphereOverlay({
-    step, theta, phi, onNext, onBack, onQuizResult
+    step, theta, phi, onNext, onBack, onQuizResult, onStateChange
 }: any) {
     const navigate = useNavigate()
 
@@ -163,6 +163,36 @@ export function BlochSphereOverlay({
                             <div className={styles.valueRow}>
                                 <span className={styles.coord}>θ = {(theta / Math.PI).toFixed(3)}π ({(theta * 180 / Math.PI).toFixed(1)}°)</span>
                                 <span className={styles.coord}>φ = {phiPi}π ({phiDeg}°)</span>
+                            </div>
+                            
+                            {/* NEW SLIDERS */}
+                            <div className={styles.sliderGroup}>
+                                <div className={styles.sliderItem}>
+                                    <span className={styles.sliderIcon}>↕</span>
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max={Math.PI} 
+                                        step="0.01" 
+                                        value={theta} 
+                                        onChange={(e) => onStateChange(parseFloat(e.target.value), phi)}
+                                        className={styles.rangeInput}
+                                    />
+                                    <span className={styles.sliderLabel}>θ</span>
+                                </div>
+                                <div className={styles.sliderItem}>
+                                    <span className={styles.sliderIcon}>↔</span>
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max={Math.PI * 2} 
+                                        step="0.01" 
+                                        value={phi} 
+                                        onChange={(e) => onStateChange(theta, parseFloat(e.target.value))}
+                                        className={styles.rangeInput}
+                                    />
+                                    <span className={styles.sliderLabel}>φ</span>
+                                </div>
                             </div>
                         </div>
 

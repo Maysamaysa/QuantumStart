@@ -25,7 +25,7 @@ export function BlochSphereModule() {
 
     // Track visited cardinal states for "Bloch Sphere Navigator" badge
     const [, setVisitedStates] = useState<Set<string>>(new Set())
-    
+
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
     const [catRetreat, setCatRetreat] = useState(false)
@@ -72,14 +72,14 @@ export function BlochSphereModule() {
         // Check for cardinal states
         const EPS = 0.1
         let stateKey = ''
-        
+
         if (Math.abs(t) < EPS) stateKey = '0'
         else if (Math.abs(t - Math.PI) < EPS) stateKey = '1'
-        else if (Math.abs(t - Math.PI/2) < EPS) {
+        else if (Math.abs(t - Math.PI / 2) < EPS) {
             const normPhi = ((p % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)
             if (Math.abs(normPhi) < EPS || Math.abs(normPhi - Math.PI * 2) < EPS) stateKey = '+'
             else if (Math.abs(normPhi - Math.PI) < EPS) stateKey = '-'
-            else if (Math.abs(normPhi - Math.PI/2) < EPS) stateKey = 'i+'
+            else if (Math.abs(normPhi - Math.PI / 2) < EPS) stateKey = 'i+'
             else if (Math.abs(normPhi - Math.PI * 1.5) < EPS) stateKey = 'i-'
         }
 
@@ -97,7 +97,7 @@ export function BlochSphereModule() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
-            <ModuleCanvas camera={{ position: [0, 3, 14], fov: 55 }}>
+            <ModuleCanvas camera={{ position: [2.2, 3, 14], fov: 55 }}>
                 <BlochSphereScene
                     step={step}
                     theta={theta}
@@ -118,6 +118,7 @@ export function BlochSphereModule() {
                 onNext={handleNextStep}
                 onBack={handleBackStep}
                 onQuizResult={handleQuizResult}
+                onStateChange={handleStateChange}
             />
         </div>
     )

@@ -3,11 +3,11 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 /**
- * TaskScheduleScene — Phase 2 3D visualization
+ * TaskScheduleScene — Phase 3 (Example) 3D visualization
  * 
- * Step 0 (Map): Shows task nodes connected to slot nodes with constraint lines
- * Step 1 (Execute): Animated particles flowing through the graph (annealing)
- * Step 2 (Post-Process): Solution highlights with glow on optimal path
+ * Step 0-2: Shows task nodes connected to slot nodes with red conflict rings
+ * Step 3 (Annealing): Animated particles flowing through the graph
+ * Step 4 (Results): Solution highlights with glow on optimal path
  */
 
 interface TaskScheduleSceneProps {
@@ -16,7 +16,7 @@ interface TaskScheduleSceneProps {
 
 // Task positions (left column)
 const TASK_POSITIONS: [number, number, number][] = [
-  [-3.5, 2.0, 0],  // Task A (Scaled up distance)
+  [-3.5, 2.0, 0],  // Task A
   [-3.5, 0, 0],    // Task B
   [-3.5, -2.0, 0], // Task C
 ];
@@ -72,9 +72,9 @@ export function TaskScheduleScene({ currentStep }: TaskScheduleSceneProps) {
         child.scale.setScalar(scale);
       }
 
-      // Particle animation along edges (only in step 1)
+      // Particle animation along edges (only in step 3: Quantum Solve)
       if (userData.type === 'particle') {
-        if (currentStep === 1) {
+        if (currentStep === 3) {
           const progress = ((t * userData.speed + userData.offset) % 1);
           const edge = EDGES[userData.edge];
           const from = TASK_POSITIONS[edge[0]];
@@ -92,30 +92,30 @@ export function TaskScheduleScene({ currentStep }: TaskScheduleSceneProps) {
         }
       }
 
-      // Solution highlighting (step 2)
+      // Solution highlighting (step 4: Final Data)
       if (userData.type === 'edge') {
         const edgeIdx = userData.idx as number;
         const isSolution = SOLUTION_EDGES.includes(edgeIdx);
         const mat = (child as THREE.Mesh).material as THREE.MeshPhongMaterial;
         
-        if (currentStep === 2 && isSolution) {
+        if (currentStep === 4 && isSolution) {
           mat.opacity = THREE.MathUtils.lerp(mat.opacity, 0.95, 0.05);
           mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 1.5, 0.05);
-        } else if (currentStep === 2 && !isSolution) {
+        } else if (currentStep === 4 && !isSolution) {
           mat.opacity = THREE.MathUtils.lerp(mat.opacity, 0.05, 0.05);
           mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.0, 0.05);
         } else {
-          const baseOpacity = currentStep === 0 ? 0.4 : 0.2;
+          const baseOpacity = currentStep < 3 ? 0.4 : 0.1;
           mat.opacity = THREE.MathUtils.lerp(mat.opacity, baseOpacity, 0.05);
           mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, 0.4, 0.05);
         }
       }
 
-      // Conflict torus (A-B can't overlap)
+      // Conflict rings (A-B and B-C)
       if (userData.type === 'conflict-ring') {
         child.rotation.z = t * 0.5;
         const mat = (child as THREE.Mesh).material as THREE.MeshPhongMaterial;
-        const targetOpacity = currentStep === 0 ? 0.6 : 0.15;
+        const targetOpacity = currentStep < 3 ? 0.6 : 0.15;
         mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.05);
       }
     });
@@ -183,13 +183,13 @@ export function TaskScheduleScene({ currentStep }: TaskScheduleSceneProps) {
         );
       })}
 
-      {/* Conflict ring between A and B */}
+      {/* Conflict rings (Representing QUBO Penalties: A-B and B-C) */}
       <mesh 
-        position={[-3.5, 1.0, 0.02]} // Correct midpoint between Task A (2.0) and Task B (0.0)
+        position={[-3.5, 1.0, 0.02]} 
         rotation={[Math.PI / 2, 0, 0]}
         userData={{ type: 'conflict-ring' }}
       >
-        <torusGeometry args={[1.0, 0.04, 12, 48]} />
+        <torusGeometry args={[0.9, 0.04, 12, 48]} />
         <meshPhongMaterial
           color="#ff4444"
           emissive="#ff0000"
@@ -200,7 +200,23 @@ export function TaskScheduleScene({ currentStep }: TaskScheduleSceneProps) {
         />
       </mesh>
 
-      {/* Annealing particles (only visible in step 1) */}
+      <mesh 
+        position={[-3.5, -1.0, 0.02]} 
+        rotation={[Math.PI / 2, 0, 0]}
+        userData={{ type: 'conflict-ring' }}
+      >
+        <torusGeometry args={[0.9, 0.04, 12, 48]} />
+        <meshPhongMaterial
+          color="#ff4444"
+          emissive="#ff0000"
+          emissiveIntensity={0.8}
+          transparent
+          opacity={0.6}
+          shininess={80}
+        />
+      </mesh>
+
+      {/* Annealing particles (visible in step 3) */}
       {particles.map((p, i) => (
         <mesh
           key={`particle-${i}`}

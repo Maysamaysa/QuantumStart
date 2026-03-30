@@ -6,7 +6,7 @@ export interface AlgorithmsOverlayProps {
   onStepChange: (step: number) => void;
 }
 
-export function AlgorithmsOverlay({ currentStep, onStepChange }: AlgorithmsOverlayProps) {
+export function AlgorithmsOverlay({ currentStep, onStepChange }: AlgorithmsOverlayProps): JSX.Element {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -17,7 +17,6 @@ export function AlgorithmsOverlay({ currentStep, onStepChange }: AlgorithmsOverl
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentStep, onStepChange]);
 
-  // Combined wheel scroll handler
   const wheelAcc = useRef(0);
   const lastScrollTime = useRef(0);
   const handleWheel = (e: React.WheelEvent) => {
@@ -122,7 +121,7 @@ export function AlgorithmsOverlay({ currentStep, onStepChange }: AlgorithmsOverl
         )}
       </div>
 
-      {/* ─── BOTTOM NAV (LEFT SIDE) ─── */}
+      {/* ─── BOTTOM NAV ─── */}
       <div className={styles.bottomNav}>
         <button 
           className={styles.navBtn} 

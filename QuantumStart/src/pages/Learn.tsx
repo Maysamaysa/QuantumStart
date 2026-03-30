@@ -554,6 +554,7 @@ export function Learn() {
             }}
         >
             <button className={ styles.navBtn } onClick = {() => navigate('/')} > ← Landing </button>
+            <button className={ styles.navBtn } onClick = {() => navigate('/playground')} > Quantum Playground 🧪 </button>
             <button className={ styles.navBtn } onClick = {() => navigate('/profile')} > Observer Profile 👤 </button>
         </motion.div>
 
