@@ -6,6 +6,9 @@ import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import GatesScene from './GatesScene'
 import { GatesOverlay } from './GatesOverlay'
 import PortalCanvas2D from './PortalCanvas2D'
+import GatesTour from './GatesTour'
+import GatesChallenges from './GatesChallenges'
+import GatesQuiz from './GatesQuiz'
 import type { State1Q } from './gateLogic'
 
 export type GatePhase = 'phase1_intro' | 'phase2_challenges' | 'phase3_quiz' | 'complete'
@@ -57,11 +60,15 @@ export function GatesModule() {
     }, [completeModule])
 
     const showCanvas2D = phase === 'phase1_intro' && introStage === 'primer'
+    const showTour = phase === 'phase1_intro' && introStage === 'palette'
+    const showChallenges = phase === 'phase2_challenges'
+    const showQuiz = phase === 'phase3_quiz'
+    const hideR3F = showCanvas2D || showTour || showChallenges || showQuiz
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'auto' }}>
-            {/* R3F scene — hidden during primer (2D canvas takes over) */}
-            <div style={{ opacity: showCanvas2D ? 0 : 1, transition: 'opacity 0.4s ease', position: 'absolute', inset: 0 }}>
+            {/* R3F scene — hidden during primer/palette (2D takes over) */}
+            <div style={{ opacity: hideR3F ? 0 : 1, transition: 'opacity 0.4s ease', position: 'absolute', inset: 0 }}>
                 <ModuleCanvas camera={{ position: [0, 0, 11], fov: 55 }}>
                     <GatesScene
                         phase={phase}
@@ -78,8 +85,31 @@ export function GatesModule() {
                 </ModuleCanvas>
             </div>
 
-            {/* 2D Canvas — visible only during primer */}
+            {/* 2D Canvas — primer stage */}
             {showCanvas2D && <PortalCanvas2D />}
+
+            {/* Gate Tour — palette stage */}
+            {showTour && <GatesTour onComplete={() => handlePhaseComplete('phase1_intro')} />}
+
+            {/* Challenges */}
+            {showChallenges && (
+                <GatesChallenges
+                    challengeIdx={challengeIdx}
+                    setChallengeIdx={setChallengeIdx}
+                    wireState1={wireState1}
+                    setWireState1={setWireState1}
+                    wireState2={wireState2}
+                    setWireState2={setWireState2}
+                    isEntangled={isEntangled}
+                    setIsEntangled={setIsEntangled}
+                    onComplete={() => handlePhaseComplete('phase2_challenges')}
+                />
+            )}
+
+            {/* Final Quiz */}
+            {showQuiz && (
+                <GatesQuiz onComplete={() => handlePhaseComplete('phase3_quiz')} />
+            )}
 
             {/* HTML overlay */}
             <GatesOverlay

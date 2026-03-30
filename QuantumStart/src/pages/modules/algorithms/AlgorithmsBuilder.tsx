@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { type GateType, type CircuitOp } from './circuitLogic'
 import styles from './AlgorithmsOverlay.module.css'
 
@@ -8,10 +8,9 @@ interface AlgorithmsBuilderProps {
 
 export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
     // 3 layers max. Each layer can hold either:
-    // a wide gate ('Oracle' or 'Amplifier')
+    // a wide gate ('Oracle_Constant' or 'Oracle_Balanced')
     // or two single gates ('H' on q0, 'H' on q1)
     
-    // We represent the grid as a 2D array: 2 rows (q0, q1) x 3 columns (layers)
     const [grid, setGrid] = useState<(GateType | null)[][]>([
         [null, null, null],
         [null, null, null]
@@ -28,12 +27,10 @@ export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
 
         const newGrid = [...grid.map(r => [...r])]
 
-        if (gate === 'Oracle' || gate === 'Amplifier') {
-            // Wide gates span both rows
+        if (gate === 'Oracle_Constant' || gate === 'Oracle_Balanced') {
             newGrid[0][col] = gate
             newGrid[1][col] = gate
         } else {
-            // Single gates just snap to the specific row
             newGrid[row][col] = gate
         }
         
@@ -43,7 +40,7 @@ export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
     const clearSlot = (row: number, col: number) => {
         const newGrid = [...grid.map(r => [...r])]
         const gate = grid[row][col]
-        if (gate === 'Oracle' || gate === 'Amplifier') {
+        if (gate === 'Oracle_Constant' || gate === 'Oracle_Balanced') {
             newGrid[0][col] = null
             newGrid[1][col] = null
         } else {
@@ -58,17 +55,11 @@ export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
             const topGate = grid[0][col]
             const botGate = grid[1][col]
             
-            if (topGate === 'Oracle' || topGate === 'Amplifier') {
+            if (topGate === 'Oracle_Constant' || topGate === 'Oracle_Balanced') {
                 steps.push({ gate: topGate })
             } else {
-                // Not a wide gate
-                if (topGate === 'H' && botGate === 'H') {
-                    // Optimized step: H on both
-                    steps.push({ gate: 'H' }) 
-                } else {
-                    if (topGate === 'H') steps.push({ gate: 'H', target: 0 })
-                    if (botGate === 'H') steps.push({ gate: 'H', target: 1 })
-                }
+                if (topGate === 'H' || topGate === 'X' || topGate === 'Z') steps.push({ gate: topGate, target: 0 })
+                if (botGate === 'H' || botGate === 'X' || botGate === 'Z') steps.push({ gate: botGate, target: 1 })
             }
         }
         return steps
@@ -82,32 +73,19 @@ export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
             </p>
 
             <div style={{ display: 'flex', gap: '20px' }}>
-                {/* toolbox */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div 
-                        draggable 
-                        onDragStart={(e) => handleDragStart(e, 'H')}
-                        style={{ padding: '10px', background: '#eab308', color: 'black', fontWeight: 'bold', borderRadius: '4px', cursor: 'grab', textAlign: 'center' }}
-                    >
-                        [ H ]
-                    </div>
-                    <div 
-                        draggable 
-                        onDragStart={(e) => handleDragStart(e, 'Oracle')}
-                        style={{ padding: '10px', background: '#ec4899', color: 'white', fontWeight: 'bold', borderRadius: '4px', cursor: 'grab', textAlign: 'center' }}
-                    >
-                        [ Oracle ]
-                    </div>
-                    <div 
-                        draggable 
-                        onDragStart={(e) => handleDragStart(e, 'Amplifier')}
-                        style={{ padding: '10px', background: '#3b82f6', color: 'white', fontWeight: 'bold', borderRadius: '4px', cursor: 'grab', textAlign: 'center' }}
-                    >
-                        [ Amplifier ]
-                    </div>
+                    {(['H', 'X', 'Oracle_Constant', 'Oracle_Balanced'] as GateType[]).map(gt => (
+                         <div 
+                         key={gt}
+                         draggable 
+                         onDragStart={(e) => handleDragStart(e, gt)}
+                         style={{ padding: '10px', background: '#3b82f6', color: 'white', fontWeight: 'bold', borderRadius: '4px', cursor: 'grab', textAlign: 'center' }}
+                     >
+                         [ {gt} ]
+                     </div>
+                    ))}
                 </div>
 
-                {/* Circuit Grid */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontFamily: 'monospace', color: '#fff' }}>q0</span>
@@ -123,46 +101,12 @@ export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
                                         border: grid[0][col] ? 'none' : '2px dashed #555', 
                                         borderRadius: '8px',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        background: grid[0][col] === 'H' ? '#eab308' : (grid[0][col] ? '#ec4899' : 'transparent'),
-                                        color: grid[0][col] === 'H' ? 'black' : 'white', fontWeight: 'bold',
+                                        background: grid[0][col] ? '#ec4899' : 'transparent',
+                                        color: 'white', fontWeight: 'bold',
                                         cursor: grid[0][col] ? 'pointer' : 'default',
-                                        borderBottom: (grid[0][col] === 'Oracle' || grid[0][col] === 'Amplifier') ? 'none' : undefined,
-                                        borderBottomLeftRadius: (grid[0][col] === 'Oracle' || grid[0][col] === 'Amplifier') ? 0 : undefined,
-                                        borderBottomRightRadius: (grid[0][col] === 'Oracle' || grid[0][col] === 'Amplifier') ? 0 : undefined,
                                     }}
                                 >
-                                    {grid[0][col] === 'H' ? 'H' : ''}
-                                    {grid[0][col] === 'Oracle' ? 'Oracle' : ''}
-                                    {grid[0][col] === 'Amplifier' ? 'Amp' : ''}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontFamily: 'monospace', color: '#fff' }}>q1</span>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            {[0, 1, 2].map(col => (
-                                <div 
-                                    key={`1-${col}`}
-                                    onDragOver={(e) => e.preventDefault()}
-                                    onDrop={(e) => handleDrop(e, 1, col)}
-                                    onClick={() => clearSlot(1, col)}
-                                    style={{ 
-                                        width: '80px', height: '60px', 
-                                        border: grid[1][col] ? 'none' : '2px dashed #555', 
-                                        borderRadius: '8px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        background: grid[1][col] === 'H' ? '#eab308' : (grid[1][col] === 'Oracle' ? '#ec4899' : (grid[1][col] === 'Amplifier' ? '#3b82f6' : 'transparent')),
-                                        color: grid[1][col] === 'H' ? 'black' : 'white', fontWeight: 'bold',
-                                        cursor: grid[1][col] ? 'pointer' : 'default',
-                                        borderTop: (grid[1][col] === 'Oracle' || grid[1][col] === 'Amplifier') ? 'none' : undefined,
-                                        borderTopLeftRadius: (grid[1][col] === 'Oracle' || grid[1][col] === 'Amplifier') ? 0 : undefined,
-                                        borderTopRightRadius: (grid[1][col] === 'Oracle' || grid[1][col] === 'Amplifier') ? 0 : undefined,
-                                    }}
-                                >
-                                    {grid[1][col] === 'H' ? 'H' : ''}
-                                    {/* The wide gates show their name in the center visually across the two using border tricks, but text is fine in both or just bottom */}
+                                    {grid[0][col] || ''}
                                 </div>
                             ))}
                         </div>
@@ -171,8 +115,8 @@ export function AlgorithmsBuilder({ onRunCircuit }: AlgorithmsBuilderProps) {
             </div>
 
             <button 
-                className={styles.actionBtn} 
-                style={{ marginTop: '20px', width: '100%' }}
+                className={styles.btnPrimary} 
+                style={{ marginTop: '20px', width: '100%', padding: '12px' }}
                 onClick={() => onRunCircuit(parseGridToSteps())}
             >
                 Run Circuit

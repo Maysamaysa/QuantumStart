@@ -36,12 +36,12 @@ export default function PortalCanvas2D() {
         const t = tRef.current
 
         // ─── CONFIG ────────────────────────────────
-        const GATE_W = 72
-        const GATE_H = 170
+        const GATE_W = 140
+        const GATE_H = 300
         const GATE_Y = H / 2 - GATE_H / 2 - 10
         const CL_GX = W * 0.28
         const QT_GX = W * 0.72
-        const CYCLE = 220
+        const CYCLE = 150
 
         // ─── THEME COLORS ──────────────────────────
         const BG_CARD = '#24253a'
@@ -334,27 +334,30 @@ export default function PortalCanvas2D() {
     }, [draw])
 
     return (
-        <div style={{
-            position: 'absolute',
+        <div style= {{
+        position: 'absolute',
             top: 0, left: 0, right: 0, bottom: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 5
-        }}>
-            <div style={{
-                width: '100%',
-                maxWidth: 860,
+                display: 'flex',
+                    alignItems: 'center',
+                        justifyContent: 'center',
+                            zIndex: 5
+    }
+}>
+    <div style={
+    {
+        width: '100%',
+            maxWidth: 860,
                 height: '60vh',
-                maxHeight: 420,
-                borderRadius: 16,
-                overflow: 'hidden'
-            }}>
-                <canvas
-                    ref={canvasRef}
-                    style={{ display: 'block', width: '100%', height: '100%' }}
+                    maxHeight: 420,
+                        borderRadius: 16,
+                            overflow: 'hidden'
+    }
+}>
+    <canvas
+                    ref={ canvasRef }
+style = {{ display: 'block', width: '100%', height: '100%' }}
                 />
-            </div>
-        </div>
+    </div>
+    </div>
     )
 }

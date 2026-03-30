@@ -1,114 +1,167 @@
+:root {
+  --bg:           #0d0e1a;   /* Deep Space Indigo */
+  --surface:      #16172d;   /* Card / panel background */
+  --blue-0:       #5DA7DB;   /* State |0⟩, primary accent, buttons */
+  --amber-1:      #A67B5B;   /* State |1⟩ accent */
+  --lotus:        #FFB7C5;   /* Success, eureka, celebration */
+  --glass-border: rgba(193, 225, 193, 0.2);   /* Borders */
+  --text:         #F0F0FF;   /* Primary text */
+  --muted:        #8888AA;   /* Secondary text */
+  --transition:   cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+}
+
 .overlayContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
 }
 
-.leftTitlePanel {
-    position: absolute;
-    top: 140px; /* Offset for ModuleHeader */
-    left: 40px;
-    width: 420px;
-    color: #F8F9FF;
-    font-family: 'DM Sans', sans-serif;
-    pointer-events: none;
-    animation: fadeIn 0.8s ease-out;
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 24px;
+  pointer-events: auto;
+  transition: var(--transition);
 }
 
-.leftTitlePanel h1 {
-    font-size: 42px;
-    font-weight: 800;
-    margin-bottom: 16px;
-    letter-spacing: -0.03em;
-    color: #fff;
-    line-height: 1.1;
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+.glass:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(193, 225, 193, 0.4);
 }
 
-.leftTitlePanel p {
-    font-size: 18px;
-    line-height: 1.65;
-    color: rgba(248, 249, 255, 0.65);
-    margin-bottom: 20px;
+/* ─── Nav Bar ──────────────────────────────────────────────────────────────── */
+.navBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1000;
+  background: rgba(13, 14, 26, 0.4);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--glass-border);
 }
 
-.bottomDialog {
-    position: absolute;
-    bottom: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(640px, calc(100vw - 48px));
-    z-index: 20;
-    pointer-events: auto;
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
 }
 
-/* ─── FEEDBACK / DIALOG BOX ─────────────────────────────────────────────────── */
-.feedback {
-    padding: 32px 40px;
-    background: rgba(14, 15, 26, 0.85);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid rgba(255, 183, 197, 0.25);
-    border-radius: 28px;
-    box-shadow: 
-        0 24px 80px rgba(0, 0, 0, 0.8),
-        inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-    text-align: center;
+.navItem.unlocked {
+  color: var(--text);
 }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(32px); }
-    to { opacity: 1; transform: translateY(0); }
+.navItem.active {
+  border: 1px solid var(--blue-0);
+  background: rgba(93, 167, 219, 0.1);
+  color: var(--blue-0);
 }
 
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+}
+
+.unlocked .dot {
+  background: var(--blue-0);
+  border-color: var(--blue-0);
+}
+
+.locked .dot {
+  background: transparent;
+}
+
+.progressBarContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--blue-0);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px var(--blue-0);
+}
+
+/* ─── Hero / Stage Container ──────────────────────────────────────────────── */
+.stageWrapper {
+  width: 100%;
+  height: 100vh;
+  padding-top: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.feedback p {
-    margin-bottom: 15px;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.6;
-    color: rgba(248, 249, 255, 0.95);
+.fadeIn {
+  animation: fadeIn 0.8s var(--transition) forwards;
 }
 
-/* ─── ACTION BUTTON ────────────────────────────────────────────────────────── */
-.actionBtn {
-    margin-top: 10px;
-    padding: 14px 36px;
-    background: linear-gradient(135deg, #FFB7C5 0%, #FF8FA3 100%);
-    color: #0c0d12;
-    border: none;
-    border-radius: 16px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 24px rgba(255, 183, 197, 0.25);
-    pointer-events: auto;
+/* ─── Buttons ──────────────────────────────────────────────────────────────── */
+.btn {
+  padding: 12px 24px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.actionBtn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(255, 183, 197, 0.4);
-    filter: brightness(1.1);
+.btnPrimary {
+  background: var(--blue-0);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(93, 167, 219, 0.3);
 }
 
-.actionBtn:active {
-    transform: translateY(-1px);
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(93, 167, 219, 0.5);
 }
 
-/* ─── BUILDER SPECIFIC ─────────────────────────────────────────────────────── */
-.builderContainer {
-    width: 100%;
+.btnLotus {
+  background: var(--lotus);
+  color: #1a1b26;
+  box-shadow: 0 4px 15px rgba(255, 183, 197, 0.3);
+}
+
+.btnLotus:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 183, 197, 0.5);
 }

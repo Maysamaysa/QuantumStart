@@ -1,113 +1,88 @@
-import { useState, useCallback, useMemo } from 'react'
-import { ACESFilmicToneMapping } from 'three'
-import { AlgorithmsScene } from './AlgorithmsScene'
-import { AlgorithmsOverlay } from './AlgorithmsOverlay'
-import { useProgress } from '../../../context/ProgressContext'
-import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
-import { ModuleCanvas } from '../../../components/ModuleCanvas'
-import { simulateCircuit, type CircuitOp, getInitialState } from './circuitLogic'
-
-import { type AlgoPhase } from './algoTypes'
+import { useState, useEffect, useCallback } from 'react';
+import styles from './AlgorithmsOverlay.module.css';
+import { TopNavBar } from './components/TopNavBar';
+import { ConceptBridge } from './stages/ConceptBridge';
+import { AlgoLibrary } from './stages/AlgoLibrary';
+import { CircuitBuilder } from './stages/CircuitBuilder';
+import { SimulationZone } from './stages/SimulationZone';
+import { SoloChallenge } from './stages/SoloChallenge';
+import { useProgress } from '../../../context/ProgressContext';
+import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup';
+import type { CircuitGate } from './algoTypes';
 
 export function AlgorithmsModule() {
-    const { completeModule } = useProgress()
-    useModuleCatSetup('hidden', 'idle')
-    const [phase, setPhase] = useState<AlgoPhase>('phase0_intro')
-    // Get a random winning box between 0 to 3, memoized so it only happens once per mount
-    const winningBox = useMemo(() => Math.floor(Math.random() * 4), [])
-    
-    // Phase 1 constraints state
-    const [guessedBox, setGuessedBox] = useState<number | null>(null)
-    
-    // Quantum state
-    const [qState, setQState] = useState<number[]>(getInitialState())
-    // For average line animation
-    const [showAverage, setShowAverage] = useState(false)
-    const [builderFeedback, setBuilderFeedback] = useState<string | null>(null)
-    
-    // We'll use panelsVisible for UI transitions
-    const { panelsVisible } = useCatNPCTransition(true)
+  const { completeModule } = useProgress();
+  useModuleCatSetup('hidden', 'idle');
 
-    const handlePhaseComplete = useCallback((completedPhase: AlgoPhase) => {
-        if (completedPhase === 'phase0_intro') setPhase('phase1_classical')
-        else if (completedPhase === 'phase1_classical') setPhase('phase2_superposition')
-        else if (completedPhase === 'phase2_superposition') setPhase('phase3_oracle')
-        else if (completedPhase === 'phase3_oracle') setPhase('phase4_amplification')
-        else if (completedPhase === 'phase4_amplification') {
-            setPhase('phase5_builder')
-            // Reset state for builder
-            setQState(getInitialState())
-        }
-        else if (completedPhase === 'phase5_builder') {
-            setPhase('phase6_quiz')
-        }
-        else if (completedPhase === 'phase6_quiz') {
-            setPhase('complete')
-            completeModule('algorithms', 'blue') 
-        }
-    }, [completeModule])
+  // Module State
+  const [stage, setStage] = useState(1);
+  const [unlocked, setUnlocked] = useState([1]);
+  const [circuitGates, setCircuitGates] = useState<CircuitGate[]>([]);
 
-    const handleRunCircuit = useCallback((steps: CircuitOp[]) => {
-        const finalState = simulateCircuit(steps, winningBox)
-        setQState(finalState)
+  // Persistence logic
+  useEffect(() => {
+    const saved = localStorage.getItem('qm7');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setStage(parsed.stage || 1);
+        setUnlocked(parsed.unlocked || [1]);
+        setCircuitGates(parsed.circuit?.gates || []);
+      } catch (e) {
+        console.error("Failed to load algorithms state", e);
+      }
+    }
+  }, []);
 
-        // Check correctness: valid Grover sequence is H → Oracle → Amplifier
-        const isCorrect = steps.length === 3 &&
-                          steps[0].gate === 'H' &&
-                          steps[1].gate === 'Oracle' &&
-                          steps[2].gate === 'Amplifier';
-        
-        if (isCorrect) {
-            setBuilderFeedback("Perfect! The measurement isolates the target state! The Cat gets the Golden Treat!")
-            setTimeout(() => setPhase('phase6_quiz'), 4000)
-        } else {
-            const hasOracle = steps.find(s => s.gate === 'Oracle')
-            const hasAmp = steps.find(s => s.gate === 'Amplifier')
-            const hasH = steps.find(s => s.gate === 'H')
+  const saveState = useCallback((newStage: number, newUnlocked: number[], newGates: CircuitGate[]) => {
+    const state = {
+      stage: newStage,
+      unlocked: newUnlocked,
+      circuit: { gates: newGates }
+    };
+    localStorage.setItem('qm7', JSON.stringify(state));
+  }, []);
 
-            if (hasAmp && !hasOracle) {
-                setBuilderFeedback("The Amplifier didn't do what you expected. It needs a negative phase to bounce off of! Use the Oracle first.")
-            } else if (hasOracle && !hasH) {
-                setBuilderFeedback("The Oracle flipped the phase, but without Superposition first, we still have only 1 possibility to check.")
-            } else {
-                setBuilderFeedback("Hmm, that didn't isolate the target state. Remember the order: Superposition -> Oracle -> Amplifier.")
-            }
-        }
-    }, [winningBox])
+  const handleStageComplete = (nextStage: number) => {
+    const newUnlocked = Array.from(new Set([...unlocked, nextStage]));
+    setUnlocked(newUnlocked);
+    setStage(nextStage);
+    saveState(nextStage, newUnlocked, circuitGates);
+  };
 
-    return (
-        <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-            <ModuleCanvas
-                camera={{ position: [0, 0, 15], fov: 50 }}
-                gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
-            >
-                <ambientLight intensity={2.5} />
-                <directionalLight position={[5, 10, 5]} intensity={3.5} />
-                <pointLight position={[-5, 5, 5]} intensity={2.0} color="#ffffff" />
-                <AlgorithmsScene 
-                    phase={phase} 
-                    winningBox={winningBox} 
-                    guessedBox={guessedBox}
-                    onGuessBox={setGuessedBox}
-                    qState={qState}
-                    showAverage={showAverage}
-                />
-            </ModuleCanvas>
+  const handleCircuitComplete = (gates: CircuitGate[]) => {
+    setCircuitGates(gates);
+    handleStageComplete(5); // Move to simulation
+  };
 
-            <AlgorithmsOverlay 
-                phase={phase} 
-                winningBox={winningBox} 
-                guessedBox={guessedBox}
-                qState={qState}
-                onApplyState={(newState) => setQState(newState)}
-                showAverage={showAverage}
-                setShowAverage={setShowAverage}
-                onComplete={handlePhaseComplete} 
-                panelsVisible={panelsVisible}
-                builderFeedback={builderFeedback}
-                onRunCircuit={handleRunCircuit}
-            />
-        </div>
-    )
+  const handleFinalComplete = () => {
+    completeModule('algorithms', 'blue');
+    saveState(6, unlocked, circuitGates);
+  };
+
+  const renderStage = () => {
+    switch (stage) {
+      case 1: return <ConceptBridge onComplete={() => handleStageComplete(2)} />;
+      case 2: return <AlgoLibrary onComplete={() => handleStageComplete(3)} />;
+      case 3: return <CircuitBuilder onComplete={handleCircuitComplete} />;
+      case 4: return <CircuitBuilder isChallenge onComplete={handleCircuitComplete} />;
+      case 5: return <SimulationZone gates={circuitGates} onComplete={() => handleStageComplete(6)} />;
+      case 6: return <SoloChallenge onComplete={handleFinalComplete} />;
+      default: return <ConceptBridge onComplete={() => handleStageComplete(2)} />;
+    }
+  };
+
+  return (
+    <div className={styles.overlayContainer} style={{ background: 'var(--bg)', minHeight: '100vh', position: 'relative', pointerEvents: 'auto' }}>
+      <TopNavBar 
+        currentStage={stage} 
+        unlockedStages={unlocked} 
+        onStageClick={(s) => setStage(s)} 
+      />
+      
+      <main style={{ width: '100%', height: '100%' }}>
+        {renderStage()}
+      </main>
+    </div>
+  );
 }
