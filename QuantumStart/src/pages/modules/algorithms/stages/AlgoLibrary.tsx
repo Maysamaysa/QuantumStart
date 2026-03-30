@@ -25,20 +25,20 @@ interface AlgoLibraryProps {
   onComplete: () => void;
 }
 
-export const AlgoLibrary: React.FC<AlgoLibraryProps> = ({ onComplete }) => {
+export function AlgoLibrary({ onComplete }: AlgoLibraryProps): React.JSX.Element {
   const [expandedAny, setExpandedAny] = useState(false);
   const [timerReady, setTimerReady] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setTimerReady(true), 30000); // 30s as per prompt
+    const timer = setTimeout(() => setTimerReady(true), 15000); // reduced to 15s
     return () => clearTimeout(timer);
   }, []);
 
   const handleExpand = () => setExpandedAny(true);
 
   return (
-    <div className={styles.stageWrapper} style={{ flexDirection: 'column', padding: '100px 40px 40px' }}>
-      <h2 style={{ fontSize: '36px', marginBottom: '40px', textAlign: 'center' }}>Algorithm Library</h2>
+    <div className={styles.stageWrapper} style={{ flexDirection: 'column', padding: '60px 40px 40px' }}>
+      <h2 style={{ fontSize: '32px', marginBottom: '32px', textAlign: 'center', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Algorithm Library</h2>
       
       <div style={{ 
         display: 'grid', 
@@ -153,16 +153,16 @@ export const AlgoLibrary: React.FC<AlgoLibraryProps> = ({ onComplete }) => {
           onClick={onComplete}
           style={{ marginTop: '40px' }}
         >
-          Build your first circuit →
+          Begin Search Challenge →
         </button>
       )}
     </div>
   );
-};
+}
 
 // --- Sub-components for expanded demos ---
 
-const GroverDemo = () => {
+function GroverDemo(): React.JSX.Element {
   const [iter, setIter] = useState(0);
   const data = [
     [12, 12, 12, 12, 12, 12, 12, 12], // Iter 0
@@ -176,7 +176,7 @@ const GroverDemo = () => {
       <div style={{ height: '140px', marginBottom: '16px' }}>
         <Bar 
           data={{
-            labels: ['|000⟩', '|001⟩', '|010⟩', '|011⟩', '|100⟩', '|101⟩', '|110⟩', '|111⟩'],
+            labels: ['|000\u27E9', '|001\u27E9', '|010\u27E9', '|011\u27E9', '|100\u27E9', '|101\u27E9', '|110\u27E9', '|111\u27E9'],
             datasets: [{
               label: 'Amplitude %',
               data: data,
@@ -200,4 +200,4 @@ const GroverDemo = () => {
       </button>
     </div>
   );
-};
+}

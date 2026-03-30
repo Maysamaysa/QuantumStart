@@ -24,6 +24,8 @@ interface ModuleHeaderProps {
     phases?: string[]
     /** Index of the active phase (0-based) */
     currentPhase?: number
+    /** Callback when a phase dot is clicked (optional) */
+    onPhaseChange?: (phaseIndex: number) => void
     /** Override back destination (default '/learn') */
     backTo?: string
 }
@@ -33,6 +35,7 @@ export function ModuleHeader({
     moduleName,
     phases,
     currentPhase = 0,
+    onPhaseChange,
     backTo = '/learn',
 }: ModuleHeaderProps) {
     const navigate = useNavigate()
@@ -63,28 +66,30 @@ export function ModuleHeader({
                 <span className={styles.backArrow}>←</span>
                 <span className={styles.backLabel}>Hub</span>
             </button>
-
+ 
             {/* CENTER — module name */}
             <div className={styles.nameZone}>
                 <span className={styles.moduleNum}>MODULE {moduleNumber}</span>
                 <span className={styles.moduleName}>{moduleName}</span>
             </div>
-
+ 
             {/* RIGHT — phase nav (only for multi-phase modules) */}
             <div className={styles.phaseZone}>
                 {hasPhases && (
-                    <div className={styles.phaseNav}>
+                    <nav className={styles.phaseNav}>
                         {phases.map((label, i) => (
-                            <div
+                            <button
                                 key={i}
                                 className={`${styles.phaseDot} ${i === currentPhase ? styles.phaseDotActive : i < currentPhase ? styles.phaseDotDone : ''}`}
+                                onClick={() => onPhaseChange?.(i)}
                                 title={label}
                                 aria-label={`Phase ${i + 1}: ${label}`}
+                                aria-current={i === currentPhase ? 'step' : undefined}
                             >
                                 <span className={styles.phaseTooltip}>{label}</span>
-                            </div>
+                            </button>
                         ))}
-                    </div>
+                    </nav>
                 )}
             </div>
         </motion.div>

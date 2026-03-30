@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Line } from '@react-three/drei'
@@ -7,7 +7,7 @@ export function AlgoIntroScene() {
     const groupRef = useRef<THREE.Group>(null)
 
     // Generate random nodes for a network/circuit look
-    const nodes = useMemo(() => {
+    const [nodes] = useState(() => {
         const pts = []
         for (let i = 0; i < 20; i++) {
             pts.push(new THREE.Vector3(
@@ -17,7 +17,7 @@ export function AlgoIntroScene() {
             ))
         }
         return pts
-    }, [])
+    })
 
     // Generate connections between close nodes
     const lines = useMemo(() => {

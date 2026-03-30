@@ -24,6 +24,7 @@ export function AlgorithmsChallenges({ phase, onComplete }: AlgorithmsChallenges
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const challengeIdx = phase === 'stage4_grover_scenario' ? 2 : (phase.includes('entanglement') ? 1 : 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const oracleType = useMemo(() => Math.random() > 0.5 ? 'Oracle_Constant' : 'Oracle_Balanced', [phase]);
 
   const challenges = useMemo(() => [

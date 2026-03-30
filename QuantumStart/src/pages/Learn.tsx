@@ -193,34 +193,44 @@ function EntanglementModel({ hovered }: { hovered: boolean }) {
     )
 }
 
-// Wave pattern (Algorithms)
+// Intersection model (Quantum Programs)
 function AlgorithmModel({ hovered }: { hovered: boolean }) {
     const ref = useRef<THREE.Group>(null)
     useFrame((s) => {
         if (!ref.current) return
-        ref.current.rotation.y = s.clock.getElapsedTime() * 0.5
+        const t = s.clock.getElapsedTime()
+        ref.current.rotation.y = t * 0.4
     })
-    const points = useMemo(() => {
-        const pts: [number, number, number][] = []
-        for (let i = 0; i < 40; i++) {
-            const x = (i / 39) * 0.9 - 0.45
-            const y = Math.sin(i * 0.75) * 0.18 * (1 + i / 39)
-            pts.push([x, y, 0])
-        }
-        return pts
-    }, [])
-    const col = hovered ? '#ffd580' : '#C4955A'
+    
+    const col = hovered ? '#C1E1C1' : '#a0c0a0'
+    const roadCol = '#1a1b26'
+    
     return (
-        <group ref= { ref } scale = { hovered? 1.15: 1 } >
-        {
-            points.map((p, i) => (
-                <mesh key= { i } position = { p } >
-                <sphereGeometry args={ [0.03, 6, 6]} />
-            <meshStandardMaterial color={ col } emissive = { col } emissiveIntensity = { 1.6} transparent opacity = { 0.75 + (i / 39) * 0.25 } />
+        <group ref={ref} scale={hovered ? 1.25 : 1.1}>
+            {/* Roads */}
+            <mesh rotation={[-Math.PI/2, 0, 0]}>
+                <planeGeometry args={[1, 0.15]} />
+                <meshStandardMaterial color={roadCol} />
             </mesh>
-            ))
-        }
-            </group>
+            <mesh rotation={[-Math.PI/2, 0, Math.PI/2]}>
+                <planeGeometry args={[1, 0.15]} />
+                <meshStandardMaterial color={roadCol} />
+            </mesh>
+            {/* Central Decision Qubit */}
+            <mesh position={[0, 0.08, 0]}>
+                <sphereGeometry args={[0.06, 16, 16]} />
+                <meshStandardMaterial color={col} emissive={col} emissiveIntensity={2} />
+            </mesh>
+            {/* Tiny cars (particles) */}
+            <mesh position={[0.3, 0.02, 0]}>
+                <boxGeometry args={[0.04, 0.02, 0.02]} />
+                <meshStandardMaterial color="#5DA7DB" />
+            </mesh>
+            <mesh position={[0, 0.02, 0.3]}>
+                <boxGeometry args={[0.02, 0.02, 0.04]} />
+                <meshStandardMaterial color="#C1E1C1" />
+            </mesh>
+        </group>
     )
 }
 
@@ -540,7 +550,7 @@ export function Learn() {
             transition={{ 
                 duration: TRANSITION_CONFIG.header.duration, 
                 delay: TRANSITION_CONFIG.header.delay, 
-                ease: TRANSITION_CONFIG.header.ease 
+                ease: TRANSITION_CONFIG.header.ease as any
             }}
         >
             <button className={ styles.navBtn } onClick = {() => navigate('/')} > ← Landing </button>

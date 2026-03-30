@@ -125,9 +125,12 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
     border: 1.5px solid rgba(255, 255, 255, 0.25);
+    padding: 0;
+    margin: 0;
     transition: all 0.3s ease;
-    cursor: default;
+    cursor: pointer;
     flex-shrink: 0;
+    outline: none;
 }
 
 .phaseDotDone {

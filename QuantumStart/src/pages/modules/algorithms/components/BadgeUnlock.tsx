@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from '../AlgorithmsOverlay.module.css';
 import { ModuleCanvas } from '../../../../components/ModuleCanvas';
 import { useFrame } from '@react-three/fiber';
@@ -74,7 +74,7 @@ function ParticleBurst() {
   const pointsRef = useRef<THREE.Points>(null);
   const particleCount = 400;
   
-  const particles = useMemo(() => {
+  const [particles] = useState(() => {
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const velocities: THREE.Vector3[] = [];
@@ -97,7 +97,7 @@ function ParticleBurst() {
         colors[i * 3 + 2] = color.b;
     }
     return { positions, colors, velocities };
-  }, [particleCount]);
+  });
 
   useFrame((_state, delta) => {
     if (!pointsRef.current) return;

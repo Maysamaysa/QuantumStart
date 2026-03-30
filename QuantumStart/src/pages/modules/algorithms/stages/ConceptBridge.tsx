@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styles from '../AlgorithmsOverlay.module.css';
 import { BlochSphereScene } from '../components/BlochSphereScene';
 import { ModuleCanvas } from '../../../../components/ModuleCanvas';
@@ -7,7 +7,7 @@ interface ConceptBridgeProps {
   onComplete: () => void;
 }
 
-export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
+export function ConceptBridge({ onComplete }: ConceptBridgeProps): React.JSX.Element {
   const [openSection, setOpenSection] = useState<number | null>(null);
   const [visited, setVisited] = useState<Set<number>>(new Set());
   const [showReady, setShowReady] = useState(false);
@@ -23,7 +23,7 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
     {
       id: 2,
       title: 'What is a quantum gate?',
-      content: 'Gates rotate the qubit\u0027s state on the Bloch sphere. H puts it on the equator. X flips it. CNOT entangles two qubits.'
+      content: 'Gates rotate the qubit\'s state on the Bloch sphere. H puts it on the equator. X flips it. CNOT entangles two qubits.'
     },
     {
       id: 3,
@@ -42,7 +42,7 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowReady(true), 90000); // 90s fallback
+    const timer = setTimeout(() => setShowReady(true), 15000); // reduced to 15s
     return () => clearTimeout(timer);
   }, []);
 
@@ -58,7 +58,7 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
         {/* Left Panel - Recap */}
         <div style={{ flex: 1, padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', zIndex: 10 }}>
           <div className={styles.glass} style={{ maxWidth: '500px' }}>
-            <h2 style={{ marginBottom: '24px', fontSize: '32px' }}>Quantum Recap</h2>
+            <h2 style={{ marginBottom: '24px', fontSize: '32px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Quantum Recap</h2>
             {sections.map((section) => (
               <div 
                 key={section.id} 
@@ -78,11 +78,12 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'space-between',
-                    padding: '8px 0'
+                    padding: '8px 0',
+                    color: visited.has(section.id) ? 'var(--blue-0)' : 'var(--text)'
                   }}
                 >
                   {section.title}
-                  <span>{openSection === section.id ? '\u2212' : '+'}</span>
+                  <span>{openSection === section.id ? '−' : '+'}</span>
                 </div>
                 {openSection === section.id && (
                   <div className={styles.fadeIn} style={{ fontSize: '16px', color: 'var(--muted)', marginTop: '8px', lineHeight: '1.6' }}>
@@ -94,11 +95,11 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
             
             {showReady && (
               <button 
-                className={`${styles.btn} ${styles.btnLotus} ${styles.fadeIn}`}
+                className={`${styles.btn} ${styles.btnPrimary} ${styles.fadeIn}`}
                 style={{ marginTop: '32px', width: '100%', justifyContent: 'center' }}
                 onClick={onComplete}
               >
-                I\u0027m ready \u2192
+                I'm ready →
               </button>
             )}
           </div>
@@ -108,7 +109,7 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
         <div style={{ flex: 1.5, position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0 }}>
             <ModuleCanvas camera={{ position: [0, 0, 8], fov: 45 }}>
-              <BlochSphereScene vector={vector} label="|ψ\u27E9" />
+              <BlochSphereScene vector={vector} label="|ψ⟩" />
             </ModuleCanvas>
           </div>
 
@@ -117,7 +118,7 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
             <div className={styles.glass} style={{ padding: '16px 32px' }}>
               <div style={{ marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-                  <span>Theta (\u03B8): {theta.toFixed(2)}</span>
+                  <span>Theta (θ): {theta.toFixed(2)}</span>
                   <span>{theta > 0.78 && theta < 2.35 ? 'Superposition zone' : ''}</span>
                 </div>
                 <input 
@@ -129,7 +130,7 @@ export function ConceptBridge({ onComplete }: ConceptBridgeProps) {
                 />
               </div>
               <div>
-                <div style={{ marginBottom: '8px', fontSize: '14px' }}>Phi (\u03C6): {phi.toFixed(2)}</div>
+                <div style={{ marginBottom: '8px', fontSize: '14px' }}>Phi (φ): {phi.toFixed(2)}</div>
                 <input 
                   type="range" 
                   min="0" max={Math.PI * 2} step="0.01" 

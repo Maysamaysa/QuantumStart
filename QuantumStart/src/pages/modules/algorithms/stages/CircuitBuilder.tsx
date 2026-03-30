@@ -10,14 +10,14 @@ interface CircuitBuilderProps {
   onComplete: (gates: CircuitGate[]) => void;
 }
 
-export const CircuitBuilder: React.FC<CircuitBuilderProps> = ({ isChallenge, onComplete }) => {
+export function CircuitBuilder({ isChallenge, onComplete }: CircuitBuilderProps): React.JSX.Element {
   const [gates, setGates] = useState<CircuitGate[]>([]);
   const [selectedGateType, setSelectedGateType] = useState<string | null>(null);
 
   const handlePlaceGate = useCallback((qubit: number, slot: number) => {
     if (!selectedGateType) return;
     const newGate: CircuitGate = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 9),
       type: selectedGateType,
       qubit,
       slot
@@ -76,7 +76,7 @@ export const CircuitBuilder: React.FC<CircuitBuilderProps> = ({ isChallenge, onC
         >
           <h3 style={{ marginBottom: '12px' }}>Grover Challenge</h3>
           <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: '1.5' }}>
-            Build the circuit to locate record |101⟩.
+            Build the circuit to locate record |101\u27E9.
             <br />1. Place <strong>Oracle</strong> at slot 2.
             <br />2. Place <strong>Diffusion</strong> at slot 3.
           </p>
@@ -117,9 +117,9 @@ export const CircuitBuilder: React.FC<CircuitBuilderProps> = ({ isChallenge, onC
           className={`${styles.btn} ${styles.btnPrimary}`}
           onClick={handleRun}
         >
-          {isChallenge ? 'Run your quantum search →' : 'Run simulation →'}
+          {isChallenge ? 'Run your quantum search \u2192' : 'Run simulation \u2192'}
         </button>
       </div>
     </div>
   );
-};
+}

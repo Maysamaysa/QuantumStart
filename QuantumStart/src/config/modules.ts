@@ -89,14 +89,14 @@ export const MODULE_DATA: Module[] = [
     },
     {
         id: 'algorithms',
-        name: 'Quantum Algorithms',
+        name: 'Quantum Programs',
         emoji: '⚡',
         angle: (Math.PI * 2 * 6) / 7,
         radius: 1,
         blueLabel: 'Intuition',
         amberLabel: 'Technical',
-        qubitBlue: "A quantum computer doesn't try every answer — it makes all wrong answers cancel out, leaving only the right one standing. It's interference, not magic.",
-        qubitAmber: "Grover's algorithm achieves O(√N) search via amplitude amplification. Shor's factors N in O((log N)³) using QFT-based period finding. Classical: O(e^N^(1/3)).",
+        qubitBlue: "From optimizing city traffic to scheduling complex tasks, explore how quantum thinking solves real-world problems. Master the 4-step workflow: Map, Build, Execute, and Interpret.",
+        qubitAmber: "Explore variational algorithms and annealing workflows. Formulate optimization problems as Cost Functions (QUBO), encode them into quantum rotations, and extract solutions from collapsing superpositions.",
         route: '/learn/algorithms',
     },
 ]

@@ -1,167 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+
 :root {
-  --bg:           #0d0e1a;   /* Deep Space Indigo */
-  --surface:      #16172d;   /* Card / panel background */
-  --blue-0:       #5DA7DB;   /* State |0⟩, primary accent, buttons */
-  --amber-1:      #A67B5B;   /* State |1⟩ accent */
-  --lotus:        #FFB7C5;   /* Success, eureka, celebration */
-  --glass-border: rgba(193, 225, 193, 0.2);   /* Borders */
-  --text:         #F0F0FF;   /* Primary text */
-  --muted:        #8888AA;   /* Secondary text */
-  --transition:   cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
+  --bg: #1A1B26;
+  --bg2: #13141F;
+  --blue: #5DA7DB;
+  --amber: #A67B5B;
+  --pink: #FFB7C5;
+  --green: #C1E1C1;
+  --white: #F8F9FF;
+  --muted: rgba(248,249,255,0.45);
+  --glass: rgba(93,167,219,0.07);
+  --glass-border: rgba(193,225,193,0.18);
 }
 
 .overlayContainer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  overflow: hidden;
+  font-family: 'DM Mono', monospace;
+  color: var(--white);
+  pointer-events: auto; /* Enable for scroll capture */
+}
+
+/* ─── DOT NAVIGATION (LEFT) ─── */
+.stepDots {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 100;
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-}
-
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 24px;
+  left: 3rem;
+  top: 55%; /* Slightly lower to avoid ModuleHeader */
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 20;
   pointer-events: auto;
-  transition: var(--transition);
 }
 
-.glass:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(193, 225, 193, 0.4);
-}
-
-/* ─── Nav Bar ──────────────────────────────────────────────────────────────── */
-.navBar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 70px;
+.dotItem {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
-  z-index: 1000;
-  background: rgba(13, 14, 26, 0.4);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--glass-border);
-}
-
-.navItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
+  gap: 1rem;
   cursor: pointer;
-  transition: var(--transition);
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--muted);
+  opacity: 0.4;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.navItem.unlocked {
-  color: var(--text);
-}
-
-.navItem.active {
-  border: 1px solid var(--blue-0);
-  background: rgba(93, 167, 219, 0.1);
-  color: var(--blue-0);
+.dotItemActive {
+  opacity: 1;
 }
 
 .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 1.5px solid var(--muted);
+  background: var(--dot-color, var(--blue));
+  box-shadow: 0 0 15px var(--dot-color, var(--blue));
+  transition: transform 0.3s ease;
 }
 
-.unlocked .dot {
-  background: var(--blue-0);
-  border-color: var(--blue-0);
+.dotItemActive .dot {
+  transform: scale(1.4);
 }
 
-.locked .dot {
-  background: transparent;
+.dotLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  color: var(--white);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
 }
 
-.progressBarContainer {
+.dotItem:hover .dotLabel,
+.dotItemActive .dotLabel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─── MAIN PANEL (RIGHT) ─── */
+.mainPanel {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  right: 4rem;
+  top: 5.5rem;
+  bottom: 5.5rem;
+  width: 420px;
+  padding: 2.5rem;
+  background: rgba(13, 14, 21, 0.9);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  overflow-y: auto;
+  z-index: 20;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4);
 }
 
-.progressBar {
-  height: 100%;
-  background: var(--blue-0);
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 10px var(--blue-0);
-}
-
-/* ─── Hero / Stage Container ──────────────────────────────────────────────── */
-.stageWrapper {
-  width: 100%;
-  height: 100vh;
-  padding-top: 70px;
+.stepContent {
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.stepTag {
+  font-size: 0.65rem;
+  color: var(--pink);
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.stepTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: var(--white);
+}
+
+.stepDesc {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(248, 249, 255, 0.7);
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+.formula {
+  font-size: 1.1rem;
+  color: var(--pink);
+  letter-spacing: 0.05em;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.insightBox {
+  padding: 1.2rem;
+  background: rgba(255, 183, 197, 0.05);
+  border: 1px solid rgba(255, 183, 197, 0.2);
+  border-radius: 16px;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* ─── BOTTOM NAVIGATION ─── */
+.bottomNav {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 4rem;
+  right: 4rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+.navBtn {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--white);
+  padding: 0.8rem 1.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.navBtn:hover:not(:disabled) {
+  background: rgba(193,225,193,0.12);
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: initial;
+}
+
+.navBtnPrimary {
+  background: var(--blue);
+  color: var(--bg2);
+  border: none;
+  font-weight: 700;
+}
+
+.navBtnPrimary:hover {
+  background: var(--white);
+  box-shadow: 0 0 20px rgba(193,225,193,0.4);
+}
+
+/* ─── SCROLL HINT ─── */
+.scrollHint {
+  position: absolute;
+  bottom: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.hintArrow {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--green));
+  position: relative;
   overflow: hidden;
 }
 
-/* ─── Animations ──────────────────────────────────────────────────────────── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.hintArrow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--white);
+  animation: scrollAnim 2s infinite;
 }
 
-.fadeIn {
-  animation: fadeIn 0.8s var(--transition) forwards;
-}
-
-/* ─── Buttons ──────────────────────────────────────────────────────────────── */
-.btn {
-  padding: 12px 24px;
-  border-radius: 14px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btnPrimary {
-  background: var(--blue-0);
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(93, 167, 219, 0.3);
-}
-
-.btnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(93, 167, 219, 0.5);
-}
-
-.btnLotus {
-  background: var(--lotus);
-  color: #1a1b26;
-  box-shadow: 0 4px 15px rgba(255, 183, 197, 0.3);
-}
-
-.btnLotus:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 183, 197, 0.5);
+@keyframes scrollAnim {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }

@@ -1,77 +1,77 @@
-import { useState, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Box, Float, Html } from '@react-three/drei';
+import React, { useRef, useEffect } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-export function AlgorithmsScene() {
-  const [activeBox, setActiveBox] = useState<number | null>(null);
+// Import our sub-scenes
+import { StepLattice } from './components/StepLattice';
+import { StepOptimizer } from './components/StepOptimizer';
+import { StepExecution } from './components/StepExecution';
+import { StepPostProcess } from './components/StepPostProcess';
+import { TaskScheduleScene } from './components/TaskScheduleScene';
+import { TrafficScene } from './components/TrafficScene';
 
-  return (
-    <group>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-        <ClassicalBox 
-          position={[-3, 0, 0]} 
-          label="Classical Filter" 
-          active={activeBox === 0}
-          onClick={() => setActiveBox(0)}
-        />
-        <ClassicalBox 
-          position={[3, 0, 0]} 
-          label="Quantum Oracle" 
-          active={activeBox === 1}
-          onClick={() => setActiveBox(1)}
-        />
-      </Float>
-
-      {activeBox !== null && (
-         <Html position={[0, -3, 0]} center>
-            <div style={{ 
-              background: 'rgba(0,0,0,0.8)', padding: '20px', borderRadius: '12px',
-              border: '1px solid var(--blue-0)', color: '#fff', width: '300px',
-              textAlign: 'center', pointerEvents: 'none'
-            }}>
-              {activeBox === 0 ? 
-                "Classical logic checks bits one by one. Slow and recursive." : 
-                "Quantum Oracles mark the solution in one step via phase kickback."
-              }
-            </div>
-         </Html>
-      )}
-    </group>
-  );
+interface AlgorithmsSceneProps {
+  currentStep: number;
+  phase: number;
+  trafficWeight: number;
 }
 
-function ClassicalBox({ position, label, active, onClick }: { position: [number, number, number], label: string, active: boolean, onClick: () => void }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.5;
-      if (active) {
-        meshRef.current.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
-      } else {
-        meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-      }
+export function AlgorithmsScene({ currentStep, phase, trafficWeight }: AlgorithmsSceneProps) {
+  const { camera } = useThree();
+  const targetPos = useRef(new THREE.Vector3(0, 0, 12));
+  const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
+
+  useEffect(() => {
+    // Set target positions based on phase
+    if (phase === 0) {
+      targetPos.current.set(0, 0, -currentStep * 22 + 12);
+      targetLookAt.current.set(0, 0, -currentStep * 22);
+    } else if (phase === 1) {
+      // Third-person perspective for Traffic
+      targetPos.current.set(15, 12, 12);
+      targetLookAt.current.set(0, 0, 0);
+    } else {
+      // Task schedule view (Closer and slightly lower)
+      targetPos.current.set(0, 2, 12);
+      targetLookAt.current.set(0, 0, 0);
     }
+  }, [currentStep, phase]);
+
+  useFrame(() => {
+    // Smoothly interpolate camera position
+    camera.position.lerp(targetPos.current, 0.05);
+    
+    // Smoothly interpolate camera lookAt
+    const currentLookAt = new THREE.Vector3();
+    camera.getWorldDirection(currentLookAt);
+    
+    // We don't use lerp for lookAt directly, but we can animate the target
+    camera.lookAt(targetLookAt.current);
   });
 
   return (
-    <group position={position} onClick={onClick}>
-      <Box ref={meshRef} args={[1.5, 1.5, 1.5]}>
-        <meshStandardMaterial 
-          color={active ? "var(--blue-0)" : "#333"} 
-          emissive={active ? "var(--blue-0)" : "#000"}
-          emissiveIntensity={0.5}
-        />
-      </Box>
-      <Html position={[0, 1.5, 0]} center>
-         <div style={{ color: '#fff', fontSize: '12px', whiteSpace: 'nowrap', fontWeight: 'bold' }}>
-            {label}
-         </div>
-      </Html>
+    <group>
+      {/* Base Lighting */}
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[10, 20, 10]} intensity={2.5} />
+      <pointLight position={[-10, 5, -10]} intensity={1.5} color="#5DA7DB" />
+
+      {phase === 0 && (
+        <group>
+          <group position={[0, 0, 0]}><StepLattice isActive={currentStep === 0} /></group>
+          <group position={[0, 0, -22]}><StepOptimizer isActive={currentStep === 1} /></group>
+          <group position={[0, 0, -44]}><StepExecution isActive={currentStep === 2} /></group>
+          <group position={[0, 0, -66]}><StepPostProcess isActive={currentStep === 3} /></group>
+        </group>
+      )}
+
+      {phase === 1 && (
+        <TrafficScene trafficWeight={trafficWeight} />
+      )}
+
+      {phase === 2 && (
+        <TaskScheduleScene currentStep={currentStep} />
+      )}
     </group>
   );
 }

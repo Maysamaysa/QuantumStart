@@ -20,4 +20,4 @@ export const TRANSITION_CONFIG = {
     ease: [0.4, 0, 0.2, 1],
     yOffset: -20, // Slide down from top
   }
-}
+} as const;
