@@ -1,12 +1,14 @@
 .histogram {
   margin-top: 1.5rem;
   padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.45);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(93, 167, 219, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   font-family: 'Outfit', sans-serif;
   animation: fadeIn 0.4s ease-out;
+  box-shadow: 0 4px 20px rgba(93, 167, 219, 0.08);
 }
 
 @keyframes fadeIn {
@@ -23,14 +25,17 @@
 .title {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #fff;
+  color: #1A1B26;
   letter-spacing: -0.01em;
 }
 
 .subtitle {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: #4A5568;
+  font-weight: 500;
   margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .barsContainer {
@@ -47,15 +52,16 @@
 
 .label {
   font-family: 'DM Mono', monospace;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  color: #2D3748;
+  font-weight: 700;
   width: 50px;
 }
 
 .track {
   flex: 1;
   height: 14px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(93, 167, 219, 0.1);
   border-radius: 7px;
   overflow: hidden;
   position: relative;
@@ -79,28 +85,29 @@
 
 .count {
   font-family: 'DM Mono', monospace;
-  font-size: 0.8rem;
-  color: #fff;
-  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1A1B26;
+  font-weight: 700;
 }
 
 .pct {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
-  width: 40px;
+  font-size: 0.75rem;
+  color: #4A5568;
+  font-weight: 600;
+  width: 45px;
   text-align: right;
 }
 
 .footer {
   margin-top: 1.5rem;
   padding-top: 1.2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.5;
+  border-top: 1px solid rgba(93, 167, 219, 0.15);
+  font-size: 0.8rem;
+  color: #4A5568;
+  line-height: 1.6;
 }
 
 .footer strong {
   color: #5DA7DB;
-  font-weight: 700;
+  font-weight: 800;
 }
