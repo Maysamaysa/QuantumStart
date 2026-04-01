@@ -12,6 +12,7 @@
   overflow: hidden;
   font-family: 'Inter', system-ui, sans-serif;
   color: #1A1B26;
+  pointer-events: none;
 }
 
 /* ---------- Canvas Shell ---------- */
