@@ -4,7 +4,16 @@ import type { Complex } from './stateVector';
 import { add, mul } from './stateVector';
 import { gateMatrices, getCNOTMatrix, getCZMatrix } from './gates';
 import type { Matrix2x2 } from './gates';
-import { initialState } from './stateVector';
+import { initialState, normSq, scale } from './stateVector';
+
+/**
+ * Simple seeded random for measurement stability.
+ * Returns a value in [0, 1) based on a seed (e.g. gate index).
+ */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
 
 /**
  * Apply a 2x2 single-qubit gate to the state vector.
@@ -77,13 +86,62 @@ export function applyTwoQubitGate(
 }
 
 /**
+ * Apply a measurement to a qubit.
+ * Causes the state vector to collapse based on probabilities.
+ */
+export function applyMeasurement(
+  state: Complex[],
+  _nQubits: number,
+  qubitIndex: number,
+  gateIndex: number
+): Complex[] {
+  const bit = 1 << qubitIndex;
+  
+  // 1. Calculate probability of being in state |1> at this qubit
+  let prob1 = 0;
+  for (let i = 0; i < state.length; i++) {
+    if ((i & bit) !== 0) {
+      prob1 += normSq(state[i]);
+    }
+  }
+
+  // 2. Decide outcome (0 or 1) using seeded random for UI stability
+  const outcome = seededRandom(gateIndex + 42) < prob1 ? 1 : 0;
+
+  // 3. Collapse state vector
+  const newState = state.map((amp, i) => {
+    const bitValue = (i & bit) !== 0 ? 1 : 0;
+    return bitValue === outcome ? { ...amp } : { re: 0, im: 0 };
+  });
+
+  // 4. Re-normalize
+  const newTotalProb = outcome === 1 ? prob1 : 1 - prob1;
+  if (newTotalProb > 1e-15) {
+    const normalizationFactor = 1 / Math.sqrt(newTotalProb);
+    for (let i = 0; i < newState.length; i++) {
+      newState[i] = scale(normalizationFactor, newState[i]);
+    }
+  } else {
+    // Edge case: if probability is effectively zero, just return initial state or something safe
+    return state;
+  }
+
+  return newState;
+}
+
+/**
  * Apply one gate to the state vector. Returns a new state (does not mutate).
+ * gateIndex is used for stable measurement outcomes.
  */
 export function applyGate(
   state: Complex[],
   nQubits: number,
-  gate: Gate
+  gate: Gate,
+  gateIndex: number = 0
 ): Complex[] {
+  if (gate.type === 'Measure') {
+    return applyMeasurement(state, nQubits, gate.targets[0], gateIndex);
+  }
   if (isTwoQubitGate(gate.type)) {
     const control = gate.controls?.[0] ?? gate.targets[0];
     const target = gate.targets[0];
@@ -111,7 +169,7 @@ export function getStateAfterStep(
   if (n === 0 || stepIndex < 0) return state;
   const last = Math.min(stepIndex, n - 1);
   for (let k = 0; k <= last; k++) {
-    state = applyGate(state, qubitCount, circuit[k]);
+    state = applyGate(state, qubitCount, circuit[k], k);
   }
   return state;
 }

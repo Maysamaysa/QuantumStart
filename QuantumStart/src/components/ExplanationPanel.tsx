@@ -2,6 +2,9 @@ import type { Circuit } from '../lib/circuit/types';
 import type { Complex } from '../lib/simulator/stateVector';
 import { explainGate } from '../lib/explanations/gateExplanations';
 import { explainState } from '../lib/explanations/stateExplanations';
+import { sampleState } from '../lib/simulator/stateVector';
+import { MeasurementHistogram } from './MeasurementHistogram';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './ExplanationPanel.module.css';
 
 export interface ExplanationPanelProps {
@@ -15,6 +18,19 @@ export function ExplanationPanel({
   stepIndex,
   state,
 }: ExplanationPanelProps) {
+  const [counts, setCounts] = useState<Record<string, number> | null>(null);
+  const SHOTS = 1000;
+
+  // Reset experimental results if state or circuit changes
+  useEffect(() => {
+    setCounts(null);
+  }, [state, circuit.length, stepIndex]);
+
+  const handleRunExperiment = useCallback(() => {
+    const results = sampleState(state, SHOTS);
+    setCounts(results);
+  }, [state]);
+
   const stateExplanation = explainState(state);
   const gateExplanation =
     stepIndex >= 0 &&
@@ -36,6 +52,28 @@ export function ExplanationPanel({
           <p className={styles.text}>{gateExplanation}</p>
         </div>
       )}
+
+      {/* Experimental Measurement Section */}
+      <div className={styles.section} style={{ marginTop: '2rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <span className={styles.label}>Measurement Lab</span>
+          <button 
+            type="button" 
+            className={styles.experimentBtn}
+            onClick={handleRunExperiment}
+          >
+            🧪 Run 1,000 Shots
+          </button>
+        </div>
+        
+        {counts ? (
+          <MeasurementHistogram counts={counts} totalShots={SHOTS} />
+        ) : (
+          <p className={styles.text} style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+            Run an experiment to see the statistical distribution of measurement outcomes for the current state.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

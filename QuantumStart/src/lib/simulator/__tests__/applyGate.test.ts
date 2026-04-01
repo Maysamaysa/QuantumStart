@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applySingleQubitGate, applyTwoQubitGate, getStateAfterStep } from '../applyGate';
+import { applySingleQubitGate, applyTwoQubitGate, applyGate, getStateAfterStep } from '../applyGate';
 import { initialState, normSq } from '../stateVector';
 import { gateMatrices, getCNOTMatrix } from '../gates';
 import type { Gate, Circuit } from '../../circuit/types';
@@ -64,6 +64,39 @@ describe('Quantum Simulator Logic', () => {
         expect(nextState[1].re).toBe(1);
         expect(nextState[3].re).toBe(0);
       });
+  });
+
+  describe('applyMeasurement', () => {
+    it('collapses a superposition state |+> to a basis state', () => {
+      // Start in |+> = 1/sqrt(2)(|0> + |1>)
+      let state = initialState(1);
+      state = applySingleQubitGate(state, 1, 0, gateMatrices.H);
+      
+      // Measure qubit 0
+      const collapsed = applyGate(state, 1, { type: 'Measure', targets: [0] }, 0);
+      
+      // Should be either |0> or |1>
+      const prob0 = normSq(collapsed[0]);
+      const prob1 = normSq(collapsed[1]);
+      
+      // One must be 1, the other 0
+      expect(prob0 + prob1).toBeCloseTo(1, 10);
+      expect([0, 1]).toContain(Math.round(prob0));
+      expect([0, 1]).toContain(Math.round(prob1));
+      expect(Math.round(prob0) + Math.round(prob1)).toBe(1);
+    });
+
+    it('is stable across multiple calls with the same gateIndex', () => {
+        let state = initialState(1);
+        state = applySingleQubitGate(state, 1, 0, gateMatrices.H);
+        
+        const gate = { type: 'Measure' as const, targets: [0] };
+        const res1 = applyGate(state, 1, gate, 7);
+        const res2 = applyGate(state, 1, gate, 7);
+        
+        expect(res1[0].re).toBe(res2[0].re);
+        expect(res1[1].re).toBe(res2[1].re);
+    });
   });
 
   describe('getStateAfterStep (System Integration)', () => {

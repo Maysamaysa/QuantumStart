@@ -37,3 +37,27 @@
   line-height: 1.6;
   color: var(--bg-space);
 }
+
+.experimentBtn {
+  padding: 0.4rem 0.8rem;
+  background: linear-gradient(135deg, rgba(93, 167, 219, 0.2), rgba(142, 84, 233, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.experimentBtn:hover {
+  background: linear-gradient(135deg, rgba(93, 167, 219, 0.3), rgba(142, 84, 233, 0.3));
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(93, 167, 219, 0.2);
+}
+
+.experimentBtn:active {
+  transform: translateY(0);
+}

@@ -93,3 +93,35 @@ function formatImag(im: number): string {
 export function getProbabilities(state: Complex[]): number[] {
   return state.map((z) => normSq(z));
 }
+
+/**
+ * Sample the state vector N times (shots).
+ * Returns a record of basis state bitstrings -> counts.
+ */
+export function sampleState(state: Complex[], shots: number): Record<string, number> {
+  const probs = getProbabilities(state);
+  const n = Math.log2(state.length);
+  const counts: Record<string, number> = {};
+
+  for (let i = 0; i < shots; i++) {
+    const r = Math.random();
+    let cumulative = 0;
+    let found = false;
+    for (let j = 0; j < probs.length; j++) {
+      cumulative += probs[j];
+      if (r <= cumulative + 1e-10) {
+        const bitstring = j.toString(2).padStart(n, '0');
+        counts[bitstring] = (counts[bitstring] || 0) + 1;
+        found = true;
+        break;
+      }
+    }
+    // Fallback for floating point edge cases
+    if (!found) {
+        const bitstring = (probs.length - 1).toString(2).padStart(n, '0');
+        counts[bitstring] = (counts[bitstring] || 0) + 1;
+    }
+  }
+
+  return counts;
+}

@@ -29,7 +29,7 @@ export interface CircuitBuilderProps {
 }
 
 function parseGateType(type: string, targetQubit: number, qubitCount: number): Gate | null {
-  if (['H', 'X', 'Y', 'Z', 'S', 'T'].includes(type)) {
+  if (['H', 'X', 'Y', 'Z', 'S', 'T', 'Measure'].includes(type)) {
     return singleQubitGate(type as SingleQubitGateType, targetQubit);
   }
   if (type === 'CNOT' || type === 'CZ') {
