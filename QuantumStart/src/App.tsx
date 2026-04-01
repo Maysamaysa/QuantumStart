@@ -138,7 +138,7 @@ function AppShell() {
 
       {/* Layer 1: page content — pointer-events: none at higher level is dangerous, 
           using 'auto' here and handling it per-page. */}
-      <div style={{ position: 'relative', zIndex: 1, width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', zIndex: 1, width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'none' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
