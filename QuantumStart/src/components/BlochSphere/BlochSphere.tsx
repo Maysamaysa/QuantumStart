@@ -1,6 +1,7 @@
-import { useRef, useMemo, useState, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useRef, useMemo, useState, Suspense, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Sphere, Line, Text, OrbitControls } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 import type { Complex } from '../../lib/simulator/stateVector';
 import { stateToBlochVector } from '../../lib/simulator/bloch';
@@ -54,15 +55,15 @@ function AnimatedArrow({ bloch }: { bloch: { x: number; y: number; z: number; le
       {/* Projections to equatorial plane */}
       <Line
         points={[[points[1][0], 0, points[1][2]], points[1]]}
-        color="#ffffff"
+        color="#000000"
         lineWidth={1}
         transparent
-        opacity={0.3}
+        opacity={0.2}
         dashed
       />
       <mesh position={[points[1][0], 0, points[1][2]]}>
         <sphereGeometry args={[0.04]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.4} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.25} />
       </mesh>
     </group>
   );
@@ -87,7 +88,7 @@ function DetailedScene({
       
       {/* The Central Sphere (Invisible depth filler) */}
       <Sphere args={[SPHERE_RADIUS, 32, 24]}>
-        <meshBasicMaterial transparent opacity={0.06} color="#ffffff" depthWrite={false} />
+        <meshBasicMaterial transparent opacity={0.04} color="#000000" depthWrite={false} />
       </Sphere>
 
       {/* Lat/Lon Cage (Visual) */}
@@ -104,10 +105,10 @@ function DetailedScene({
                 const y = Math.sin(a) * SPHERE_RADIUS;
                 return [x * Math.cos(angle), y, x * Math.sin(angle)];
               })} 
-              color="#ffffff" 
+              color="#000000" 
               lineWidth={1} 
               transparent 
-              opacity={0.15} 
+              opacity={0.08} 
             />
           );
         })}
@@ -128,31 +129,53 @@ function DetailedScene({
       {/* AXES with Labels */}
       {/* Z Axis (|0> to |1>) */}
       <group>
-        <Line points={[[0, -SPHERE_RADIUS * 1.25, 0], [0, SPHERE_RADIUS * 1.25, 0]]} color="#ffffff" lineWidth={2} transparent opacity={0.4} />
-        <Text position={[0, SPHERE_RADIUS * 1.5, 0]} fontSize={0.25} color="#ffffff" fontWeight="bold">|0⟩</Text>
-        <Text position={[0, -SPHERE_RADIUS * 1.5, 0]} fontSize={0.25} color="#ffffff" fontWeight="bold">|1⟩</Text>
+        <Line points={[[0, -SPHERE_RADIUS * 1.25, 0], [0, SPHERE_RADIUS * 1.25, 0]]} color="#000000" lineWidth={1.5} transparent opacity={0.3} />
+        <Text position={[0, SPHERE_RADIUS * 1.5, 0]} fontSize={0.25} color="#1A1B26" fontWeight="bold">|0⟩</Text>
+        <Text position={[0, -SPHERE_RADIUS * 1.5, 0]} fontSize={0.25} color="#1A1B26" fontWeight="bold">|1⟩</Text>
         <mesh position={[0, SPHERE_RADIUS, 0]}><sphereGeometry args={[0.07]} /><meshBasicMaterial color="#5DA7DB" /></mesh>
         <mesh position={[0, -SPHERE_RADIUS, 0]}><sphereGeometry args={[0.07]} /><meshBasicMaterial color="#FFB7C5" /></mesh>
       </group>
 
       {/* X Axis (|+> to |->) */}
       <group>
-        <Line points={[[-SPHERE_RADIUS * 1.25, 0, 0], [SPHERE_RADIUS * 1.25, 0, 0]]} color="#ff6666" lineWidth={2} transparent opacity={0.4} />
-        <Text position={[SPHERE_RADIUS * 1.6, 0.1, 0]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|+⟩</Text>
-        <Text position={[-SPHERE_RADIUS * 1.6, 0.1, 0]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|-⟩</Text>
+        <Line points={[[-SPHERE_RADIUS * 1.25, 0, 0], [SPHERE_RADIUS * 1.25, 0, 0]]} color="#ff3333" lineWidth={1.5} transparent opacity={0.35} />
+        <Text position={[SPHERE_RADIUS * 1.6, 0.1, 0]} fontSize={0.2} color="#1A1B26" fontWeight="bold">|+⟩</Text>
+        <Text position={[-SPHERE_RADIUS * 1.6, 0.1, 0]} fontSize={0.2} color="#1A1B26" fontWeight="bold">|-⟩</Text>
       </group>
 
       {/* Y Axis (|i> to |-i>) */}
       <group>
-        <Line points={[[0, 0, -SPHERE_RADIUS * 1.25], [0, 0, SPHERE_RADIUS * 1.25]]} color="#66ff66" lineWidth={2} transparent opacity={0.4} />
-        <Text position={[0.1, 0.1, SPHERE_RADIUS * 1.6]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|i⟩</Text>
-        <Text position={[0.1, 0.1, -SPHERE_RADIUS * 1.6]} fontSize={0.2} color="#5DA7DB" fontWeight="bold">|-i⟩</Text>
+        <Line points={[[0, 0, -SPHERE_RADIUS * 1.25], [0, 0, SPHERE_RADIUS * 1.25]]} color="#00aa00" lineWidth={1.5} transparent opacity={0.35} />
+        <Text position={[0.1, 0.1, SPHERE_RADIUS * 1.6]} fontSize={0.2} color="#1A1B26" fontWeight="bold">|i⟩</Text>
+        <Text position={[0.1, 0.1, -SPHERE_RADIUS * 1.6]} fontSize={0.2} color="#1A1B26" fontWeight="bold">|-i⟩</Text>
       </group>
 
       {/* The Animated Arrow */}
       <AnimatedArrow bloch={bloch} />
     </>
   );
+}
+
+/** ── Camera Sync logic ── */
+function CameraSync({ zoom, resetToggle }: { zoom: number; resetToggle: number }) {
+  const { camera } = useThree();
+  const initialPos = useMemo(() => new THREE.Vector3(2.8, 2, 2.8), []);
+
+  useEffect(() => {
+    // On reset, restore the laboratory perspective
+    camera.position.copy(initialPos);
+    camera.lookAt(0, 0, 0);
+  }, [resetToggle, camera, initialPos]);
+
+  useFrame(() => {
+    // Keep camera distance synced with the zoom state
+    const currentDist = camera.position.length();
+    if (Math.abs(currentDist - zoom) > 0.01) {
+      camera.position.setLength(zoom);
+    }
+  });
+
+  return null;
 }
 
 export interface BlochSphereProps {
@@ -170,23 +193,62 @@ export function BlochSphere({
 }: BlochSphereProps) {
   const bloch = stateToBlochVector(state, nQubits, selectedQubitIndex);
 
+  const [zoom, setZoom] = useState(4.5); // Default laboratory distance
+  const [resetToggle, setResetToggle] = useState(0);
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+
+  const handleReset = () => {
+    if (controlsRef.current) {
+      controlsRef.current.reset();
+      setZoom(4.5);
+      setResetToggle(prev => prev + 1);
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <span className={styles.label}>Bloch sphere</span>
-        <div className={styles.qubitSelector}>
-          <span className={styles.qubitLabel}>Qubit:</span>
-          {Array.from({ length: nQubits }, (_, i) => (
-            <button
-              key={i}
-              type="button"
-              className={styles.qubitBtn}
-              data-selected={selectedQubitIndex === i || undefined}
-              onClick={() => onQubitIndexChange(i)}
-            >
-              {i}
-            </button>
-          ))}
+        <div className={styles.headerTop}>
+          <span className={styles.label}>Bloch sphere</span>
+          <div className={styles.qubitSelector}>
+            <span className={styles.qubitLabel}>Qubit:</span>
+            {Array.from({ length: nQubits }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                className={styles.qubitBtn}
+                data-selected={selectedQubitIndex === i || undefined}
+                onClick={() => onQubitIndexChange(i)}
+              >
+                {i}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.controlsRow}>
+          <div className={styles.zoomControl}>
+            <span className={styles.controlIcon} title="Zoom out">🔍−</span>
+            <input 
+              type="range"
+              min="3"
+              max="10"
+              step="0.1"
+              value={zoom}
+              onChange={(e) => setZoom(parseFloat(e.target.value))}
+              className={styles.slider}
+            />
+            <span className={styles.controlIcon} title="Zoom in">🔍+</span>
+          </div>
+          
+          <button 
+            type="button" 
+            className={styles.resetBtn}
+            onClick={handleReset}
+            title="Reset to laboratory perspective"
+          >
+            Reset View 🔄
+          </button>
         </div>
       </div>
       {!bloch.isPure && (
@@ -203,13 +265,15 @@ export function BlochSphere({
               nQubits={nQubits}
               selectedQubit={selectedQubitIndex}
             />
+            <CameraSync zoom={zoom} resetToggle={resetToggle} />
           </Suspense>
           <OrbitControls 
+            ref={controlsRef}
             enableDamping 
             dampingFactor={0.1} 
             enablePan={false}
-            minDistance={4}
-            maxDistance={12}
+            minDistance={3}
+            maxDistance={10}
           />
         </Canvas>
       </div>
