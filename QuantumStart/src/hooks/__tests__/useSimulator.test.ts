@@ -1,19 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { useSimulator } from '../useSimulator'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import type { Circuit } from '../../lib/circuit/types'
-
-// Mock the core simulator logic to avoid complex matrix math in this hook test
-vi.mock('../../lib/simulator/applyGate', () => ({
-  getStateAfterStep: vi.fn((_circuit: Circuit, _qubitCount: number, stepIndex: number) => {
-    // Return a simplified state mock for testing
-    return {
-      vector: [1, 0], // |0> state
-      probabilities: [1, 0],
-      stepIndex
-    }
-  })
-}))
 
 describe('useSimulator Hook', () => {
   const mockCircuit: Circuit = [
