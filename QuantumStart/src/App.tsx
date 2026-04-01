@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation, Outlet } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
-import { Suspense } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CatProvider, useCat } from './context/CatContext'
 import { ProgressProvider } from './context/ProgressContext'
@@ -20,6 +20,58 @@ import { GatesModule } from './pages/modules/gates/GatesModule'
 import { AlgorithmsModule } from './pages/modules/algorithms/AlgorithmsModule'
 import { TRANSITION_CONFIG } from './config/transitions'
 import './App.css'
+
+// ─── TRANSITION CURTAIN ───────────────────────────────────────────────────────
+function TransitionCurtain() {
+  const location = useLocation()
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [displayLocation, setDisplayLocation] = useState(location)
+
+  useEffect(() => {
+    if (location.pathname !== displayLocation.pathname) {
+      setIsTransitioning(true)
+      const timer = setTimeout(() => {
+        setDisplayLocation(location)
+        setIsTransitioning(false)
+      }, 700) // Match duration + buffer
+      return () => clearTimeout(timer)
+    }
+  }, [location, displayLocation])
+
+  return (
+    <AnimatePresence mode="wait">
+      {isTransitioning && (
+        <motion.div
+           key="curtain"
+           initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+           animate={{ opacity: 1, backdropFilter: 'blur(28px)' }}
+           exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+           transition={{ duration: 0.5, ease: 'easeInOut' }}
+           style={{
+             position: 'fixed',
+             inset: 0,
+             zIndex: 9999,
+             background: 'rgba(10, 11, 20, 0.45)', // Glass layer
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+             pointerEvents: 'all',
+             border: '1px solid rgba(255, 255, 255, 0.1)'
+           }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ textAlign: 'center', color: '#F8F9FF', letterSpacing: '0.2em' }}
+          >
+            <div className="quantum-loader" />
+            <div style={{ marginTop: '20px', fontWeight: 600, fontSize: '0.9rem' }}>INITIALIZING STATE...</div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
 
 // ─── GLOBAL CAT CANVAS ────────────────────────────────────────────────────────
 // Fixed behind everything. Never unmounts on route changes.
@@ -84,27 +136,27 @@ function AppShell() {
       {/* Layer 0: persistent cat + starfield */}
       <CatCanvas />
 
-      {/* Layer 1: page content — pointer-events:none so clicks fall through to cat canvas. */}
-      <div style={{ position: 'relative', zIndex: 1, width: '100vw', height: '100vh', overflow: 'hidden', pointerEvents: 'none' }}>
+      {/* Layer 1: page content — pointer-events: none at higher level is dangerous, 
+          using 'auto' here and handling it per-page. */}
+      <div style={{ position: 'relative', zIndex: 1, width: '100vw', height: '100vh', overflow: 'hidden' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
             variants={{
-              initial: { opacity: 0, y: TRANSITION_CONFIG.page.yOffset },
-              animate: { opacity: 1, y: 0 },
-              exit: { opacity: 0, y: -TRANSITION_CONFIG.page.yOffset }
+              initial: { opacity: 0, scale: 0.98 },
+              animate: { opacity: 1, scale: 1 },
+              exit: { opacity: 0, scale: 1.02 }
             }}
             initial="initial"
             animate="animate"
             exit="exit"
             transition={{ 
                 duration: TRANSITION_CONFIG.page.duration, 
-                ease: TRANSITION_CONFIG.page.ease 
+                ease: TRANSITION_CONFIG.page.ease as any
             }}
             style={{
               position: 'absolute',
               inset: 0,
-              pointerEvents: 'none',
               willChange: 'transform, opacity'
             }}
           >
@@ -112,6 +164,9 @@ function AppShell() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Layer 2: Transition Overlay Curtain (highest z-index) */}
+      <TransitionCurtain />
     </>
   )
 }

@@ -8,4 +8,10 @@ export default defineConfig({
   resolve: {
     dedupe: ['three'],
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './vitest.setup.tsx',
+    css: true,
+  },
 })

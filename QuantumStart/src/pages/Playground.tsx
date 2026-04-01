@@ -31,16 +31,17 @@ function LeftPanel({
     < div className = { styles.tabBar } >
       <button
           type="button"
-  className = {`${styles.tab} ${tab === 'builder' ? styles.tabActive : ''}`
-}
-onClick = {() => setTab('builder')}
+          data-testid="tab-builder"
+          className = {`${styles.tab} ${tab === 'builder' ? styles.tabActive : ''}`}
+          onClick = {() => setTab('builder')}
         >
           ⚛ Circuit
   </button>
   < button
-type = "button"
-className = {`${styles.tab} ${tab === 'explainer' ? styles.tabActive : ''}`}
-onClick = {() => setTab('explainer')}
+          type = "button"
+          data-testid="tab-explainer"
+          className = {`${styles.tab} ${tab === 'explainer' ? styles.tabActive : ''}`}
+          onClick = {() => setTab('explainer')}
         >
           💬 Explainer
   </button>
@@ -106,7 +107,7 @@ export function Playground() {
             ease: TRANSITION_CONFIG.header.ease 
         }}
     >
-      <h1 className={ styles.topBarTitle }>
+      <h1 className={ styles.topBarTitle } data-testid="playground-title">
         Quantum < span > Playground </span>
         </h1>
         < p className = { styles.topBarSub } > Build circuits · Observe collapse </p>

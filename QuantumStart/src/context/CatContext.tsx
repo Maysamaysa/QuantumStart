@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useProgress } from './ProgressContext'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 export type QubitState = 'idle' | 'blue' | 'amber'
@@ -32,6 +33,22 @@ export function CatProvider({ children }: { children: ReactNode }) {
     const handleSetQubit = useCallback((q: QubitState) => setQubitState(q), [])
     const handleSetPosition = useCallback((p: CatPosition) => setCatPosition(p), [])
     const handleSetAwake = useCallback((a: boolean) => setAwake(a), [])
+
+    const { unlockBadge } = useProgress()
+
+    // ─── SECRET: CAT SLEEP BADGE ─────────────────────────────────────────────
+    useEffect(() => {
+        // Only track if cat is asleep
+        if (isAwake) return;
+
+        // 3 minutes (180,000 ms) of uninterrupted sleep
+        const timer = setTimeout(() => {
+            unlockBadge('catZ')
+        }, 180000)
+
+        // Reset timer if cat wakes up or component unmounts
+        return () => clearTimeout(timer)
+    }, [isAwake, unlockBadge])
 
     return (
         <CatContext.Provider value={{

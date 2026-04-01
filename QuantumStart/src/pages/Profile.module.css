@@ -11,7 +11,7 @@
 
 .header {
     max-width: 1000px;
-    margin: 0 auto 40px;
+    margin: 0 auto 16px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -55,7 +55,7 @@
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1.5fr;
-    gap: 40px;
+    gap: 20px;
 }
 
 /* ─── TRACK STATS ─── */
@@ -123,6 +123,19 @@
     font-size: 0.85rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.4);
+}
+
+.progressSection {
+    margin-bottom: 20px;
+}
+
+.progressHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* ─── QUANTUM TERRARIUM ─── */
@@ -277,8 +290,8 @@
 
 .resetZone {
     max-width: 1000px;
-    margin: 60px auto 0;
-    padding-top: 40px;
+    margin: 20px auto 0;
+    padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     text-align: center;
 }
@@ -298,4 +311,84 @@
     background: rgba(255, 50, 50, 0.1);
     color: rgba(255, 50, 50, 1);
     border-color: rgba(255, 50, 50, 0.5);
+}
+.statSubtext {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 4px;
+}
+
+.secretLink {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: #FFB7C5;
+    text-shadow: 0 0 10px rgba(255, 183, 197, 0.3);
+    transition: all 0.3s ease;
+}
+
+.secretLink:hover {
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.moduleBreakdown {
+    margin-top: 10px;
+}
+
+.moduleBreakdown h4 {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.moduleGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.moduleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.moduleName {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.trackIndicators {
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.blueDot { background: #5DA7DB; box-shadow: 0 0 8px #5DA7DB; }
+.amberDot { background: #C4955A; box-shadow: 0 0 8px #C4955A; }
+.emptyDot { background: rgba(255, 255, 255, 0.1); }
+
+.capsule {
+    width: 28px;
+    height: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.mergedCapsule {
+    background: linear-gradient(90deg, #5DA7DB 0%, #C4955A 100%);
+    box-shadow: 0 0 8px rgba(93, 167, 219, 0.5), 0 0 8px rgba(196, 149, 90, 0.5);
+}
+
+.emptyCapsule {
+    background: rgba(255, 255, 255, 0.1);
 }

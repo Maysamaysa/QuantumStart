@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
-import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import GatesScene from './GatesScene'
 import { GatesOverlay } from './GatesOverlay'
@@ -16,10 +14,9 @@ export type IntroStage = 'choice' | 'primer' | 'palette'
 
 export function GatesModule() {
     const { completeModule } = useProgress()
-    useModuleCatSetup('hidden', 'idle')
 
     const [phase, setPhase] = useState<GatePhase>('phase1_intro')
-    const { panelsVisible } = useCatNPCTransition(true)
+    const [panelsVisible] = useState(true)
 
     // Shared state for 3D and UI
     const [introStage, setIntroStage] = useState<IntroStage>('choice')

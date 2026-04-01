@@ -4,20 +4,15 @@
 
 import { useState, useCallback } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
-import { useCatNPCTransition } from '../../../hooks/useCatNPCTransition'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import BlochSphereScene from './BlochSphereScene'
 import { BlochSphereOverlay } from './BlochSphereOverlay'
 
 export function BlochSphereModule() {
     const { completeModule, unlockBadge } = useProgress()
-    useModuleCatSetup('hidden', 'amber')
-
     // Linear steps: 1 to 5, then 'sandbox', then 'quiz', then 'complete'
     const [step, setStep] = useState<number | 'sandbox' | 'quiz' | 'complete'>(1)
-    const [catSettled, setCatSettled] = useState(false)
-    const { panelsVisible } = useCatNPCTransition(catSettled)
+    const [panelsVisible] = useState(true)
 
     // Bloch state: theta (0 to PI), phi (0 to 2PI)
     const [theta, setTheta] = useState(0)
@@ -29,8 +24,6 @@ export function BlochSphereModule() {
     const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null)
     const [showParticles, setShowParticles] = useState(false)
     const [catRetreat, setCatRetreat] = useState(false)
-
-    const handleCatSettled = useCallback(() => setCatSettled(true), [])
 
     const handleNextStep = useCallback(() => {
         if (typeof step === 'number') {
@@ -103,7 +96,6 @@ export function BlochSphereModule() {
                     theta={theta}
                     phi={phi}
                     onStateChange={handleStateChange}
-                    onCatSettled={handleCatSettled}
                     quizCorrect={quizCorrect}
                     showParticles={showParticles}
                     catRetreat={catRetreat}

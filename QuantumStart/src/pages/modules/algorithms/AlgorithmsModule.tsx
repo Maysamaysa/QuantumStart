@@ -5,7 +5,6 @@ import { AlgorithmsOverlay } from './AlgorithmsOverlay';
 import { ExampleOverlay } from './ExampleOverlay';
 import { TrafficOverlay } from './TrafficOverlay';
 import { useProgress } from '../../../context/ProgressContext';
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup';
 import { ModuleCanvas } from '../../../components/ModuleCanvas';
 import { ModuleHeader } from '../../../components/ModuleHeader';
 
@@ -21,7 +20,6 @@ const PHASE_NAMES = ['Theory', 'Traffic Light', 'Task Schedule'];
 
 export function AlgorithmsModule() {
   const { completeModule } = useProgress();
-  useModuleCatSetup('hidden');
 
   const [phase, setPhase] = useState(0); 
   const [currentStep, setCurrentStep] = useState(0);

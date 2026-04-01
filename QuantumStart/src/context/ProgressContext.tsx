@@ -41,8 +41,34 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         return saved ? JSON.parse(saved) : INITIAL_PROGRESS
     })
 
-    // Save to localStorage whenever progress changes
+    // Save to localStorage and handle retroactive track syncing
     useEffect(() => {
+        // Quantum Healing: Auto-sync tracks for modules 3-7 if they were completed before the shortcut logic
+        const modulesToSync = ['bloch', 'measurement', 'entanglement', 'gates', 'algorithms']
+        let needsSync = false
+        const updatedTracks = { ...progress.completedTracks }
+
+        modulesToSync.forEach(id => {
+            if (progress.completedModules.includes(id)) {
+                const tracks = updatedTracks[id] || []
+                if (!tracks.includes('blue') || !tracks.includes('amber')) {
+                    updatedTracks[id] = ['blue', 'amber']
+                    needsSync = true
+                }
+            }
+        })
+
+        if (needsSync) {
+            setProgress(prev => ({
+                ...prev,
+                completedTracks: updatedTracks,
+                // Check if this newly unlocks Quantum Architect
+                unlockedBadges: prev.unlockedBadges.includes('quantum_architect') 
+                    ? prev.unlockedBadges 
+                    : prev.completedModules.length >= 7 ? [...prev.unlockedBadges, 'quantum_architect'] : prev.unlockedBadges
+            }))
+        }
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
     }, [progress])
 
@@ -64,9 +90,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 : [...prev.completedModules, moduleId]
 
             const currentTracks = prev.completedTracks[moduleId] || []
-            const newTracks = (track && !currentTracks.includes(track))
+            let newTracks = (track && !currentTracks.includes(track))
                 ? [...currentTracks, track]
                 : currentTracks
+
+            // Auto-complete both tracks for modules 3-7 (anything except qubit/superposition)
+            if (moduleId !== 'qubit' && moduleId !== 'superposition') {
+                if (!newTracks.includes('blue')) newTracks.push('blue')
+                if (!newTracks.includes('amber')) newTracks.push('amber')
+            }
 
             const nextProgress = {
                 ...prev,

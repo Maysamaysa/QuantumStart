@@ -11,7 +11,7 @@ interface BlochSphereSceneProps {
     theta: number
     phi: number
     onStateChange: (theta: number, phi: number) => void
-    onCatSettled: () => void
+    onCatSettled?: () => void
     quizCorrect: boolean | null
     showParticles: boolean
     catRetreat: boolean
@@ -25,8 +25,10 @@ export default function BlochSphereScene({
     const [isDragging, setIsDragging] = useState(false)
 
     useEffect(() => {
-        const timer = setTimeout(onCatSettled, 1000)
-        return () => clearTimeout(timer)
+        const id = setTimeout(() => {
+            if (onCatSettled) onCatSettled()
+        }, 1200)
+        return () => clearTimeout(id)
     }, [onCatSettled])
 
     const vectorPos = useMemo(() => {

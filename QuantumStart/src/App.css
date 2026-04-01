@@ -80,3 +80,19 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── QUANTUM TRANSITION LOADER ────────────────────────────────────────────── */
+.quantum-loader {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 183, 197, 0.2);
+  border-top-color: var(--accent-pink);
+  border-radius: 50%;
+  animation: quantum-spin 1s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+  box-shadow: 0 0 20px rgba(255, 183, 197, 0.3);
+}
+
+@keyframes quantum-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -4,7 +4,6 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useProgress } from '../../../context/ProgressContext'
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import QubitScene from './QubitScene'
 import { QubitOverlay } from './QubitOverlay'
@@ -12,7 +11,6 @@ import type { Phase, Track } from './QubitScene'
 
 export function QubitModule() {
     const { completeModule } = useProgress()
-    useModuleCatSetup('hidden')
 
     const [phase, setPhase] = useState<Phase>('hook')
     const [track, setTrack] = useState<Track>(null)

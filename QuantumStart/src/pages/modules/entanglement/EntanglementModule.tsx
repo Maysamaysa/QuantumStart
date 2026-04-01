@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { ACESFilmicToneMapping } from 'three'
 import { useProgress } from '../../../context/ProgressContext'
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import EntanglementScene from './EntanglementScene'
 import { EntanglementOverlay } from './EntanglementOverlay'
@@ -10,7 +9,6 @@ export type Phase = 'concept' | 'collapse' | 'sandbox' | 'quiz' | 'complete'
 
 export function EntanglementModule() {
     const { completeModule } = useProgress()
-    useModuleCatSetup('hidden')
     
     const [phase, setPhase] = useState<Phase>('concept')
     const [step, setStep] = useState(1)

@@ -3,14 +3,12 @@ import MeasurementScene from './MeasurementScene'
 import { MeasurementOverlay } from './MeasurementOverlay'
 import { useProgress } from '../../../context/ProgressContext'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
-import { useModuleCatSetup } from '../../../hooks/useModuleCatSetup'
 
 export type Phase = 'concept' | 'collapse' | 'sandbox' | 'quiz' | 'complete'
 export type Basis = 'Z' | 'X' | 'Y'
 
 export function MeasurementModule() {
     const { completeModule } = useProgress()
-    useModuleCatSetup('hidden')
     const run50IntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
     const [phase, setPhase] = useState<Phase>('concept')

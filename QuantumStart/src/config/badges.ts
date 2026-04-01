@@ -88,7 +88,16 @@ export const BADGES: Badge[] = [
         name: 'Qubit\'s Equal',
         emoji: '🐾',
         description: 'You found the secret hiding in plain sight.',
-        unlockCondition: 'Find the hidden easter egg in the 3D scene',
+        unlockCondition: 'Click the Qubits Used stat 10 times.',
+        rarity: 'Secret',
+        hidden: true
+    },
+    {
+        id: 'catZ',
+        name: 'Zzz...',
+        emoji: '💤',
+        description: 'The cat is finally at peace.',
+        unlockCondition: 'Let the cat sleep for 3 minutes without interruption.',
         rarity: 'Secret',
         hidden: true
     }
