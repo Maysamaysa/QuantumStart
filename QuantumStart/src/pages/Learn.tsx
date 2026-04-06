@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
-import React, { Suspense, useRef, useState, useEffect, useLayoutEffect, useMemo } from 'react'
+import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { Html } from '@react-three/drei'
 import styles from './Learn.module.css'
@@ -9,7 +9,7 @@ import { useCat } from '../context/CatContext'
 import { useProgress } from '../context/ProgressContext'
 import { useTypewriter } from '../hooks/useTypewriter'
 import { TRANSITION_CONFIG } from '../config/transitions'
-import { MODULE_DATA, type Track, type Module } from '../config/modules'
+import { MODULE_DATA, type Module } from '../config/modules'
 
 // ─── PROCEDURAL 3D MODELS ─────────────────────────────────────────────────────
 

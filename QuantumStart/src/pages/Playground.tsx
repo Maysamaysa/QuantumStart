@@ -10,7 +10,7 @@ import { StateDisplay } from '../components/StateDisplay';
 import { ExplanationPanel } from '../components/ExplanationPanel';
 import { Link } from 'react-router-dom';
 import { ModuleCanvas } from '../components/ModuleCanvas';
-import ProceduralBackground from '../models/procedural-background';
+
 import styles from './Playground.module.css';
 import type { UseCircuitReturn } from '../hooks/useCircuit';
 import type { UseSimulatorReturn } from '../hooks/useSimulator';

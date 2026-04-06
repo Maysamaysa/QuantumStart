@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react'
 import { ProgressProvider, useProgress } from '../ProgressContext'
 import { describe, it, expect, beforeEach } from 'vitest'
-import React from 'react'
+
 
 const TestConsumer = () => {
     const { progress, completeModule } = useProgress()

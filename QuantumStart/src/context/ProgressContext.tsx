@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { BADGES, type Badge, type Rarity } from '../config/badges'
+import { BADGES, type Badge } from '../config/badges'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
