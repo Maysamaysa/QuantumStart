@@ -4,3 +4,10 @@ export type AlgoPhase =
   | 'stage3_deutsch' 
   | 'stage4_grover_scenario' 
   | string; 
+
+export interface CircuitGate {
+  id: string;
+  type: string;
+  qubit: number;
+  slot: number;
+}

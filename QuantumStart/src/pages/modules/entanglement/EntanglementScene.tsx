@@ -1,12 +1,11 @@
 import { useRef, useState, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { Line, Sphere } from '@react-three/drei'
-import type { Phase } from './EntanglementModule'
+import { Line } from '@react-three/drei'
+
 import { MiniBlochSphere } from '../../../models/MiniBlochSphere'
 
 interface EntanglementSceneProps {
-    phase: Phase
     step: number
     isEntangled: boolean
     isMeasured: boolean
@@ -128,7 +127,7 @@ function TetherLine({ getPosA, getPosB, isEntangled, isMeasured }: any) {
 }
 
 export default function EntanglementScene({ 
-    phase, isEntangled, isMeasured, outcome, qubitA, setQubitA, qubitB, setQubitB 
+    isEntangled, isMeasured, outcome, qubitA, setQubitA, qubitB, setQubitB 
 }: EntanglementSceneProps) {
 
     useEffect(() => {

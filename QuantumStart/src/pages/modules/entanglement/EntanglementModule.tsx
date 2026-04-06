@@ -115,7 +115,6 @@ export function EntanglementModule() {
                 <ambientLight intensity={1.2} />
                 <directionalLight position={[5, 5, 5]} intensity={1.8} />
                 <EntanglementScene 
-                    phase={phase} 
                     step={step} 
                     isEntangled={isEntangled}
                     isMeasured={isMeasured}

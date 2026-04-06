@@ -6,7 +6,7 @@ export interface AlgorithmsOverlayProps {
   onStepChange: (step: number) => void;
 }
 
-export function AlgorithmsOverlay({ currentStep, onStepChange }: AlgorithmsOverlayProps): JSX.Element {
+export function AlgorithmsOverlay({ currentStep, onStepChange }: AlgorithmsOverlayProps) {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -210,7 +210,7 @@ export function ExampleOverlay({ currentStep, onStepChange, onReset }: ExampleOv
               {TASKS.map(task => (
                 <div key={task} className={styles.gridRow}>
                   <div className={styles.taskLabel}>Task {task}</div>
-                  {SLOTS.map((s, slotIdx) => (
+                  {SLOTS.map((_s, slotIdx) => (
                     <button 
                       key={slotIdx}
                       className={`${styles.gridCell} ${manualState[task] === slotIdx ? styles.gridCellActive : ''}`}

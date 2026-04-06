@@ -13,7 +13,6 @@ export function StepExecution({ isActive }: { isActive?: boolean }) {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (groupRef.current) {
-      const targetEmissive = isActive ? 1.0 : 0.0;
 
       groupRef.current.children.forEach(child => {
         const mesh = child as THREE.Mesh;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const FINAL_QUIZ = [
     { q: "Which gate flips a qubit from |0⟩ to |1⟩?", opts: ["H", "Z", "X", "Y"], ans: 2 },

@@ -93,6 +93,7 @@ export default function PortalCanvas2D() {
 
         // ─── DRAW GATE ─────────────────────────────
         function drawGate(x: number, y: number, w: number, h: number, borderColor: string, accentColor: string, label: string, sublabel: string, sublabelColor: string) {
+            if (!ctx) return
             const barH = 7
             const rr = 4
             ctx.fillStyle = BG_CARD

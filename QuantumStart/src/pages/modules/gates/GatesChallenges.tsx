@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { applyGate1Q, formatStateString, INITIAL_STATE, stateToBloch } from './gateLogic'
-import type { State1Q, State2Q } from './gateLogic'
+import type { State1Q } from './gateLogic'
 import { GATES as MATH_GATES } from '../../../config/gates'
 
 const GATE_COLORS: Record<string, { color: string, borderColor: string }> = {
@@ -139,7 +139,6 @@ export default function GatesChallenges(props: GatesChallengesProps) {
             animRef.current += 0.05
             const pulse = (Math.sin(animRef.current) + 1) / 2
 
-            const cx = w / 2
             const cy = h / 2
             const isDual = challengeIdx === 2
             
@@ -177,7 +176,7 @@ export default function GatesChallenges(props: GatesChallengesProps) {
             const gateBoxSize = 40
             let currentX = wireStartX + 40
             
-            appliedGates.forEach((item, i) => {
+            appliedGates.forEach((item, _i) => {
                 const colors = GATE_COLORS[item.gate] || { color: '#ffffff', borderColor: '#ffffff' }
                 
                 if (item.gate === 'CNOT') {

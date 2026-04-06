@@ -5,7 +5,7 @@
  * Two qubits: [00_r, 00_i, 01_r, 01_i, 10_r, 10_i, 11_r, 11_i]
  */
 
-import { GATES } from '../../../config/gates';
+
 
 export type Complex = [number, number]; // [real, imag]
 export type State1Q = [number, number, number, number]; // [a_r, a_i, b_r, b_i]
