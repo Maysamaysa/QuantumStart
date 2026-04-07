@@ -4,7 +4,7 @@ import { explainGate } from '../lib/explanations/gateExplanations';
 import { explainState } from '../lib/explanations/stateExplanations';
 import { runShots } from '../lib/simulator/shotRunner';
 import { MeasurementHistogram } from './MeasurementHistogram';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import styles from './ExplanationPanel.module.css';
 
 export interface ExplanationPanelProps {

@@ -4,11 +4,11 @@
  */
 
 import { useState, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTypewriter } from '../../../hooks/useTypewriter'
 import styles from './QubitOverlay.module.css'
 import type { Track, Phase } from './QubitScene'
 import { ModuleHeader } from '../../../components/ModuleHeader'
+import { CompletionCard } from '../../../components/Quiz/CompletionCard'
 
 // ─── LESSON CONTENT ───────────────────────────────────────────────────────────
 const BLUE_PANELS = [
@@ -325,12 +325,12 @@ function QuizPanel({ track, panelsVisible, onComplete, onAllCorrect, sphereClick
             {currentQ.isObserver && !answered && <div className={styles.observerPrompt}><span className={styles.eyeIcon}>👁️</span> Interact with the correct model in the scene to answer.</div>}
             {currentQ.isObserver && observerResult !== null && (
                 <div className={`${styles.quizFeedback} ${observerResult ? styles.feedbackCorrect : styles.feedbackWrong}`}>
-                    {observerResult ? "✓ Correct! Notice how the qubit's paths overlap." : "✗ That's the classical bit. Try the one with multiple paths!"}
+                    {observerResult ? "✦ The universe and I agree — you've found the superposition." : "↻ That's the classical bit. The qubit is the one with overlapping paths!"}
                 </div>
             )}
             {!currentQ.isObserver && answered && (
                 <div className={`${styles.quizFeedback} ${isCorrect ? styles.feedbackCorrect : styles.feedbackWrong}`}>
-                    {isCorrect ? "✓ Masterfully observed. The quantum world reveals its secrets." : "✗ A temporary decoherence! Let's examine the reality again."}
+                    {isCorrect ? "✦ Beautifully observed — the wave function collapsed in your favor." : "↻ A momentary decoherence — the universe invites you to look again."}
                 </div>
             )}
             {showExplanation && <div className={styles.explanationBox}><span className={styles.bookIcon}>📖</span> {currentQ.explanation} </div>}
@@ -341,18 +341,18 @@ function QuizPanel({ track, panelsVisible, onComplete, onAllCorrect, sphereClick
 
 // ─── COMPLETION PANEL ──────────────────────────────────────────────────────────
 function CompletionPanel({ track, panelsVisible }: { track: Track; panelsVisible: boolean }) {
-    const navigate = useNavigate()
     const badge = track === 'amber'
-        ? { emoji: '🟡', label: 'Quantum Analyst', color: '#C4955A' }
-        : { emoji: '🔵', label: 'Quantum Explorer', color: '#5DA7DB' }
+        ? { emoji: '🟡', label: 'Quantum Analyst' }
+        : { emoji: '🔵', label: 'Quantum Explorer' }
     return (
-        <div className={`${styles.panel} ${styles.completionPanel} ${panelsVisible ? styles.panelVisible : ''}`}>
-            <div className={styles.badgeGlow}>{badge.emoji}</div>
-            <h2 className={styles.badgeName}>{badge.label} Unlocked</h2>
-            <p className={styles.badgeSubtitle} style={{ color: badge.color }}>You've mastered the fundamentals of the Qubit.</p>
-            <button className={styles.continueBtn} onClick={() => navigate('/learn')} id="completion-continue-btn">
-                Return to Modules
-            </button>
+        <div className={`${styles.panel} ${styles.completionPanel} ${panelsVisible ? styles.panelVisible : ''}`} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <CompletionCard
+                emoji={badge.emoji}
+                badgeName={`${badge.label} Unlocked`}
+                subtitle="You've mastered the fundamentals of the Qubit."
+                nextRoute="/learn/superposition"
+                nextLabel="Next: Superposition →"
+            />
         </div>
     )
 }

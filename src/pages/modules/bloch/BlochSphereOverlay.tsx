@@ -2,9 +2,11 @@
  * BlochSphereOverlay.tsx — HTML panels for Module 3 "Bloch Sphere"
  */
 
-import { useNavigate } from 'react-router-dom'
 import styles from './BlochSphereOverlay.module.css'
 import { ModuleHeader } from '../../../components/ModuleHeader'
+import { QuizCard } from '../../../components/Quiz/QuizCard'
+import { CompletionCard } from '../../../components/Quiz/CompletionCard'
+import type { QuizQuestion } from '../../../components/Quiz/QuizCard'
 
 const STEPS = [
     {
@@ -34,20 +36,42 @@ const STEPS = [
     }
 ]
 
-const QUIZ = {
-    question: "What state is represented by the South Pole (θ = π)?",
-    answers: [
-        { label: "A) |0⟩", correct: false },
-        { label: "B) |1⟩", correct: true },
-        { label: "C) Superposition", correct: false },
-        { label: "D) The Cat", correct: false },
-    ]
-}
+const QUIZ: QuizQuestion[] = [
+    {
+        question: "What state is represented by the South Pole (θ = π)?",
+        answers: [
+            { label: "A) |0⟩", correct: false },
+            { label: "B) |1⟩", correct: true },
+            { label: "C) Superposition", correct: false },
+            { label: "D) Phase shift", correct: false },
+        ],
+        explanation: "The South Pole represents the |1⟩ state. Moving the state vector all the way down (θ = π) means the qubit is entirely in state |1⟩."
+    },
+    {
+        question: "What does the phase angle φ affect?",
+        answers: [
+            { label: "A) The probability of measuring |0⟩ or |1⟩", correct: false },
+            { label: "B) The rotation around the equator", correct: true },
+            { label: "C) The speed of the qubit", correct: false },
+            { label: "D) The number of qubits", correct: false },
+        ],
+        explanation: "φ controls the phase — it rotates the state around the Z-axis (equator) without changing measurement probabilities. Phase is invisible to single measurements but crucial for interference."
+    },
+    {
+        question: "Where on the Bloch Sphere is equal superposition?",
+        answers: [
+            { label: "A) North Pole", correct: false },
+            { label: "B) South Pole", correct: false },
+            { label: "C) On the equator", correct: true },
+            { label: "D) Inside the sphere", correct: false },
+        ],
+        explanation: "Equal superposition (50% chance of |0⟩ and 50% chance of |1⟩) occurs when θ = π/2, which is the equator of the Bloch Sphere."
+    }
+]
 
 export function BlochSphereOverlay({
     step, theta, phi, onNext, onBack, onQuizResult, onStateChange
 }: any) {
-    const navigate = useNavigate()
 
     // Derived values for the dashboard
     const x = (Math.sin(theta) * Math.cos(phi)).toFixed(3)
@@ -135,19 +159,10 @@ export function BlochSphereOverlay({
                         ) : (
                             <>
                                 <span className={styles.stepText}>Final Challenge</span>
-                                <h2 className={styles.title}>Knowledge Check</h2>
-                                <p className={styles.description}>{QUIZ.question}</p>
-                                <div style={{ display: 'grid', gap: '10px', marginTop: '10px' }}>
-                                    {QUIZ.answers.map((ans, i) => (
-                                        <button 
-                                            key={i} 
-                                            className={styles.quizOption}
-                                            onClick={() => onQuizResult(ans.correct)}
-                                        >
-                                            {ans.label}
-                                        </button>
-                                    ))}
-                                </div>
+                                <QuizCard
+                                    questions={QUIZ}
+                                    onComplete={onQuizResult}
+                                />
                             </>
                         )}
                     </div>
@@ -234,19 +249,14 @@ export function BlochSphereOverlay({
             </div>
 
             {step === 'complete' && (
-                <div className={styles.completionPanel}>
-                    <div className={styles.badgeGlow}>🔮</div>
-                    <h2 className={styles.title} style={{ fontSize: '32px' }}>Sphere Surveyor</h2>
-                    <p className={styles.description} style={{ marginBottom: '30px' }}>
-                        You've mastered the geometry of the qubit!
-                    </p>
-                    <button 
-                        className={`${styles.navBtn} ${styles.nextStepBtn}`} 
-                        style={{ width: '200px' }}
-                        onClick={() => navigate('/learn')}
-                    >
-                        Continue to Hub →
-                    </button>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 200 }}>
+                    <CompletionCard
+                        emoji="🔮"
+                        badgeName="Sphere Surveyor"
+                        subtitle="You've mastered the geometry of the qubit!"
+                        nextRoute="/learn/measurement"
+                        nextLabel="Next: Measurement →"
+                    />
                 </div>
             )}
 

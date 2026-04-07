@@ -1,6 +1,8 @@
-import { useNavigate } from 'react-router-dom'
 import styles from './EntanglementOverlay.module.css'
 import { ModuleHeader } from '../../../components/ModuleHeader'
+import { QuizCard } from '../../../components/Quiz/QuizCard'
+import { CompletionCard } from '../../../components/Quiz/CompletionCard'
+import type { QuizQuestion } from '../../../components/Quiz/QuizCard'
 
 const STEPS = {
     concept: [
@@ -34,29 +36,39 @@ const STEPS = {
     ]
 }
 
-const QUIZ_QUESTIONS = [
+const QUIZ_QUESTIONS: QuizQuestion[] = [
     {
         question: "If two qubits are entangled and you measure the first one, how long does it take for the second one to collapse?",
-        options: [
+        answers: [
             { label: "It depends how far apart they are.", correct: false },
             { label: "At the speed of light.", correct: false },
-            { label: "Instantaneously, simultaneously.", correct: true }
-        ]
+            { label: "Instantaneously, simultaneously.", correct: true },
+        ],
+        explanation: "Entangled qubits form a single quantum system. Measuring one instantly determines the other, regardless of distance. This is not communication — it's correlation."
     },
     {
         question: "When measuring our perfectly entangled qubits, is it possible to get Qubit A as |0⟩ and Qubit B as |1⟩?",
-        options: [
+        answers: [
             { label: "Yes, 50% of the time.", correct: false },
-            { label: "No, they always collapse to the exact same state.", correct: true }
-        ]
+            { label: "No, they always collapse to the exact same state.", correct: true },
+        ],
+        explanation: "In a |$\\Phi^+$⟩ Bell state, both qubits are perfectly correlated. If A is |0⟩, B must be |0⟩. If A is |1⟩, B must be |1⟩. They share one destiny."
+    },
+    {
+        question: "Can entanglement be used to send information faster than light?",
+        answers: [
+            { label: "Yes, it's instant communication.", correct: false },
+            { label: "No — the outcomes are random and require classical communication to interpret.", correct: true },
+            { label: "Only for binary messages.", correct: false },
+        ],
+        explanation: "While entanglement acts instantaneously, each individual measurement appears random. You need classical communication to compare results, which is limited by the speed of light."
     }
 ]
 
 export function EntanglementOverlay({
-    phase, step, isEntangled, isMeasured, outcome, histogram, shotsTaken, quizQuestion,
+    phase, step, isEntangled, isMeasured, outcome, histogram, shotsTaken, quizQuestion: _quizQuestion,
     onEntangle, onMeasure, onReset, onRun50, onNext, onBack, onQuizAnswer
 }: any) {
-    const navigate = useNavigate()
 
     // Derived probability values for UI
     const maxShots = Math.max(1, histogram['00'] + histogram['11'] + histogram['01'] + histogram['10'])
@@ -198,29 +210,23 @@ export function EntanglementOverlay({
 
                 {phase === 'quiz' && (
                     <div className={styles.instructionPanel}>
-                        <span className={styles.stepText}>Knowledge Check {quizQuestion}/2</span>
-                        <h2 className={styles.title}>Review</h2>
-                        <p className={styles.description}>{QUIZ_QUESTIONS[quizQuestion - 1].question}</p>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {QUIZ_QUESTIONS[quizQuestion - 1].options.map((opt, i) => (
-                                <button key={i} className={styles.quizOption} onClick={() => onQuizAnswer(opt.correct)}>
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
+                        <QuizCard
+                            questions={QUIZ_QUESTIONS}
+                            onComplete={() => onQuizAnswer(true)}
+                            onQuizResult={onQuizAnswer}
+                        />
                     </div>
                 )}
 
                 {phase === 'complete' && (
-                    <div className={styles.instructionPanel} style={{ textAlign: 'center', padding: '40px 20px' }}>
-                        <div style={{ fontSize: '60px', marginBottom: '20px' }}>🔗</div>
-                        <h2 className={styles.title}>Entanglement Unlocked</h2>
-                        <p className={styles.description}>You've mastered the spooky action! The universe is truly connected.</p>
-                        
-                        <button className={styles.measureBtn} style={{ marginTop: '20px' }} onClick={() => navigate('/learn/gates')}>
-                            Next Module →
-                        </button>
+                    <div style={{ padding: '20px' }}>
+                        <CompletionCard
+                            emoji="🔗"
+                            badgeName="Entanglement Unlocked"
+                            subtitle="You've mastered the spooky action! The universe is truly connected."
+                            nextRoute="/learn/gates"
+                            nextLabel="Next: Quantum Gates →"
+                        />
                     </div>
                 )}
             </div>

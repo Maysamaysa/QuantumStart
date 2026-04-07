@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { Circuit } from '../lib/circuit/types';
 import { getStateAfterStep } from '../lib/simulator/applyGate';
 

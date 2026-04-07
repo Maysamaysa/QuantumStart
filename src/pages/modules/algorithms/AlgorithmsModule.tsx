@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import styles from './AlgorithmsOverlay.module.css';
 import { AlgorithmsScene } from './AlgorithmsScene';
 import { AlgorithmsOverlay } from './AlgorithmsOverlay';

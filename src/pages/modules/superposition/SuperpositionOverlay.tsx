@@ -3,11 +3,13 @@
  */
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTypewriter } from '../../../hooks/useTypewriter'
 import styles from './SuperpositionOverlay.module.css'
 import type { Track, Phase } from './SuperpositionScene'
 import { ModuleHeader } from '../../../components/ModuleHeader'
+import { QuizCard } from '../../../components/Quiz/QuizCard'
+import { CompletionCard } from '../../../components/Quiz/CompletionCard'
+import type { QuizQuestion } from '../../../components/Quiz/QuizCard'
 
 const BLUE_PANELS = [
     { text: "Superposition is like a wave in a pool. It’s not in one spot; it’s spread across possibilities.", hint: "Watch the Hadamard machine pulsate." },
@@ -21,17 +23,36 @@ const AMBER_PANELS = [
     { text: "Interference allows us to manipulate these amplitudes so that wrong answers cancel out.", math: null, hint: "The wave field represents the state's complex phase." },
 ]
 
-const QUIZ_QUESTIONS = [
+const QUIZ_QUESTIONS: QuizQuestion[] = [
     {
         question: "What does the Hadamard gate do to a qubit in state |0⟩?",
         answers: [
             { label: "A) Flips it to |1⟩", correct: false },
-            { label: "B) Places it in superposition", correct: true },
+            { label: "B) Places it in equal superposition", correct: true },
             { label: "C) Measures it", correct: false },
-            { label: "D) Erases it", correct: false },
+            { label: "D) Erases the qubit entirely", correct: false },
         ],
         explanation: "The Hadamard gate is the primary tool for creating superposition, turning a definite state into an equal mixture of |0⟩ and |1⟩.",
-        tracks: ['blue', 'amber'],
+    },
+    {
+        question: "What happens if you apply the Hadamard gate twice to |0⟩?",
+        answers: [
+            { label: "A) It stays in superposition", correct: false },
+            { label: "B) It becomes |1⟩", correct: false },
+            { label: "C) It returns to |0⟩", correct: true },
+            { label: "D) It collapses randomly", correct: false },
+        ],
+        explanation: "Applying H twice is like going through a superposition and then interfering back. H·H = I (identity). The qubit returns to its original state.",
+    },
+    {
+        question: "In quantum computing, superposition means a qubit is:",
+        answers: [
+            { label: "A) Broken or unstable", correct: false },
+            { label: "B) Exactly halfway between 0 and 1", correct: false },
+            { label: "C) A mathematical combination of |0⟩ and |1⟩", correct: true },
+            { label: "D) Two qubits stacked together", correct: false },
+        ],
+        explanation: "Superposition isn't 'in between' — it's a linear combination where both states coexist with specific probability amplitudes until measured.",
     }
 ]
 
@@ -114,55 +135,15 @@ function LessonPanels({ track, panelsVisible, hasTransformed, onComplete, phase 
     )
 }
 
-function QuizPanel({ track, panelsVisible, onQuizResult, onQuizComplete }: { track: Track; panelsVisible: boolean; onQuizResult: (correct: boolean) => void; onQuizComplete: () => void }) {
-    const questions = QUIZ_QUESTIONS.filter(q => track && q.tracks.includes(track))
-    const [selected, setSelected] = useState<number | null>(null)
-    const [answered, setAnswered] = useState(false)
-    const currentQ = questions[0]
-
-    const handleAnswer = (idx: number) => {
-        if (answered) return
-        setSelected(idx)
-        setAnswered(true)
-        onQuizResult(currentQ.answers[idx].correct)
-    }
-
-    if (!track || !currentQ) return null
+function QuizPanel({ panelsVisible, onQuizResult, onQuizComplete }: { panelsVisible: boolean; onQuizResult: (correct: boolean) => void; onQuizComplete: () => void }) {
+    if (!panelsVisible) return null
     return (
-        <div className={`${styles.panel} ${styles.lessonPanel} ${panelsVisible ? styles.panelVisible : ''}`}>
-             <p style={{ fontSize: '11px', color: 'rgba(255,183,197,0.5)', marginBottom: '8px' }}>QUIZ TIME</p>
-             <p className={styles.lessonText}>{currentQ.question}</p>
-             <div style={{ display: 'grid', gap: '10px' }}>
-                {currentQ.answers.map((ans, i) => (
-                    <button 
-                        key={i} 
-                        onClick={() => handleAnswer(i)}
-                        style={{
-                            background: selected === i ? (ans.correct ? '#2d5a3f' : '#5a2d2d') : 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '10px',
-                            color: '#fff',
-                            padding: '12px',
-                            cursor: 'pointer',
-                            textAlign: 'left'
-                        }}
-                    >
-                        {ans.label}
-                    </button>
-                ))}
-             </div>
-             {answered && (
-                 <button 
-                    className={styles.nextBtn} 
-                    onClick={() => {
-                        onQuizComplete()
-                        // if we want to navigate or just finish
-                    }} 
-                    style={{ marginTop: '20px' }}
-                 >
-                    Finish →
-                 </button>
-             )}
+        <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+            <QuizCard
+                questions={QUIZ_QUESTIONS}
+                onComplete={onQuizComplete}
+                onQuizResult={onQuizResult}
+            />
         </div>
     )
 }
@@ -224,7 +205,6 @@ interface SuperpositionOverlayProps {
 export function SuperpositionOverlay({ 
     panelsVisible, track, phase, hasTransformed, hasPassedSecondGate, onTrackSelect, onLessonComplete, onCompareComplete, onQuizComplete, onQuizResult 
 }: SuperpositionOverlayProps) {
-    const navigate = useNavigate()
     const phaseIndex = phase === 'hook' ? 0 : phase === 'lesson' ? 1 : phase === 'quiz' ? 2 : 3
 
     return (
@@ -243,14 +223,17 @@ export function SuperpositionOverlay({
             )}
             {phase === 'lesson' && <LessonPanels track={track} panelsVisible={panelsVisible} hasTransformed={hasTransformed} onComplete={onLessonComplete} phase={phase} />}
             {phase === 'sandbox' && <SandboxPanel panelsVisible={panelsVisible} hasTransformed={hasTransformed} hasPassedSecondGate={hasPassedSecondGate} onCompareComplete={onCompareComplete} />}
-            {phase === 'quiz' && <QuizPanel track={track} panelsVisible={panelsVisible} onQuizResult={onQuizResult} onQuizComplete={onQuizComplete} />}
+            {phase === 'quiz' && <QuizPanel panelsVisible={panelsVisible} onQuizResult={onQuizResult} onQuizComplete={onQuizComplete} />}
             {phase === 'complete' && (
-                 <div className={`${styles.panel} ${styles.completionPanel} ${styles.panelVisible}`}>
-                    <div className={styles.badgeGlow}>🌊</div>
-                    <h2 className={styles.badgeName}>Wave Master</h2>
-                    <p style={{ color: 'rgba(255,183,197,0.7)', fontSize: '14px' }}>Module 2 Complete</p>
-                    <button className={styles.continueBtn} onClick={() => navigate('/learn')}>Return to Hub</button>
-                 </div>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 20 }}>
+                    <CompletionCard
+                        emoji="🌊"
+                        badgeName="Wave Master"
+                        subtitle="You've mastered the fundamentals of Superposition."
+                        nextRoute="/learn/measurement"
+                        nextLabel="Next: Measurement →"
+                    />
+                </div>
             )}
         </>
     )

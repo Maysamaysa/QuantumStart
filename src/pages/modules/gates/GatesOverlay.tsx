@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import styles from './GatesOverlay.module.css'
 import type { GatePhase, IntroStage } from './GatesModule'
 import { applyGate1Q } from './gateLogic'
 import { GATES } from '../../../config/gates'
 import type { State1Q } from './gateLogic'
 import { ModuleHeader } from '../../../components/ModuleHeader'
+import { CompletionCard } from '../../../components/Quiz/CompletionCard'
 
 interface GatesOverlayProps {
     panelsVisible: boolean
@@ -170,31 +170,23 @@ function Phase1Intro({ selectedGate, setAnimState, introStage, setIntroStage }: 
     )
 }
 
-// ─── Complete Summary ───
 function GatesSummary() {
-    const navigate = useNavigate()
     return (
-        <div style={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className={styles.glassPanel} style={{ maxWidth: '600px', textAlign: 'center' }}>
-                <h1 className={styles.title} style={{ fontSize: '3rem' }}>Module 4 Complete!</h1>
-                <p className={styles.subtitle}>You've mastered the Quantum Gates.</p>
-                
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', margin: '2rem 0' }}>
-                     {['H', 'X', 'Y', 'Z', 'CNOT'].map(g => (
-                         <div key={g} style={{ background: '#C1E1C1', color: '#1A1B26', padding: '0.5rem 1rem', borderRadius: '12px', fontWeight: 'bold' }}>
-                             {g} Mastered ✓
-                         </div>
-                     ))}
-                </div>
-
-                <button
-                    className={`${styles.btn} ${styles.btnPrimary}`}
-                    onClick={() => navigate('/learn')}
-                    style={{ width: 'auto', padding: '1rem 2rem', pointerEvents: 'auto' }}
-                >
-                    Return to Hub
-                </button>
+        <div style={{ pointerEvents: 'auto', width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                 {['H', 'X', 'Y', 'Z', 'CNOT'].map(g => (
+                     <div key={g} style={{ background: '#C1E1C1', color: '#1A1B26', padding: '0.4rem 0.8rem', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                         {g} ✓
+                     </div>
+                 ))}
             </div>
+            <CompletionCard
+                emoji="⚡"
+                badgeName="Gate Keeper"
+                subtitle="You've mastered all the fundamental quantum gates."
+                nextRoute="/learn/algorithms"
+                nextLabel="Next: Algorithms →"
+            />
         </div>
     )
 }

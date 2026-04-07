@@ -1,7 +1,9 @@
-import { useNavigate } from 'react-router-dom'
 import styles from './MeasurementOverlay.module.css'
 import type { Basis, Phase } from './MeasurementModule'
 import { ModuleHeader } from '../../../components/ModuleHeader'
+import { QuizCard } from '../../../components/Quiz/QuizCard'
+import { CompletionCard } from '../../../components/Quiz/CompletionCard'
+import type { QuizQuestion } from '../../../components/Quiz/QuizCard'
 
 interface Props {
     phase: Phase
@@ -27,9 +29,8 @@ interface Props {
 
 export function MeasurementOverlay({
     phase, step, theta, setTheta, phi, setPhi, isMeasured, measuredValue, basis, setBasis,
-    histogram, quizQuestion, onMeasure, onReset, onRun50, onClearHistogram, onNext, onBack, onQuizAnswer
+    histogram, quizQuestion: _quizQuestion, onMeasure, onReset, onRun50, onClearHistogram, onNext, onBack, onQuizAnswer
 }: Props) {
-    const navigate = useNavigate()
 
     const renderConcept = () => {
         const specs = [
@@ -224,37 +225,46 @@ export function MeasurementOverlay({
         )
     }
 
+    const MEASUREMENT_QUIZ: QuizQuestion[] = [
+        {
+            question: "If the state vector is exactly halfway between the North and South pole (|+⟩), what is P(0)?",
+            answers: [
+                { label: "100%", correct: false },
+                { label: "50%", correct: true },
+                { label: "0%", correct: false },
+                { label: "Depends on phase φ", correct: false },
+            ],
+            explanation: "At the equator (|+⟩), the state has equal probability amplitudes for |0⟩ and |1⟩. The Born rule gives P(0) = |⟨0|+⟩|² = 50%."
+        },
+        {
+            question: "A histogram shows 75 shots for |0⟩ and 25 shots for |1⟩. Where does the state vector likely point?",
+            answers: [
+                { label: "Closer to North Pole", correct: true },
+                { label: "Closer to South Pole", correct: false },
+                { label: "Exactly on Equator", correct: false },
+                { label: "Cannot determine", correct: false },
+            ],
+            explanation: "75% probability of |0⟩ means the state vector is tilted toward the North Pole (|0⟩). The closer to the pole, the higher that outcome's probability."
+        },
+        {
+            question: "If you prepare |0⟩ and measure in the X-basis, what do you get?",
+            answers: [
+                { label: "Always |+⟩", correct: false },
+                { label: "Always |0⟩", correct: false },
+                { label: "50% |+⟩ and 50% |-⟩", correct: true },
+                { label: "Measurement fails", correct: false },
+            ],
+            explanation: "The state |0⟩ is an equal superposition of |+⟩ and |-⟩ in the X-basis. So measuring in X gives a 50/50 split — the basis you choose changes the outcome distribution."
+        }
+    ]
+
     const renderQuiz = () => {
-        const Q = [
-            {
-                q: "If the state vector is exactly halfway between the North and South pole (|+⟩), what is P(0)?",
-                opts: [{l: "100%", c: false}, {l: "50%", c: true}, {l: "0%", c: false}, {l: "Depends on phase φ", c: false}]
-            },
-            {
-                q: "A histogram shows 75 shots for |0⟩ and 25 shots for |1⟩. Where does the state vector likely point?",
-                opts: [{l: "Closer to North Pole", c: true}, {l: "Closer to South Pole", c: false}, {l: "Exactly on Equator", c: false}, {l: "It points at the cat", c: false}]
-            },
-            {
-                q: "If you prepare |0⟩ and measure in the X-basis, what do you get?",
-                opts: [{l: "Always |+⟩", c: false}, {l: "Always |0⟩", c: false}, {l: "50% |+⟩ and 50% |-⟩", c: true}, {l: "Measurement fails", c: false}]
-            }
-        ][quizQuestion - 1]
-
-        if (!Q) return null;
-
         return (
-            <div className={styles.instructionPanel}>
-                <span className={styles.stepText}>Phase 4 — Final Challenge {quizQuestion}/3</span>
-                <h2 className={styles.title}>Knowledge Check</h2>
-                <p className={styles.description}>{Q.q}</p>
-                <div style={{ display: 'grid', gap: '10px' }}>
-                    {Q.opts.map((opt, i) => (
-                        <button key={i} className={styles.quizOption} onClick={() => onQuizAnswer(opt.c)}>
-                            {opt.l}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <QuizCard
+                questions={MEASUREMENT_QUIZ}
+                onComplete={() => onQuizAnswer(true)}
+                onQuizResult={onQuizAnswer}
+            />
         )
     }
 
@@ -279,11 +289,14 @@ export function MeasurementOverlay({
                 {phase === 'sandbox' && renderSandbox()}
                 {phase === 'quiz' && renderQuiz()}
                 {phase === 'complete' && (
-                    <div className={styles.instructionPanel}>
-                         <div style={{fontSize: 40, textAlign: 'center', marginBottom: 16}}>👁️</div>
-                         <h2 className={styles.title} style={{textAlign: 'center'}}>Wave Collapser</h2>
-                         <p className={styles.description} style={{textAlign: 'center'}}>You have mastered the irreversible act of quantum measurement.</p>
-                         <button className={styles.measureBtn} onClick={() => navigate('/learn')}>Return to Hub</button>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                        <CompletionCard
+                            emoji="👁️"
+                            badgeName="Wave Collapser"
+                            subtitle="You have mastered the irreversible act of quantum measurement."
+                            nextRoute="/learn/entanglement"
+                            nextLabel="Next: Entanglement →"
+                        />
                     </div>
                 )}
             </div>

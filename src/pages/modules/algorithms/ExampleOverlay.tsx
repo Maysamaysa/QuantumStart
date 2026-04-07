@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './ExampleOverlay.module.css';
 import { EnergyHistogram } from './components/EnergyHistogram';
+import { CompletionCard } from '../../../components/Quiz/CompletionCard';
 
 export interface ExampleOverlayProps {
   currentStep: number;
@@ -9,8 +9,7 @@ export interface ExampleOverlayProps {
   onReset: () => void;
 }
 
-export function ExampleOverlay({ currentStep, onStepChange, onReset }: ExampleOverlayProps) {
-  const navigate = useNavigate();
+export function ExampleOverlay({ currentStep, onStepChange, onReset: _onReset }: ExampleOverlayProps) {
 
   // --- STATE FOR MANUAL CHALLENGE ---
   const [manualState, setManualState] = useState<Record<string, number>>({
@@ -90,12 +89,7 @@ export function ExampleOverlay({ currentStep, onStepChange, onReset }: ExampleOv
   if (currentStep === 5) {
     return (
       <div className={styles.completionOverlay}>
-        <div className={styles.completeCard}>
-          <div className={styles.badgeGlow}>🏆</div>
-          <h1 className={styles.completeTitle}>Quantum Architect</h1>
-          <p className={styles.completeDesc}>
-            Congratulations! You've successfully built and executed a quantum algorithm to solve a real-world scheduling problem.
-          </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
           <div className={styles.statsRow}>
             <div className={styles.statItem}>
               <div className={styles.statVal}>100%</div>
@@ -106,12 +100,11 @@ export function ExampleOverlay({ currentStep, onStepChange, onReset }: ExampleOv
                <div className={styles.statLab}>Qubits Used</div>
             </div>
           </div>
-          <button className={styles.hubBtn} onClick={() => {
-            onReset();
-            navigate('/learn');
-          }}>
-            Return to Learning Hub →
-          </button>
+          <CompletionCard
+            emoji="🏆"
+            badgeName="Quantum Architect"
+            subtitle="Congratulations! You've successfully built and executed a quantum algorithm to solve a real-world scheduling problem."
+          />
         </div>
       </div>
     );
