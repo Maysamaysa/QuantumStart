@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import MeasurementScene from './MeasurementScene'
 import { MeasurementOverlay } from './MeasurementOverlay'
-import { useProgress } from '../../../context/ProgressContext'
+import { useProgress } from '../../../context/hooks'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 
 export type Phase = 'concept' | 'collapse' | 'sandbox' | 'quiz' | 'complete'

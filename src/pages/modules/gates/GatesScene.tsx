@@ -154,16 +154,18 @@ function Phase2Scene({ challengeIdx, wireState1, wireState2, isEntangled }: {
 
 
 // --- Floating Ambient Particles ---
+const generateAmbientParticles = (count: number) => Array.from({ length: count }, () => ({
+    pos: new THREE.Vector3((Math.random() - 0.5) * 22, (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 8 - 3),
+    speed: 0.15 + Math.random() * 0.4,
+    phase: Math.random() * Math.PI * 2,
+    size: 0.015 + Math.random() * 0.035
+}))
+
 function AmbientParticles() {
     const meshRef = useRef<THREE.InstancedMesh>(null)
     const COUNT = 60
     const dummy = useMemo(() => new THREE.Object3D(), [])
-    const particles = useMemo(() => Array.from({ length: COUNT }, () => ({
-        pos: new THREE.Vector3((Math.random() - 0.5) * 22, (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 8 - 3),
-        speed: 0.15 + Math.random() * 0.4,
-        phase: Math.random() * Math.PI * 2,
-        size: 0.015 + Math.random() * 0.035
-    })), [])
+    const particles = useMemo(() => generateAmbientParticles(COUNT), [])
 
     useFrame((state) => {
         if (!meshRef.current) return

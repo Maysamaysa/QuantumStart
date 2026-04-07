@@ -5,8 +5,7 @@ import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { Html } from '@react-three/drei'
 import styles from './Learn.module.css'
-import { useCat } from '../context/CatContext'
-import { useProgress } from '../context/ProgressContext'
+import { useCat, useProgress } from '../context/hooks'
 import { useTypewriter } from '../hooks/useTypewriter'
 import { TRANSITION_CONFIG } from '../config/transitions'
 import { MODULE_DATA, type Module } from '../config/modules'
@@ -134,18 +133,21 @@ function GateModel({ hovered }: { hovered: boolean }) {
     )
 }
 
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+const generateMeasurementPoints = (count: number) => {
+    const pts: [number, number, number][] = []
+    for (let i = 0; i < count; i++) {
+        const theta = Math.random() * Math.PI * 2
+        const phi = Math.random() * Math.PI
+        const r = 0.22 + Math.random() * 0.2
+        pts.push([Math.sin(phi) * Math.cos(theta) * r, Math.sin(phi) * Math.sin(theta) * r, Math.cos(phi) * r])
+    }
+    return pts
+}
+
 // Probability cloud (Measurement)
 function MeasurementModel({ hovered }: { hovered: boolean }) {
-    const points = useMemo(() => {
-        const pts: [number, number, number][] = []
-        for (let i = 0; i < 80; i++) {
-            const theta = Math.random() * Math.PI * 2
-            const phi = Math.random() * Math.PI
-            const r = 0.22 + Math.random() * 0.2
-            pts.push([Math.sin(phi) * Math.cos(theta) * r, Math.sin(phi) * Math.sin(theta) * r, Math.cos(phi) * r])
-        }
-        return pts
-    }, [])
+    const points = useMemo(() => generateMeasurementPoints(80), [])
     const groupRef = useRef<THREE.Group>(null)
     useFrame((s) => {
         if (!groupRef.current) return

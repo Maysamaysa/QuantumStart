@@ -4,10 +4,14 @@ import { getStateAfterStep } from '../lib/simulator/applyGate';
 
 export function useSimulator(circuit: Circuit, qubitCount: number) {
   const [stepIndex, setStepIndex] = useState(-1);
+  const [prevCircuitLength, setPrevCircuitLength] = useState(circuit.length);
+  const [prevQubitCount, setPrevQubitCount] = useState(qubitCount);
 
-  useEffect(() => {
+  if (circuit.length !== prevCircuitLength || qubitCount !== prevQubitCount) {
+    setPrevCircuitLength(circuit.length);
+    setPrevQubitCount(qubitCount);
     setStepIndex(-1);
-  }, [circuit.length, qubitCount]);
+  }
 
   const numSteps = circuit.length;
   const maxStepIndex = numSteps > 0 ? numSteps - 1 : -1;

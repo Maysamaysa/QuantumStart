@@ -1,25 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { BADGES, type Badge } from '../config/badges'
-
-// ─── TYPES ────────────────────────────────────────────────────────────────────
-
-export interface ProgressData {
-    completedModules: string[] // List of module IDs ('qubit', 'superposition', etc.)
-    completedTracks: Record<string, ('blue' | 'amber')[]> // moduleID -> list of tracks completed
-    unlockedBadges: string[] // List of badge IDs
-    lastPlayed: number
-    devMode?: boolean
-}
-
-interface ProgressContextValue {
-    progress: ProgressData
-    badges: Badge[]
-    completeModule: (moduleId: string, track?: 'blue' | 'amber', perfectScore?: boolean) => void
-    unlockBadge: (badgeId: string) => void
-    isModuleLocked: (moduleId: string) => boolean
-    resetProgress: () => void
-    toggleDevMode: () => void
-}
+import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { BADGES } from '../config/badges'
+import { type ProgressData, type ProgressContextValue } from './types'
 
 // ─── CONTEXT ──────────────────────────────────────────────────────────────────
 
@@ -33,42 +14,34 @@ const INITIAL_PROGRESS: ProgressData = {
     devMode: false
 }
 
-const ProgressContext = createContext<ProgressContextValue | null>(null)
+export const ProgressContext = createContext<ProgressContextValue | null>(null)
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const [progress, setProgress] = useState<ProgressData>(() => {
         const saved = localStorage.getItem(STORAGE_KEY)
-        return saved ? JSON.parse(saved) : INITIAL_PROGRESS
-    })
+        const data: ProgressData = saved ? JSON.parse(saved) : INITIAL_PROGRESS
 
-    // Save to localStorage and handle retroactive track syncing
-    useEffect(() => {
         // Quantum Healing: Auto-sync tracks for modules 3-7 if they were completed before the shortcut logic
         const modulesToSync = ['bloch', 'measurement', 'entanglement', 'gates', 'algorithms']
-        let needsSync = false
-        const updatedTracks = { ...progress.completedTracks }
-
         modulesToSync.forEach(id => {
-            if (progress.completedModules.includes(id)) {
-                const tracks = updatedTracks[id] || []
-                if (!tracks.includes('blue') || !tracks.includes('amber')) {
-                    updatedTracks[id] = ['blue', 'amber']
-                    needsSync = true
+            if (data.completedModules.includes(id)) {
+                if (!data.completedTracks[id]) data.completedTracks[id] = []
+                if (!data.completedTracks[id].includes('blue') || !data.completedTracks[id].includes('amber')) {
+                    data.completedTracks[id] = ['blue', 'amber']
                 }
             }
         })
 
-        if (needsSync) {
-            setProgress(prev => ({
-                ...prev,
-                completedTracks: updatedTracks,
-                // Check if this newly unlocks Quantum Architect
-                unlockedBadges: prev.unlockedBadges.includes('quantum_architect') 
-                    ? prev.unlockedBadges 
-                    : prev.completedModules.length >= 7 ? [...prev.unlockedBadges, 'quantum_architect'] : prev.unlockedBadges
-            }))
+        // Retroactive badge unlock
+        if (data.completedModules.length >= 7 && !data.unlockedBadges.includes('quantum_architect')) {
+            data.unlockedBadges = [...data.unlockedBadges, 'quantum_architect']
         }
 
+        return data
+    })
+
+    // Save to localStorage
+    useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
     }, [progress])
 
@@ -90,15 +63,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 : [...prev.completedModules, moduleId]
 
             const currentTracks = prev.completedTracks[moduleId] || []
-            let newTracks = (track && !currentTracks.includes(track))
+            const baseTracks = (track && !currentTracks.includes(track))
                 ? [...currentTracks, track]
                 : currentTracks
 
             // Auto-complete both tracks for modules 3-7 (anything except qubit/superposition)
-            if (moduleId !== 'qubit' && moduleId !== 'superposition') {
-                if (!newTracks.includes('blue')) newTracks.push('blue')
-                if (!newTracks.includes('amber')) newTracks.push('amber')
-            }
+            const newTracks = (moduleId !== 'qubit' && moduleId !== 'superposition')
+                ? (Array.from(new Set([...baseTracks, 'blue', 'amber'])) as ('blue' | 'amber')[])
+                : baseTracks
 
             const nextProgress = {
                 ...prev,
@@ -197,10 +169,4 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             {children}
         </ProgressContext.Provider>
     )
-}
-
-export function useProgress() {
-    const ctx = useContext(ProgressContext)
-    if (!ctx) throw new Error('useProgress must be used inside <ProgressProvider>')
-    return ctx
 }

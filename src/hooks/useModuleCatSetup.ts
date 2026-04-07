@@ -7,9 +7,9 @@
  *   useModuleCatSetup('hidden', 'amber')  // cat hidden during module
  */
 import { useEffect } from 'react'
-import { useCat } from '../context/CatContext'
+import { useCat } from '../context/hooks'
 import { TRANSITION_CONFIG } from '../config/transitions'
-import type { CatPosition, QubitState } from '../context/CatContext'
+import type { CatPosition, QubitState } from '../context/hooks'
 
 export function useModuleCatSetup(
     position: CatPosition,

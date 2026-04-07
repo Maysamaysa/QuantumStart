@@ -57,22 +57,21 @@ function Phase1Intro({ selectedGate, setAnimState, introStage, setIntroStage }: 
     }, [selectedGate])
 
     const [narrationStep, setNarrationStep] = useState(0)
+    const [prevIntroStage, setPrevIntroStage] = useState(introStage)
     const narrationTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const NARRATION = [
-        "A gate transforms information. You walk in as one thing, walk out as another.",
-        "On the left: a classical gate. Watch the orb — it enters, hits the barrier, and shatters. The original information is destroyed. There is no way back.",
-        "On the right: a quantum gate. The orb enters, transforms — notice the color and size shift — then reverses perfectly. Every quantum gate is reversible by design.",
-    ]
-
-    useEffect(() => {
+    if (introStage !== prevIntroStage) {
+        setPrevIntroStage(introStage)
         if (introStage === 'primer') {
             setNarrationStep(0)
         }
+    }
+
+    useEffect(() => {
         return () => {
             if (narrationTimer.current) clearTimeout(narrationTimer.current)
         }
-    }, [introStage])
+    }, [])
 
     return (
         <div style={{ pointerEvents: 'none', width: '100%', height: '100%', position: 'relative' }}>

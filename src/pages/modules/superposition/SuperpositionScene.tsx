@@ -11,20 +11,26 @@ export type Phase = 'hook' | 'lesson' | 'sandbox' | 'quiz' | 'complete'
 export type Track = 'blue' | 'amber' | null
 
 // ─── PARTICLE BURST ───────────────────────────────────────────────────────────
+const generateLotusParticles = (count: number) => Array.from({ length: count }, () => {
+    const theta = Math.random() * Math.PI * 2
+    const phi = Math.random() * Math.PI * 0.8
+    return { 
+        dir: new THREE.Vector3(
+            Math.sin(phi) * Math.cos(theta), 
+            Math.abs(Math.sin(phi) * Math.sin(theta)) + 0.3, 
+            Math.cos(phi)
+        ).multiplyScalar(2.5 + Math.random() * 2), 
+        size: 0.04 + Math.random() * 0.06, 
+        phase: Math.random() * Math.PI * 2 
+    }
+})
+
 function LotusParticleBurst({ active, color }: { active: boolean; color: string }) {
     const meshRef = useRef<THREE.InstancedMesh>(null)
     const progress = useRef(0)
     const running = useRef(false)
     const COUNT = 32
-    const particles = useMemo(() => Array.from({ length: COUNT }, () => {
-        const theta = Math.random() * Math.PI * 2
-        const phi = Math.random() * Math.PI * 0.8
-        return { 
-            dir: new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.abs(Math.sin(phi) * Math.sin(theta)) + 0.3, Math.cos(phi)).multiplyScalar(2.5 + Math.random() * 2), 
-            size: 0.04 + Math.random() * 0.06, 
-            phase: Math.random() * Math.PI * 2 
-        }
-    }), [])
+    const particles = useMemo(() => generateLotusParticles(COUNT), [])
     const dummy = useMemo(() => new THREE.Object3D(), [])
     const threeColor = useMemo(() => new THREE.Color(color), [color])
     useEffect(() => { if (active) { running.current = true; progress.current = 0 } }, [active])

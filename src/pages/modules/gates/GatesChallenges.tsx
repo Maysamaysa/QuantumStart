@@ -51,18 +51,20 @@ export default function GatesChallenges(props: GatesChallengesProps) {
     
     const [msg, setMsg] = useState(CHALLENGES[challengeIdx].hint)
     const [appliedGates, setAppliedGates] = useState<{ gate: string, targetQuBit: 1 | 2 }[]>([])
+    const [prevChallengeIdx, setPrevChallengeIdx] = useState(challengeIdx)
     
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const animRef = useRef(0)
 
     // Reset everything when challenge changes
-    useEffect(() => {
+    if (challengeIdx !== prevChallengeIdx) {
+        setPrevChallengeIdx(challengeIdx)
         setWireState1(INITIAL_STATE)
         setWireState2(INITIAL_STATE)
         setIsEntangled(false)
         setAppliedGates([])
         setMsg(CHALLENGES[challengeIdx].hint)
-    }, [challengeIdx, setWireState1, setWireState2, setIsEntangled])
+    }
 
     const handleApplyGate = (gate: string, targetQuBit: 1 | 2 = 1) => {
         if (gate === 'CNOT' && challengeIdx === 2) {
@@ -176,7 +178,7 @@ export default function GatesChallenges(props: GatesChallengesProps) {
             const gateBoxSize = 40
             let currentX = wireStartX + 40
             
-            appliedGates.forEach((item, _i) => {
+            appliedGates.forEach((item) => {
                 const colors = GATE_COLORS[item.gate] || { color: '#ffffff', borderColor: '#ffffff' }
                 
                 if (item.gate === 'CNOT') {

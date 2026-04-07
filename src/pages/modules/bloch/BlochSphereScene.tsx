@@ -274,8 +274,8 @@ export default function BlochSphereScene({
             {/* Particles */}
             {showParticles && (
                 <group position={vectorPos}>
-                    {Array.from({length: 40}).map((_, i) => (
-                        <mesh key={i} position={[Math.random()-0.5, Math.random()-0.5, Math.random()-0.5]}>
+                    {useMemo(() => Array.from({length: 40}, () => [Math.random()-0.5, Math.random()-0.5, Math.random()-0.5]), []).map((pos, i) => (
+                        <mesh key={i} position={pos as [number, number, number]}>
                             <sphereGeometry args={[0.05]} />
                             <meshBasicMaterial color="#FFB7C5" />
                         </mesh>

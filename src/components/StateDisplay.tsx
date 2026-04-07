@@ -14,8 +14,6 @@ export function StateDisplay({ state }: StateDisplayProps) {
   const ket = toKetString(state);
   const probs = getProbabilities(state);
   const n = Math.log2(state.length);
-  if (!Number.isInteger(n) || n <= 0) return null;
-
   const basisLabels = Array.from(
     { length: state.length },
     (_, i) => i.toString(2).padStart(n, '0')
@@ -34,6 +32,8 @@ export function StateDisplay({ state }: StateDisplayProps) {
     }
     return data;
   }, [probs, basisLabels, sortByProb]);
+
+  if (!Number.isInteger(n) || n <= 0) return null;
 
   return (
     <div className={styles.wrapper}>

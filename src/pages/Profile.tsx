@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useProgress } from '../context/ProgressContext'
+import { useProgress } from '../context/hooks'
 import { TRANSITION_CONFIG } from '../config/transitions'
 import { MODULE_DATA } from '../config/modules'
 import styles from './Profile.module.css'

@@ -3,25 +3,49 @@ import { useGLTF, useAnimations, Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Koi_cat from '../assets/koi_cat.glb'
-import type { CatMode, CatPosition, QubitState } from '../context/CatContext'
-import { useProgress } from '../context/ProgressContext'
+import { type CatMode, type CatPosition, type QubitState } from '../context/types'
+import { useCat, useProgress } from '../context/hooks'
 import { COLOR, SLOT, TILT_CONFIG, BUBBLE_LINES } from '../config/cat'
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+const generateSparkleData = (count: number) => Array.from({ length: count }, (_, i) => ({
+    angle: (i / count) * Math.PI * 2,
+    radius: 1.4 + Math.random() * 0.9,
+    yOffset: (Math.random() - 0.5) * 2.5,
+    speed: 0.18 + Math.random() * 0.22,
+    phase: Math.random() * Math.PI * 2,
+    size: 0.015 + Math.random() * 0.025,
+    bobAmp: 0.12 + Math.random() * 0.18,
+    bobFreq: 0.6 + Math.random() * 0.8,
+}))
+
+const generateBurstData = (count: number) => Array.from({ length: count }, () => {
+    const theta = Math.random() * Math.PI * 2
+    const phi = Math.random() * Math.PI
+    return {
+        dir: new THREE.Vector3(
+            Math.sin(phi) * Math.cos(theta),
+            Math.sin(phi) * Math.sin(theta),
+            Math.cos(phi),
+        ).multiplyScalar(2.2 + Math.random() * 2),
+        size: 0.04 + Math.random() * 0.06,
+        phase: Math.random() * Math.PI * 2,
+    }
+})
+
+const generatePetalData = (count: number) => Array.from({ length: count }, () => ({
+    speed: 1 + Math.random() * 2,
+    velocity: new THREE.Vector3((Math.random() - 0.5) * 4, Math.random() * 4, (Math.random() - 0.5) * 4),
+    rotation: Math.random() * Math.PI,
+    size: 0.1 + Math.random() * 0.2,
+}))
 
 // ─── SPARKLE RING ─────────────────────────────────────────────────────────────
 function SparkleRing({ color, intensity, count = 36 }: {
     color: THREE.Color; intensity: number; count?: number
 }) {
     const meshRef = useRef<THREE.InstancedMesh>(null)
-    const particles = useMemo(() => Array.from({ length: count }, (_, i) => ({
-        angle: (i / count) * Math.PI * 2,
-        radius: 1.4 + Math.random() * 0.9,
-        yOffset: (Math.random() - 0.5) * 2.5,
-        speed: 0.18 + Math.random() * 0.22,
-        phase: Math.random() * Math.PI * 2,
-        size: 0.015 + Math.random() * 0.025,
-        bobAmp: 0.12 + Math.random() * 0.18,
-        bobFreq: 0.6 + Math.random() * 0.8,
-    })), [count])
+    const particles = useMemo(() => generateSparkleData(count), [count])
 
     const dummy = useMemo(() => new THREE.Object3D(), [])
     const baseCol = useMemo(() => new THREE.Color(), [])
@@ -69,21 +93,7 @@ function BurstEmitter({ active, color }: { active: boolean; color: THREE.Color }
     const meshRef = useRef<THREE.InstancedMesh>(null)
     const started = useRef(false)
     const progress = useRef(0)
-    const COUNT = 28
-
-    const particles = useMemo(() => Array.from({ length: COUNT }, () => {
-        const theta = Math.random() * Math.PI * 2
-        const phi = Math.random() * Math.PI
-        return {
-            dir: new THREE.Vector3(
-                Math.sin(phi) * Math.cos(theta),
-                Math.sin(phi) * Math.sin(theta),
-                Math.cos(phi),
-            ).multiplyScalar(2.2 + Math.random() * 2),
-            size: 0.04 + Math.random() * 0.06,
-            phase: Math.random() * Math.PI * 2,
-        }
-    }), [])
+    const particles = useMemo(() => generateBurstData(COUNT), [])
 
     const dummy = useMemo(() => new THREE.Object3D(), [])
 
@@ -112,7 +122,7 @@ function BurstEmitter({ active, color }: { active: boolean; color: THREE.Color }
 
     if (!active && !started.current) return null
     return (
-        <instancedMesh ref= { meshRef } args = { [undefined, undefined, COUNT]} >
+        <instancedMesh ref={meshRef} args={[undefined, undefined, 28]}>
             <icosahedronGeometry args={ [1, 0] } />
                 < meshStandardMaterial emissive = { color } emissiveIntensity = { 2} transparent opacity = { 0.9} />
                     </instancedMesh>
@@ -214,17 +224,12 @@ function ZBubbles() {
 // ─── LOTUS PETALS (wake-up) ───────────────────────────────────────────────────
 function LotusPetals() {
     const groupRef = useRef<THREE.Group>(null)
-    const petalData = useRef(Array.from({ length: 15 }, () => ({
-        speed: 1 + Math.random() * 2,
-        velocity: new THREE.Vector3((Math.random() - 0.5) * 4, Math.random() * 4, (Math.random() - 0.5) * 4),
-        rotation: Math.random() * Math.PI,
-        size: 0.1 + Math.random() * 0.2,
-    })))
+    const petalData = useMemo(() => generatePetalData(15), [])
 
     useFrame((_s, delta) => {
         if (!groupRef.current) return
         groupRef.current.children.forEach((child, i) => {
-            const d = petalData.current[i]
+            const d = petalData[i]
             child.position.add(d.velocity.clone().multiplyScalar(delta))
             child.rotation.x += delta * d.speed
             child.rotation.y += delta * d.speed
@@ -236,7 +241,7 @@ function LotusPetals() {
     return (
         <group ref= { groupRef } >
         {
-            petalData.current.map((d, i) => (
+            petalData.map((d, i) => (
                 <mesh key= { i } rotation = { [d.rotation, d.rotation, 0]} >
                 <planeGeometry args={ [d.size, d.size]} />
             <meshStandardMaterial color="#FFB7C5" side = { THREE.DoubleSide } transparent opacity = { 0.8} />
@@ -298,12 +303,12 @@ export default function QuantumCat({
     const [isAwake, setIsAwake] = useState(mode !== 'hero')
     const [clickCount, setClickCount] = useState(0)
     const [shakeTime, setShakeTime] = useState(0)
-    const wakeProgressRef = useRef(mode !== 'hero' ? 1 : 0)
+    const [wakeProgress, setWakeProgress] = useState(mode !== 'hero' ? 1 : 0)
 
     // ── shared state ──
     const [burstActive, setBurstActive] = useState(false)
     const [bubbleMessage, setBubbleMessage] = useState<string | null>(null)
-    const bubbleDrift = useRef<'left' | 'right' | 'center'>('center')
+    const [bubbleDrift, setBubbleDrift] = useState<'left' | 'right' | 'center'>('center')
     const lastQubitRef = useRef<QubitState>('idle')
     const lastModeRef = useRef<CatMode>(mode)
 
@@ -349,7 +354,7 @@ export default function QuantumCat({
         if (qubitState === 'idle') return
         const lines = BUBBLE_LINES[qubitState][mode]
         const line = lines[Math.floor(Math.random() * lines.length)]
-        bubbleDrift.current = qubitState === 'blue' ? 'left' : 'right'
+        setBubbleDrift(qubitState === 'blue' ? 'left' : 'right')
         setBubbleMessage(null)
         requestAnimationFrame(() => setBubbleMessage(line))
         setBurstActive(false)
@@ -363,7 +368,7 @@ export default function QuantumCat({
         lastModeRef.current = mode
         if (mode === 'npc') {
             setIsAwake(true)
-            wakeProgressRef.current = 1
+            setWakeProgress(1)
             const delay = setTimeout(() => {
                 const lines = BUBBLE_LINES.idle.npc
                 setBubbleMessage(lines[Math.floor(Math.random() * lines.length)])
@@ -372,7 +377,7 @@ export default function QuantumCat({
         } else {
             setIsAwake(false)
             setClickCount(0)
-            wakeProgressRef.current = 0
+            setWakeProgress(0)
         }
     }, [mode])
 
@@ -433,15 +438,16 @@ export default function QuantumCat({
 
         // ── Hero: wake-up spin ──
         if (isAwake) {
-            wakeProgressRef.current = Math.min(wakeProgressRef.current + delta * 0.6, 1)
-            const ease = 1 - Math.pow(1 - wakeProgressRef.current, 3)
+            const nextProgress = Math.min(wakeProgress + delta * 0.6, 1)
+            setWakeProgress(nextProgress)
+            const ease = 1 - Math.pow(1 - nextProgress, 3)
             catGroup.current.rotation.y = Math.PI + ease * Math.PI
         } else {
             catGroup.current.rotation.y = Math.PI
         }
 
         // ── Hero: mouse look when fully awake ──
-        if (isAwake && wakeProgressRef.current > 0.8) {
+        if (isAwake && wakeProgress > 0.8) {
             const tRotY = mouseX.current * TILT_CONFIG.hero.ySensitivity
             const tRotX = mouseY.current * TILT_CONFIG.hero.xSensitivity
             catGroup.current.rotation.y += (Math.PI * 2 + tRotY - catGroup.current.rotation.y) * TILT_CONFIG.hero.lerpSpeed
@@ -456,7 +462,7 @@ export default function QuantumCat({
         <group ref= { posGroup } position = { SLOT[catPosition].pos.toArray() } visible={catPosition !== 'hidden'} >
 
             {/* Speech bubble */ }
-            < SpeechBubble message = { bubbleMessage } drift = { bubbleDrift.current } yPos = { bubbleY } />
+            < SpeechBubble message = { bubbleMessage } drift = { bubbleDrift } yPos = { bubbleY } />
 
                 {/* Sleeping Z bubbles */ }
     { mode === 'hero' && !isAwake && <ZBubbles /> }
@@ -499,7 +505,7 @@ export default function QuantumCat({
             )}
 
 {/* Wake-up lotus petals */ }
-{ mode === 'hero' && isAwake && wakeProgressRef.current < 0.9 && <LotusPetals /> }
+{ mode === 'hero' && isAwake && wakeProgress < 0.9 && <LotusPetals /> }
 
 {/* ─ catGroup: scale + rotation + 3D content ─ */ }
 <group

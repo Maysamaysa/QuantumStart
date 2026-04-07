@@ -46,11 +46,9 @@ function DraggableQubit({ isLeft, isEntangled, isMeasured, outcome, colorOffset,
             const limitX = (viewport.width / 2) - 1.5
             const limitY = (viewport.height / 2) - 1.5
             
-            let clampedX = Math.max(-limitX, Math.min(limitX, pos.x))
-            let clampedY = Math.max(-limitY, Math.min(limitY, pos.y))
-            
-            if (isLeft) clampedX = Math.min(clampedX, -0.5)
-            else clampedX = Math.max(clampedX, 0.5)
+            const baseClampedX = Math.max(-limitX, Math.min(limitX, pos.x))
+            const clampedX = isLeft ? Math.min(baseClampedX, -0.5) : Math.max(baseClampedX, 0.5)
+            const clampedY = Math.max(-limitY, Math.min(limitY, pos.y))
 
             groupRef.current.position.set(clampedX, clampedY, 0)
             setPosObj({ x: clampedX, y: clampedY })

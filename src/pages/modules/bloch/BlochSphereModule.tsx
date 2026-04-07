@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from 'react'
-import { useProgress } from '../../../context/ProgressContext'
+import { useProgress } from '../../../context/hooks'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import BlochSphereScene from './BlochSphereScene'
 import { BlochSphereOverlay } from './BlochSphereOverlay'

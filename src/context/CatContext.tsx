@@ -1,27 +1,9 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
-import { useProgress } from './ProgressContext'
-
-// ─── TYPES ────────────────────────────────────────────────────────────────────
-export type QubitState = 'idle' | 'blue' | 'amber'
-export type CatMode = 'hero' | 'npc'
-// 'center'  → Landing page (cat is large and centered)
-// 'corner'  → Learn / Playground (cat floats to top-right, shrinks)
-// 'hidden'  → Used for modules where the cat should not be displayed
-export type CatPosition = 'center' | 'corner' | 'hidden'
-
-interface CatContextValue {
-    mode: CatMode
-    qubitState: QubitState
-    catPosition: CatPosition
-    isAwake: boolean
-    setMode: (m: CatMode) => void
-    setQubitState: (q: QubitState) => void
-    setCatPosition: (p: CatPosition) => void
-    setAwake: (a: boolean) => void
-}
+import { createContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useProgress } from './hooks'
+import { type CatMode, type QubitState, type CatPosition, type CatContextValue } from './types'
 
 // ─── CONTEXT ──────────────────────────────────────────────────────────────────
-const CatContext = createContext<CatContextValue | null>(null)
+export const CatContext = createContext<CatContextValue | null>(null)
 
 export function CatProvider({ children }: { children: ReactNode }) {
     const [mode, setMode] = useState<CatMode>('hero')
@@ -67,8 +49,3 @@ export function CatProvider({ children }: { children: ReactNode }) {
 }
 
 // ─── HOOK ─────────────────────────────────────────────────────────────────────
-export function useCat() {
-    const ctx = useContext(CatContext)
-    if (!ctx) throw new Error('useCat must be used inside <CatProvider>')
-    return ctx
-}

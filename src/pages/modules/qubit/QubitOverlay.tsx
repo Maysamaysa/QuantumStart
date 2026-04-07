@@ -118,8 +118,8 @@ const TRACK_DIALOGUE: Record<'blue' | 'amber', string> = {
 }
 
 function CatDialogueBubble({ track, panelsVisible }: { track: Track; panelsVisible: boolean }) {
+    const { displayed, finished, skip } = useTypewriter(track ? TRACK_DIALOGUE[track] : '', 36, panelsVisible)
     if (!track) return null
-    const { displayed, finished, skip } = useTypewriter(TRACK_DIALOGUE[track], 36, panelsVisible)
     return (
         <div 
             className={`${styles.panel} ${styles.catDialogue} ${track === 'amber' ? styles.amberTrack : ''} ${panelsVisible ? styles.panelVisible : ''}`}
@@ -140,19 +140,20 @@ function LessonPanels({ track, panelsVisible, onComplete, setEquationStep }: {
     track: Track; panelsVisible: boolean; onComplete: () => void; setEquationStep: (s: number) => void 
 }) {
     const [panelIndex, setPanelIndex] = useState(0)
+    const [prevTrack, setPrevTrack] = useState(track)
     
+    if (track !== prevTrack) {
+        setPrevTrack(track)
+        setPanelIndex(0)
+        setEquationStep(-1)
+    }
+
     const panels = track === 'amber' ? AMBER_PANELS : BLUE_PANELS
     const current = panels[panelIndex]
     const isLast = panelIndex >= panels.length - 1
     const isAmber = track === 'amber'
 
-    useEffect(() => { 
-        setPanelIndex(0)
-        setEquationStep(-1)
-    }, [track, setEquationStep])
-
-    useEffect(() => {
-        // Map panelIndex to equation steps for Amber track
+    useMemo(() => {
         if (isAmber) {
             if (panelIndex === 0) setEquationStep(0) // |psi>
             else if (panelIndex === 1) setEquationStep(3) // |0>
@@ -279,10 +280,13 @@ function QuizPanel({ track, panelsVisible, onComplete, onAllCorrect, sphereClick
     const currentQ = questions[qIndex]
     const isLastQ = qIndex >= questions.length - 1
 
-    useEffect(() => {
-        if (!sphereClicked || !currentQ?.isObserver || answered) return
-        setObserverResult(true); setAnswered(true); onComplete(true)
-    }, [sphereClicked, currentQ, answered, onComplete])
+    const [prevSphereClicked, setPrevSphereClicked] = useState(false)
+    if (sphereClicked && !prevSphereClicked && currentQ?.isObserver && !answered) {
+        setPrevSphereClicked(true)
+        setObserverResult(true)
+        setAnswered(true)
+        onComplete(true)
+    }
 
     const handleAnswer = (idx: number) => {
         if (answered || !currentQ.answers) return

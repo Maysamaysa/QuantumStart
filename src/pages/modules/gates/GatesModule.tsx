@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useProgress } from '../../../context/ProgressContext'
+import { useProgress } from '../../../context/hooks'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import GatesScene from './GatesScene'
 import { GatesOverlay } from './GatesOverlay'

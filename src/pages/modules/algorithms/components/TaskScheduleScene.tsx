@@ -37,21 +37,23 @@ const EDGES: [number, number][] = [
 // Optimal solution edges (A->Morning, B->Afternoon, C->Morning)
 const SOLUTION_EDGES = [0, 3, 4]; // indices into EDGES
 
+const generateParticleData = (count: number) => {
+  const data: { offset: number; speed: number; edge: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    data.push({
+      offset: Math.random(),
+      speed: 0.3 + Math.random() * 0.6,
+      edge: Math.floor(Math.random() * EDGES.length),
+    });
+  }
+  return data;
+};
+
 export function TaskScheduleScene({ currentStep }: TaskScheduleSceneProps) {
   const groupRef = useRef<THREE.Group>(null);
 
   // Particles for the annealing effect
-  const particles = useMemo(() => {
-    const data: { offset: number; speed: number; edge: number }[] = [];
-    for (let i = 0; i < 24; i++) {
-      data.push({
-        offset: Math.random(),
-        speed: 0.3 + Math.random() * 0.6,
-        edge: Math.floor(Math.random() * EDGES.length),
-      });
-    }
-    return data;
-  }, []);
+  const particles = useMemo(() => generateParticleData(24), []);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();

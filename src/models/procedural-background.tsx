@@ -84,50 +84,41 @@ export function GradientSphere() {
 }
 
 
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+const generateParticleData = (count: number) => {
+    const positions = new Float32Array(count * 3)
+    const colors = new Float32Array(count * 3)
+    for (let i = 0; i < count; i++) {
+        const radius = 5 + Math.random() * 15
+        const theta = Math.random() * Math.PI * 2
+        const phi = Math.random() * Math.PI
+        positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
+        positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
+        positions[i * 3 + 2] = radius * Math.cos(phi)
+        
+        const colorChoice = Math.random()
+        if (colorChoice < 0.4) {
+            colors[i * 3] = 1.0; colors[i * 3 + 1] = 0.717; colors[i * 3 + 2] = 0.772
+        } else if (colorChoice < 0.7) {
+            colors[i * 3] = 0.757; colors[i * 3 + 1] = 0.882; colors[i * 3 + 2] = 0.757
+        } else {
+            colors[i * 3] = 0.365; colors[i * 3 + 1] = 0.655; colors[i * 3 + 2] = 0.859
+        }
+    }
+    return { positions, colors }
+}
+
 // Floating particles (Lotus Petals/Pollen)
 export function Particles() {
     const pointsRef = useRef<THREE.Points>(null)
+    const { positions, colors } = useMemo(() => generateParticleData(800), [])
 
     const geometry = useMemo(() => {
         const geo = new THREE.BufferGeometry()
-        const positions = new Float32Array(800 * 3)
-        const colors = new Float32Array(800 * 3)
-
-        for (let i = 0; i < 800; i++) {
-            const radius = 5 + Math.random() * 15
-            const theta = Math.random() * Math.PI * 2
-            const phi = Math.random() * Math.PI
-
-            positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta)
-            positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
-            positions[i * 3 + 2] = radius * Math.cos(phi)
-
-            // Theme colors: Blue, Pink, Green
-            const colorChoice = Math.random()
-            if (colorChoice < 0.4) {
-                // Lotus Pink
-                colors[i * 3] = 1.0
-                colors[i * 3 + 1] = 0.717
-                colors[i * 3 + 2] = 0.772
-            } else if (colorChoice < 0.7) {
-                // Glass Green
-                colors[i * 3] = 0.757
-                colors[i * 3 + 1] = 0.882
-                colors[i * 3 + 2] = 0.757
-            } else {
-                // State Blue
-                colors[i * 3] = 0.365
-                colors[i * 3 + 1] = 0.655
-                colors[i * 3 + 2] = 0.859
-            }
-        }
-
-
         geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
         geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-
         return geo
-    }, [])
+    }, [positions, colors])
 
     useFrame((state) => {
         if (pointsRef.current) {

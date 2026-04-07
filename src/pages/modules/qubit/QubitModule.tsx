@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import { useProgress } from '../../../context/ProgressContext'
+import { useProgress } from '../../../context/hooks'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import QubitScene from './QubitScene'
 import { QubitOverlay } from './QubitOverlay'

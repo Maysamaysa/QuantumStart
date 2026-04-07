@@ -53,9 +53,9 @@ function TrackSelector({ onTrackSelect }: { onTrackSelect: (t: 'blue' | 'amber')
 }
 
 function CatDialogueBubble({ track, panelsVisible }: { track: Track; panelsVisible: boolean }) {
-    if (!track) return null
     const text = track === 'blue' ? "Multiple states at once. It's crowded, but efficient." : "Linear algebra is the language of the universe. Ready?"
-    const { displayed, finished, skip } = useTypewriter(text, 36, panelsVisible)
+    const { displayed, finished, skip } = useTypewriter(track ? text : '', 36, panelsVisible)
+    if (!track) return null
     return (
         <div 
             className={`${styles.panel} ${styles.catDialogue} ${styles.panelVisible}`}

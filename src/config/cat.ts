@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import type { CatPosition, QubitState } from '../context/CatContext'
+import type { CatPosition, QubitState } from '../context/types'
 
 export const COLOR = {
     idle: new THREE.Color('#ffffff'),

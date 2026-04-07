@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { ACESFilmicToneMapping } from 'three'
-import { useProgress } from '../../../context/ProgressContext'
+import { useProgress } from '../../../context/hooks'
 import { ModuleCanvas } from '../../../components/ModuleCanvas'
 import EntanglementScene from './EntanglementScene'
 import { EntanglementOverlay } from './EntanglementOverlay'

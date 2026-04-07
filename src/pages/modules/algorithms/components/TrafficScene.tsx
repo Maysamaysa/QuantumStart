@@ -7,6 +7,23 @@ interface TrafficSceneProps {
   trafficWeight: number;
 }
 
+const generateTrafficParticles = (count: number, maxPerRoad: number) => {
+  const data = [];
+  for (let i = 0; i < count; i++) {
+    const isRoadA = i < maxPerRoad;
+    data.push({
+      isRoadA,
+      axis: (isRoadA ? 'x' : 'z') as 'x' | 'z',
+      offset: (Math.random() - 0.5) * 3,
+      speed: 0.08 + Math.random() * 0.12,
+      pos: (Math.random() - 0.5) * 40,
+      color: isRoadA ? '#5DA7DB' : '#C1E1C1',
+      id: i
+    });
+  }
+  return data;
+};
+
 export function TrafficScene({ trafficWeight }: TrafficSceneProps) {
   const groupRef = useRef<THREE.Group>(null);
   const orbRef = useRef<THREE.Mesh>(null);
@@ -14,22 +31,7 @@ export function TrafficScene({ trafficWeight }: TrafficSceneProps) {
 
   const MAX_PER_ROAD = 30;
 
-  const particles = useMemo(() => {
-    const data = [];
-    for (let i = 0; i < MAX_PER_ROAD * 2; i++) {
-      const isRoadA = i < MAX_PER_ROAD;
-      data.push({
-        isRoadA,
-        axis: isRoadA ? 'x' : 'z' as 'x' | 'z',
-        offset: (Math.random() - 0.5) * 3,
-        speed: 0.08 + Math.random() * 0.12,
-        pos: (Math.random() - 0.5) * 40,
-        color: isRoadA ? '#5DA7DB' : '#C1E1C1',
-        id: i
-      });
-    }
-    return data;
-  }, []);
+  const particles = useMemo(() => generateTrafficParticles(MAX_PER_ROAD * 2, MAX_PER_ROAD), []);
 
   const particleRefs = useRef<(THREE.Group | null)[]>([]);
 

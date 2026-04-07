@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { useCat } from '../context/CatContext'
+import { useCat } from '../context/hooks'
 import { useTypewriter } from '../hooks/useTypewriter'
 import styles from './Landing.module.css'
 

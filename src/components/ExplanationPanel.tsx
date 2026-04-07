@@ -19,12 +19,17 @@ export function ExplanationPanel({
   state,
 }: ExplanationPanelProps) {
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
-  const SHOTS = 1000;
+  const [prevStep, setPrevStep] = useState(stepIndex);
+  const [prevCircuitLen, setPrevCircuitLen] = useState(circuit.length);
 
   // Reset experimental results if state or circuit changes
-  useEffect(() => {
+  if (stepIndex !== prevStep || circuit.length !== prevCircuitLen) {
+    setPrevStep(stepIndex);
+    setPrevCircuitLen(circuit.length);
     setCounts(null);
-  }, [state, circuit.length, stepIndex]);
+  }
+
+  const SHOTS = 1000;
 
   const handleRunExperiment = useCallback(() => {
     const results = runShots(circuit, Math.log2(state.length), SHOTS);

@@ -21,7 +21,6 @@ export function TutorialChallenge() {
   });
   const simulator = useSimulator(circuit.circuit, circuit.qubitCount);
   const [selectedQubitIndex, setSelectedQubitIndex] = useState(0);
-  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     if (!challenge) return;
@@ -35,11 +34,7 @@ export function TutorialChallenge() {
     circuit.circuit.length > 0 ? circuit.circuit.length - 1 : -1
   );
 
-  useEffect(() => {
-    if (!challenge) return;
-    const ok = checkChallenge(challenge, circuit.circuit, finalState);
-    setCompleted(ok);
-  }, [challenge, circuit.circuit, finalState]);
+  const completed = challenge ? checkChallenge(challenge, circuit.circuit, finalState) : false;
 
   if (!challenge) {
     return (

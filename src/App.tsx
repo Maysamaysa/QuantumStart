@@ -2,7 +2,8 @@ import { Routes, Route, useLocation, Outlet } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CatProvider, useCat } from './context/CatContext'
+import { CatProvider } from './context/CatContext'
+import { useCat, useProgress } from './context/hooks'
 import { ProgressProvider } from './context/ProgressContext'
 import QuantumCat from './models/quantum_cat'
 import ProceduralBackground from './models/procedural-background'
@@ -27,16 +28,19 @@ function TransitionCurtain() {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [displayLocation, setDisplayLocation] = useState(location)
 
+  if (location.pathname !== displayLocation.pathname && !isTransitioning) {
+    setIsTransitioning(true)
+  }
+
   useEffect(() => {
-    if (location.pathname !== displayLocation.pathname) {
-      setIsTransitioning(true)
+    if (isTransitioning) {
       const timer = setTimeout(() => {
         setDisplayLocation(location)
         setIsTransitioning(false)
       }, 700) // Match duration + buffer
       return () => clearTimeout(timer)
     }
-  }, [location, displayLocation])
+  }, [isTransitioning, location])
 
   return (
     <AnimatePresence mode="wait">

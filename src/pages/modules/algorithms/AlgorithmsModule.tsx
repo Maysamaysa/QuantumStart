@@ -4,7 +4,7 @@ import { AlgorithmsScene } from './AlgorithmsScene';
 import { AlgorithmsOverlay } from './AlgorithmsOverlay';
 import { ExampleOverlay } from './ExampleOverlay';
 import { TrafficOverlay } from './TrafficOverlay';
-import { useProgress } from '../../../context/ProgressContext';
+import { useProgress } from '../../../context/hooks';
 import { ModuleCanvas } from '../../../components/ModuleCanvas';
 import { ModuleHeader } from '../../../components/ModuleHeader';
 
@@ -21,24 +21,41 @@ const PHASE_NAMES = ['Theory', 'Traffic Light', 'Task Schedule'];
 export function AlgorithmsModule() {
   const { completeModule } = useProgress();
 
-  const [phase, setPhase] = useState(0); 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [trafficWeight, setTrafficWeight] = useState(50); // Lifted for 3D sync
-
-  // Persistence
-  useEffect(() => {
-    const saved = localStorage.getItem('qm7_v3'); // Incrementing version for safety
+  // Persistence - Lazy initialization
+  const [phase, setPhase] = useState(() => {
+    const saved = localStorage.getItem('qm7_v3');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (typeof parsed.phase === 'number') setPhase(parsed.phase);
-        if (typeof parsed.currentStep === 'number') setCurrentStep(parsed.currentStep);
-        if (typeof parsed.trafficWeight === 'number') setTrafficWeight(parsed.trafficWeight);
+        if (typeof parsed.phase === 'number') return parsed.phase;
       } catch (e) {
         console.error("Failed to load module 7 state", e);
       }
     }
-  }, []);
+    return 0;
+  });
+
+  const [currentStep, setCurrentStep] = useState(() => {
+    const saved = localStorage.getItem('qm7_v3');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.currentStep === 'number') return parsed.currentStep;
+      } catch (e) { }
+    }
+    return 0;
+  });
+
+  const [trafficWeight, setTrafficWeight] = useState(() => {
+    const saved = localStorage.getItem('qm7_v3');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.trafficWeight === 'number') return parsed.trafficWeight;
+      } catch (e) { }
+    }
+    return 50;
+  });
 
   const saveState = useCallback((p: number, step: number, weight?: number) => {
     localStorage.setItem('qm7_v3', JSON.stringify({ 
