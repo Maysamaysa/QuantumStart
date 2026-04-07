@@ -3,6 +3,7 @@ import type { Complex } from '../lib/simulator/stateVector';
 import { explainGate } from '../lib/explanations/gateExplanations';
 import { explainState } from '../lib/explanations/stateExplanations';
 import { sampleState } from '../lib/simulator/stateVector';
+import { runShots } from '../lib/simulator/shotRunner';
 import { MeasurementHistogram } from './MeasurementHistogram';
 import { useState, useEffect, useCallback } from 'react';
 import styles from './ExplanationPanel.module.css';
@@ -27,9 +28,9 @@ export function ExplanationPanel({
   }, [state, circuit.length, stepIndex]);
 
   const handleRunExperiment = useCallback(() => {
-    const results = sampleState(state, SHOTS);
+    const results = runShots(circuit, Math.log2(state.length), SHOTS);
     setCounts(results);
-  }, [state]);
+  }, [circuit, state.length]);
 
   const stateExplanation = explainState(state);
   const gateExplanation =

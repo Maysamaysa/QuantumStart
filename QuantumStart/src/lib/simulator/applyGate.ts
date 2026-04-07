@@ -93,7 +93,8 @@ export function applyMeasurement(
   state: Complex[],
   _nQubits: number,
   qubitIndex: number,
-  gateIndex: number
+  gateIndex: number,
+  useTrueRandom: boolean = false
 ): Complex[] {
   const bit = 1 << qubitIndex;
   
@@ -105,8 +106,9 @@ export function applyMeasurement(
     }
   }
 
-  // 2. Decide outcome (0 or 1) using seeded random for UI stability
-  const outcome = seededRandom(gateIndex + 42) < prob1 ? 1 : 0;
+  // 2. Decide outcome (0 or 1) using seeded random for UI stability, or true random for experiments
+  const rand = useTrueRandom ? Math.random() : seededRandom(gateIndex + 42);
+  const outcome = rand < prob1 ? 1 : 0;
 
   // 3. Collapse state vector
   const newState = state.map((amp, i) => {
@@ -137,10 +139,11 @@ export function applyGate(
   state: Complex[],
   nQubits: number,
   gate: Gate,
-  gateIndex: number = 0
+  gateIndex: number = 0,
+  useTrueRandom: boolean = false
 ): Complex[] {
   if (gate.type === 'Measure') {
-    return applyMeasurement(state, nQubits, gate.targets[0], gateIndex);
+    return applyMeasurement(state, nQubits, gate.targets[0], gateIndex, useTrueRandom);
   }
   if (isTwoQubitGate(gate.type)) {
     const control = gate.controls?.[0] ?? gate.targets[0];
