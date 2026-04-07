@@ -4,10 +4,12 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Koi_cat from '../assets/koi_cat.glb'
 import { type CatMode, type CatPosition, type QubitState } from '../context/types'
-import { useCat, useProgress } from '../context/hooks'
+import { useProgress } from '../context/hooks'
 import { COLOR, SLOT, TILT_CONFIG, BUBBLE_LINES } from '../config/cat'
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
+const COUNT = 28
+
 const generateSparkleData = (count: number) => Array.from({ length: count }, (_, i) => ({
     angle: (i / count) * Math.PI * 2,
     radius: 1.4 + Math.random() * 0.9,
@@ -76,14 +78,16 @@ function SparkleRing({ color, intensity, count = 36 }: {
     })
 
     return (
-        <instancedMesh ref= { meshRef } args = { [undefined, undefined, count]} >
-            <octahedronGeometry args={ [1, 0] } />
-                < meshStandardMaterial
-    emissive = { color }
-    emissiveIntensity = { 0.6 + intensity * 1.4 }
-                transparent opacity = { 0.55 + intensity * 0.35 }
-    roughness = { 0.3} metalness = { 0.6}
-        />
+        <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+            <octahedronGeometry args={[1, 0]} />
+            <meshStandardMaterial
+                emissive={color}
+                emissiveIntensity={0.6 + intensity * 1.4}
+                transparent
+                opacity={0.55 + intensity * 0.35}
+                roughness={0.3}
+                metalness={0.6}
+            />
         </instancedMesh>
     )
 }
@@ -122,10 +126,10 @@ function BurstEmitter({ active, color }: { active: boolean; color: THREE.Color }
 
     if (!active && !started.current) return null
     return (
-        <instancedMesh ref={meshRef} args={[undefined, undefined, 28]}>
-            <icosahedronGeometry args={ [1, 0] } />
-                < meshStandardMaterial emissive = { color } emissiveIntensity = { 2} transparent opacity = { 0.9} />
-                    </instancedMesh>
+        <instancedMesh ref={meshRef} args={[undefined, undefined, COUNT]}>
+            <icosahedronGeometry args={[1, 0]} />
+            <meshStandardMaterial emissive={color} emissiveIntensity={2} transparent opacity={0.9} />
+        </instancedMesh>
     )
 }
 
@@ -144,46 +148,42 @@ function SpeechBubble({ message, drift = 'center', yPos = 1.8 }: {
         setVisible(false)
         requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)))
         timerRef.current = setTimeout(() => setVisible(false), 4200)
-        return () => { if (timerRef.current) clearTimeout(timerRef.current) }
     }, [message])
 
     const driftX = drift === 'left' ? '-70px' : drift === 'right' ? '70px' : '0px'
 
     return (
-        <Html position= { [0, yPos, 0]} center style = {{ pointerEvents: 'none', userSelect: 'none' }
-} zIndexRange = { [200, 0]} >
-    <div style={
-    {
-        position: 'relative',
-            transform: visible
-                ? `translateX(${driftX}) translateY(-12px) scale(1)`
-                : `translateX(${driftX}) translateY(8px)  scale(0.88)`,
+        <Html position={[0, yPos, 0]} center style={{ pointerEvents: 'none', userSelect: 'none' }} zIndexRange={[200, 0]}>
+            <div style={{
+                position: 'relative',
+                transform: visible
+                    ? `translateX(${driftX}) translateY(-12px) scale(1)`
+                    : `translateX(${driftX}) translateY(8px)  scale(0.88)`,
                 opacity: visible ? 1 : 0,
-                    transition: 'opacity 0.45s ease, transform 0.55s cubic-bezier(0.34,1.56,0.64,1)',
-                        background: 'rgba(248, 249, 255, 0.12)',
-                            backdropFilter: 'blur(14px)',
-                                WebkitBackdropFilter: 'blur(14px)',
-                                    border: '1px solid rgba(248,249,255,0.22)',
-                                        borderRadius: '999px',
-                                            padding: '10px 20px',
-                                                color: '#F8F9FF',
-                                                    fontSize: '13px',
-                                                        fontFamily: 'DM Sans, sans-serif',
-                                                            fontWeight: 500,
-                                                                whiteSpace: 'nowrap',
-                                                                    boxShadow: '0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12)',
-                                                                        letterSpacing: '0.01em',
-            }
-}>
-    { text }
-    < span style = {{
-    position: 'absolute', bottom: '-10px', left: '50%',
-        transform: 'translateX(-50%)', width: '6px', height: '6px',
-            borderRadius: '50%', background: 'rgba(248,249,255,0.18)',
-                border: '1px solid rgba(248,249,255,0.25)', display: 'block',
+                transition: 'opacity 0.45s ease, transform 0.55s cubic-bezier(0.34,1.56,0.64,1)',
+                background: 'rgba(248, 249, 255, 0.12)',
+                backdropFilter: 'blur(14px)',
+                WebkitBackdropFilter: 'blur(14px)',
+                border: '1px solid rgba(248,249,255,0.22)',
+                borderRadius: '999px',
+                padding: '10px 20px',
+                color: '#F8F9FF',
+                fontSize: '13px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12)',
+                letterSpacing: '0.01em',
+            }}>
+                {text}
+                <span style={{
+                    position: 'absolute', bottom: '-10px', left: '50%',
+                    transform: 'translateX(-50%)', width: '6px', height: '6px',
+                    borderRadius: '50%', background: 'rgba(248,249,255,0.18)',
+                    border: '1px solid rgba(248,249,255,0.25)', display: 'block',
                 }} />
-    </div>
-    </Html>
+            </div>
+        </Html>
     )
 }
 
@@ -198,25 +198,22 @@ function ZBubble({ index }: { index: number }) {
         ref.current.scale.setScalar(0.8 + Math.sin(t * 2 + index) * 0.1)
     })
     return (
-        <group ref= { ref } >
-        <Html center zIndexRange = { [200, 0]} style = {{ pointerEvents: 'none' }
-}>
-    <div style={
-    {
-        color: '#ffffff', fontSize: `${1.5 + index * 0.5}rem`, fontWeight: 900,
-            opacity: 0.8, filter: 'blur(1px)', textShadow: '0 0 10px rgba(0,0,0,0.4)',
-                fontFamily: 'Outfit, sans-serif', pointerEvents: 'none', userSelect: 'none',
-                }
-}> Z </div>
-    </Html>
-    </group>
+        <group ref={ref}>
+            <Html center zIndexRange={[200, 0]} style={{ pointerEvents: 'none' }}>
+                <div style={{
+                    color: '#ffffff', fontSize: `${1.5 + index * 0.5}rem`, fontWeight: 900,
+                    opacity: 0.8, filter: 'blur(1px)', textShadow: '0 0 10px rgba(0,0,0,0.4)',
+                    fontFamily: 'Outfit, sans-serif', pointerEvents: 'none', userSelect: 'none',
+                }}> Z </div>
+            </Html>
+        </group>
     )
 }
 
 function ZBubbles() {
     return (
-        <group position= { [0, 1.5, 0]} >
-        { [1, 2, 3].map(i => <ZBubble key={ i } index = { i } />) }
+        <group position={[0, 1.5, 0]}>
+            {[1, 2, 3].map(i => <ZBubble key={i} index={i} />)}
         </group>
     )
 }
@@ -239,15 +236,15 @@ function LotusPetals() {
     })
 
     return (
-        <group ref= { groupRef } >
-        {
-            petalData.map((d, i) => (
-                <mesh key= { i } rotation = { [d.rotation, d.rotation, 0]} >
-                <planeGeometry args={ [d.size, d.size]} />
-            <meshStandardMaterial color="#FFB7C5" side = { THREE.DoubleSide } transparent opacity = { 0.8} />
-            </mesh>
-            ))
-        }
+        <group ref={groupRef}>
+            {
+                petalData.map((d, i) => (
+                    <mesh key={i} rotation={[d.rotation, d.rotation, 0]}>
+                        <planeGeometry args={[d.size, d.size]} />
+                        <meshStandardMaterial color="#FFB7C5" side={THREE.DoubleSide} transparent opacity={0.8} />
+                    </mesh>
+                ))
+            }
         </group>
     )
 }
@@ -267,9 +264,9 @@ function EyeGlow({ qubitState }: { qubitState: QubitState }) {
     })
     return (
         <>
-        <pointLight ref= { leftRef } position = { [-0.11, 0.08, 0.18]} distance = { 1.2} decay = { 2} />
-            <pointLight ref={ rightRef } position = { [0.11, 0.08, 0.18]} distance = { 1.2} decay = { 2} />
-                </>
+            <pointLight ref={leftRef} position={[-0.11, 0.08, 0.18]} distance={1.2} decay={2} />
+            <pointLight ref={rightRef} position={[0.11, 0.08, 0.18]} distance={1.2} decay={2} />
+        </>
     )
 }
 
@@ -287,12 +284,9 @@ export default function QuantumCat({
     catPosition = 'center',
     onWakeUp,
 }: QuantumCatProps) {
-    // posGroup → outer: position lerp ONLY — Html overlays here so scale can't push them off-screen
-    // catGroup → inner: scale lerp + rotation + animations
     const posGroup = useRef<THREE.Group>(null)
     const catGroup = useRef<THREE.Group>(null)
 
-    // QuantumCat is a global singleton — safe    // catGroup → inner: scale lerp + rotation + animations
     const { scene, animations } = useGLTF(Koi_cat)
     const { actions, mixer } = useAnimations(animations, catGroup)
 
@@ -409,16 +403,13 @@ export default function QuantumCat({
         if (!posGroup.current || !catGroup.current) return
         const t = state.clock.getElapsedTime()
 
-        // Position lerp on outer posGroup (no scale applied here)
         posTarget.current.copy(SLOT[catPosition].pos)
         posGroup.current.position.lerp(posTarget.current, delta * 8.0)
 
-        // Scale lerp on inner catGroup
         scaleTarget.current = SLOT[catPosition].scale
         const curScale = catGroup.current.scale.x
         catGroup.current.scale.setScalar(curScale + (scaleTarget.current - curScale) * delta * 8.0)
 
-        // ── NPC: idle bob + mouse look ──
         if (mode === 'npc') {
             posGroup.current.position.y += Math.sin(t * 0.7) * 0.006
             const tRotY = mouseX.current * TILT_CONFIG.npc.ySensitivity
@@ -429,14 +420,12 @@ export default function QuantumCat({
             return
         }
 
-        // ── Hero: shake on early clicks ──
         if (shakeTime > 0) {
             posGroup.current.position.x = SLOT.center.pos.x + 0.08 * Math.sin(state.clock.elapsedTime * 45)
             setShakeTime(p => Math.max(0, p - delta))
             if (shakeTime <= delta) posGroup.current.position.x = SLOT.center.pos.x
         }
 
-        // ── Hero: wake-up spin ──
         if (isAwake) {
             const nextProgress = Math.min(wakeProgress + delta * 0.6, 1)
             setWakeProgress(nextProgress)
@@ -446,7 +435,6 @@ export default function QuantumCat({
             catGroup.current.rotation.y = Math.PI
         }
 
-        // ── Hero: mouse look when fully awake ──
         if (isAwake && wakeProgress > 0.8) {
             const tRotY = mouseX.current * TILT_CONFIG.hero.ySensitivity
             const tRotX = mouseY.current * TILT_CONFIG.hero.xSensitivity
@@ -458,40 +446,30 @@ export default function QuantumCat({
     const inCorner = catPosition === 'corner'
 
     return (
-        // ─ posGroup: position lerp only — Html lives here, safe from scale distortion ─
-        <group ref= { posGroup } position = { SLOT[catPosition].pos.toArray() } visible={catPosition !== 'hidden'} >
-
-            {/* Speech bubble */ }
-            < SpeechBubble message = { bubbleMessage } drift = { bubbleDrift } yPos = { bubbleY } />
-
-                {/* Sleeping Z bubbles */ }
-    { mode === 'hero' && !isAwake && <ZBubbles /> }
-
-    {/* Click-to-wake label (in posGroup — unscaled, always visible) */ }
-    {
-        mode === 'hero' && !isAwake && (
-            <Html position={ [0, 1.6, 0] } center zIndexRange = { [200, 0]} style = {{ pointerEvents: 'none' }
-    }>
-        <div
-                        className={ shakeTime > 0 ? 'shake-label' : '' }
-    style = {{
-        background: 'rgba(255,255,255,0.2)',
-            backdropFilter: 'blur(5px)',
-                padding: '0.6rem 1.2rem',
-                    borderRadius: '24px',
-                        color: 'white',
+        <group ref={posGroup} position={SLOT[catPosition].pos.toArray()} visible={catPosition !== 'hidden'} >
+            <SpeechBubble message={bubbleMessage} drift={bubbleDrift} yPos={bubbleY} />
+            {mode === 'hero' && !isAwake && <ZBubbles />}
+            {mode === 'hero' && !isAwake && (
+                <Html position={[0, 1.6, 0]} center zIndexRange={[200, 0]} style={{ pointerEvents: 'none' }}>
+                    <div
+                        className={shakeTime > 0 ? 'shake-label' : ''}
+                        style={{
+                            background: 'rgba(255,255,255,0.2)',
+                            backdropFilter: 'blur(5px)',
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: '24px',
+                            color: 'white',
                             fontSize: '1rem',
-                                fontWeight: 700,
-                                    whiteSpace: 'nowrap',
-                                        border: '1px solid rgba(255,255,255,0.3)',
-                                            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-                                                pointerEvents: 'none',
-                                                    userSelect: 'none',
-                        }
-}
+                            fontWeight: 700,
+                            whiteSpace: 'nowrap',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                            pointerEvents: 'none',
+                            userSelect: 'none',
+                        }}
                     >
-    Click to wake Qubit 🌸 ({ 3 - clickCount } left)
-<style>{`
+                        Click to wake Qubit 🌸 ({3 - clickCount} left)
+                        <style>{`
                             .shake-label { animation: shakeAnim 0.6s cubic-bezier(.36,.07,.19,.97) both; }
                             @keyframes shakeAnim {
                                 10%, 90% { transform: translate3d(-2px,0,0); }
@@ -500,32 +478,30 @@ export default function QuantumCat({
                                 40%, 60% { transform: translate3d( 5px,0,0); }
                             }
                         `}</style>
-    </div>
-    </Html>
+                    </div>
+                </Html>
             )}
 
-{/* Wake-up lotus petals */ }
-{ mode === 'hero' && isAwake && wakeProgress < 0.9 && <LotusPetals /> }
+            {mode === 'hero' && isAwake && wakeProgress < 0.9 && <LotusPetals />}
 
-{/* ─ catGroup: scale + rotation + 3D content ─ */ }
-<group
-                ref={ catGroup }
-scale = { SLOT[catPosition].scale }
-onPointerOver = {() => { if (mode === 'hero') document.body.style.cursor = 'pointer' }}
-onPointerOut = {() => { document.body.style.cursor = '' }}
-onPointerDown = {(e) => {
-    e.stopPropagation()
-    secretClicks.current += 1
-    if (secretClicks.current === 7) {
-        unlockBadge('qubit_equal')
-    }
-}}
+            <group
+                ref={catGroup}
+                scale={SLOT[catPosition].scale}
+                onPointerOver={() => { if (mode === 'hero') document.body.style.cursor = 'pointer' }}
+                onPointerOut={() => { document.body.style.cursor = '' }}
+                onPointerDown={(e) => {
+                    e.stopPropagation()
+                    secretClicks.current += 1
+                    if (secretClicks.current === 7) {
+                        unlockBadge('qubit_equal')
+                    }
+                }}
             >
-    <SparkleRing color={ ringColor } intensity = { ringIntensity } count = { inCorner? 20: 36 } />
-        <BurstEmitter active={ burstActive } color = { ringColor } />
-            <EyeGlow qubitState={ qubitState } />
-                < primitive object = { scene } scale = { 0.5} />
-                    </group>
-                    </group>
+                <SparkleRing color={ringColor} intensity={ringIntensity} count={inCorner ? 20 : 36} />
+                <BurstEmitter active={burstActive} color={ringColor} />
+                <EyeGlow qubitState={qubitState} />
+                <primitive object={scene} scale={0.5} />
+            </group>
+        </group>
     )
 }

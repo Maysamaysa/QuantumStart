@@ -60,6 +60,12 @@ function Phase1Intro({ selectedGate, setAnimState, introStage, setIntroStage }: 
     const [prevIntroStage, setPrevIntroStage] = useState(introStage)
     const narrationTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+    const NARRATION = [
+        "A gate transforms information. You walk in as one thing, walk out as another.",
+        "On the left: a classical gate. Watch the orb — it enters, hits the barrier, and shatters. The original information is destroyed. There is no way back.",
+        "On the right: a quantum gate. The orb enters, transforms — notice the color and size shift — then reverses perfectly. Every quantum gate is reversible by design.",
+    ]
+
     if (introStage !== prevIntroStage) {
         setPrevIntroStage(introStage)
         if (introStage === 'primer') {
@@ -121,7 +127,7 @@ function Phase1Intro({ selectedGate, setAnimState, introStage, setIntroStage }: 
                     }}>
                         {/* Progress dots */}
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                            {NARRATION.map((_, i) => (
+                            {NARRATION.map((_unused: string, i: number) => (
                                 <div key={i} style={{
                                     width: 8, height: 8, borderRadius: '50%',
                                     background: i <= narrationStep ? '#FFB7C5' : 'rgba(255,255,255,0.2)',

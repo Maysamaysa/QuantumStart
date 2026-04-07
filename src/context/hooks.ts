@@ -13,3 +13,5 @@ export function useCat() {
     if (!ctx) throw new Error('useCat must be used inside <CatProvider>')
     return ctx
 }
+
+export type { CatPosition, QubitState } from './types'

@@ -1,4 +1,5 @@
 import { createContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+export { useCat } from './hooks'
 import { useProgress } from './hooks'
 import { type CatMode, type QubitState, type CatPosition, type CatContextValue } from './types'
 

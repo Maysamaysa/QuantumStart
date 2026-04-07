@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+export { useProgress } from './hooks'
 import { BADGES } from '../config/badges'
 import { type ProgressData, type ProgressContextValue } from './types'
 

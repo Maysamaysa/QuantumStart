@@ -3,7 +3,7 @@
  * (Moved to src/pages/qubit/)
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTypewriter } from '../../../hooks/useTypewriter'
 import styles from './QubitOverlay.module.css'
