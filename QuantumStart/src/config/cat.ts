@@ -18,13 +18,13 @@ export const SLOT: Record<CatPosition, { pos: THREE.Vector3; scale: number }> = 
 
 export const TILT_CONFIG = {
     npc: {
-        ySensitivity: 0.001,
-        xSensitivity: 0.001,
+        ySensitivity: 0.0016, // Matched with hero mode for following mouse
+        xSensitivity: 0.0012,  // Increased for responsiveness
         lerpSpeed: 0.05,
     },
     hero: {
-        ySensitivity: -0.0008,
-        xSensitivity: 0.0008, // Negative in hero to match user's original logic
+        ySensitivity: 0.0016,  // Flipped and matched with npc direction
+        xSensitivity: 0.0012,  // Increased for responsiveness
         lerpSpeed: 0.05,
     }
 }

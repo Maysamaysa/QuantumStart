@@ -2,7 +2,6 @@ import type { Circuit } from '../lib/circuit/types';
 import type { Complex } from '../lib/simulator/stateVector';
 import { explainGate } from '../lib/explanations/gateExplanations';
 import { explainState } from '../lib/explanations/stateExplanations';
-import { sampleState } from '../lib/simulator/stateVector';
 import { runShots } from '../lib/simulator/shotRunner';
 import { MeasurementHistogram } from './MeasurementHistogram';
 import { useState, useEffect, useCallback } from 'react';
