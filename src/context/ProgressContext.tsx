@@ -45,6 +45,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
     }, [progress])
 
+    // Global setGamemode(val) handler
+    useEffect(() => {
+        window.setGamemode = (val: number) => {
+            const isDev = val === 1
+            setProgress(prev => ({ ...prev, devMode: isDev }))
+            console.log(`[QuantumStart] Dev Mode ${isDev ? 'ENABLED' : 'DISABLED'}`)
+        }
+    }, [])
+
     const unlockBadge = useCallback((badgeId: string) => {
         setProgress(prev => {
             if (prev.unlockedBadges.includes(badgeId)) return prev

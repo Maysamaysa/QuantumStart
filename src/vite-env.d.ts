@@ -10,3 +10,7 @@ declare module '*.gltf' {
     const src: string
     export default src
 }
+
+interface Window {
+    setGamemode: (val: number) => void;
+}

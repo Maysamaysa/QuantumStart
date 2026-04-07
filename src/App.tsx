@@ -83,6 +83,8 @@ function CatCanvas() {
   const { mode, qubitState, catPosition, isAwake, setAwake } = useCat()
   const location = useLocation()
   const isLanding = location.pathname === '/'
+  const isModule = location.pathname.includes('/learn/') && location.pathname !== '/learn'
+  const isTutorial = location.pathname.includes('/tutorial/')
 
   // State for click count lives here so native DOM handler can drive it
   // without relying on R3F raycasting (which was blocked by Html overlays)
@@ -100,6 +102,9 @@ function CatCanvas() {
         zIndex: 0,
         pointerEvents: isLanding ? 'auto' : 'none',
         cursor: isLanding && !isAwake ? 'pointer' : 'default',
+        opacity: (isModule || isTutorial) ? 0 : 1,
+        transition: 'opacity 0.6s ease',
+        visibility: (isModule || isTutorial) ? 'hidden' : 'visible'
       }}
       onClick={handleCanvasClick}
     >

@@ -172,13 +172,15 @@ export function Profile() {
 
             <div className={styles.resetZone}>
                 <button className={styles.resetBtn} onClick={handleReset}>Reset Quantum State (Clear Progress)</button>
-                <button 
-                    className={`${styles.resetBtn} ${progress.devMode ? styles.devModeActive : ''}`}
-                    style={{ marginLeft: '16px' }}
-                    onClick={toggleDevMode}
-                >
-                    {progress.devMode ? 'Disable Dev Mode' : 'Enable Dev Mode (Unlock All)'}
-                </button>
+                {!import.meta.env.PROD && (
+                    <button 
+                        className={`${styles.resetBtn} ${progress.devMode ? styles.devModeActive : ''}`}
+                        style={{ marginLeft: '16px' }}
+                        onClick={toggleDevMode}
+                    >
+                        {progress.devMode ? 'Disable Dev Mode' : 'Enable Dev Mode (Unlock All)'}
+                    </button>
+                )}
             </div>
         </div>
     )
