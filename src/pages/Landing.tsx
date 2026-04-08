@@ -118,39 +118,42 @@ export function Landing() {
             }} />
 
             {/* CC Attribution for the 3D Koi Cat model */}
-            <div style={{
-                position: 'absolute', bottom: 12, right: 16,
-                pointerEvents: 'auto',
-                fontSize: '0.65rem',
-                color: 'rgba(248, 249, 255, 0.35)',
-                fontFamily: "'DM Sans', sans-serif",
-                letterSpacing: '0.02em',
-                display: 'flex', alignItems: 'center', gap: '4px',
-            }}>
-                <span>🐱 Cat model:</span>
-                <a
-                    href="https://sketchfab.com/3d-models/koi-cat-216615de5f91404a90ba0a721e13dd36"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                        color: 'rgba(248, 249, 255, 0.45)',
-                        textDecoration: 'none',
-                        borderBottom: '1px solid rgba(248, 249, 255, 0.15)',
-                        transition: 'color 0.2s ease, border-color 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.color = 'rgba(255,183,197,0.8)'
-                        e.currentTarget.style.borderColor = 'rgba(255,183,197,0.4)'
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.color = 'rgba(248, 249, 255, 0.45)'
-                        e.currentTarget.style.borderColor = 'rgba(248, 249, 255, 0.15)'
-                    }}
-                >
-                    "Koi Cat" by radiergummi
-                </a>
-                <span style={{ opacity: 0.7 }}>(CC BY 4.0)</span>
-            </div>
+            <a
+                href="https://sketchfab.com/3d-models/koi-cat-216615de5f91404a90ba0a721e13dd36"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                    position: 'absolute', bottom: 16, right: 20,
+                    pointerEvents: 'auto',
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 16px',
+                    background: 'rgba(255, 255, 255, 0.12)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    fontSize: '0.78rem',
+                    fontWeight: 500,
+                    color: 'rgba(248, 249, 255, 0.75)',
+                    fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: '0.01em',
+                    textDecoration: 'none',
+                    transition: 'all 0.25s ease',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.borderColor = 'rgba(255,183,197,0.45)'
+                    e.currentTarget.style.color = 'rgba(255,183,197,0.95)'
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.color = 'rgba(248, 249, 255, 0.75)'
+                }}
+            >
+                🐱 "Koi Cat" by radiergummi · CC BY 4.0
+            </a>
         </section>
     )
 }
