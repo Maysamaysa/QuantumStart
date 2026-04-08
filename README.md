@@ -78,6 +78,12 @@ src/
 ## 🌟 Contributing
 We welcome observers from all states of superposition! Whether you're fixing a bug, suggesting a feature, or just pointing out a typo, feel free to open a PR.
 
+## 🎨 Credits
+
+| Asset | Author | License |
+|-------|--------|---------|
+| [Koi Cat](https://sketchfab.com/3d-models/koi-cat-216615de5f91404a90ba0a721e13dd36) 3D Model | [radiergummi](https://sketchfab.com/radiergummi) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+
 ## 📄 License
 This project is for educational purposes as part of a university project. All rights reserved by the original authors.
 
