@@ -24,7 +24,7 @@ export const TILT_CONFIG = {
     },
     hero: {
         ySensitivity: 0.0016,  // Flipped and matched with npc direction
-        xSensitivity: 0.0012,  // Increased for responsiveness
+        xSensitivity: 0.0009,  // Increased for responsiveness
         lerpSpeed: 0.05,
     }
 }
