@@ -116,6 +116,41 @@ export function Landing() {
                         : 'transparent',
                 transition: 'background 0.4s ease',
             }} />
+
+            {/* CC Attribution for the 3D Koi Cat model */}
+            <div style={{
+                position: 'absolute', bottom: 12, right: 16,
+                pointerEvents: 'auto',
+                fontSize: '0.65rem',
+                color: 'rgba(248, 249, 255, 0.35)',
+                fontFamily: "'DM Sans', sans-serif",
+                letterSpacing: '0.02em',
+                display: 'flex', alignItems: 'center', gap: '4px',
+            }}>
+                <span>🐱 Cat model:</span>
+                <a
+                    href="https://sketchfab.com/3d-models/koi-cat-216615de5f91404a90ba0a721e13dd36"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        color: 'rgba(248, 249, 255, 0.45)',
+                        textDecoration: 'none',
+                        borderBottom: '1px solid rgba(248, 249, 255, 0.15)',
+                        transition: 'color 0.2s ease, border-color 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'rgba(255,183,197,0.8)'
+                        e.currentTarget.style.borderColor = 'rgba(255,183,197,0.4)'
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'rgba(248, 249, 255, 0.45)'
+                        e.currentTarget.style.borderColor = 'rgba(248, 249, 255, 0.15)'
+                    }}
+                >
+                    "Koi Cat" by radiergummi
+                </a>
+                <span style={{ opacity: 0.7 }}>(CC BY 4.0)</span>
+            </div>
         </section>
     )
 }

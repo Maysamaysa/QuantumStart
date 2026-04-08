@@ -86,6 +86,9 @@ function CatCanvas() {
   const isModule = location.pathname.includes('/learn/') && location.pathname !== '/learn'
   const isTutorial = location.pathname.includes('/tutorial/')
 
+  // Hide cat on module/tutorial pages, but keep the procedural background visible
+  const showCat = !(isModule || isTutorial)
+
   // State for click count lives here so native DOM handler can drive it
   // without relying on R3F raycasting (which was blocked by Html overlays)
   const handleCanvasClick = () => {
@@ -102,9 +105,6 @@ function CatCanvas() {
         zIndex: 0,
         pointerEvents: isLanding ? 'auto' : 'none',
         cursor: isLanding && !isAwake ? 'pointer' : 'default',
-        opacity: (isModule || isTutorial) ? 0 : 1,
-        transition: 'opacity 0.6s ease',
-        visibility: (isModule || isTutorial) ? 'hidden' : 'visible'
       }}
       onClick={handleCanvasClick}
     >
@@ -124,13 +124,15 @@ function CatCanvas() {
           {/* Procedural background — always present */}
           <ProceduralBackground />
 
-          {/* The persistent cat */}
-          <QuantumCat
-            mode={mode}
-            qubitState={qubitState}
-            catPosition={catPosition}
-            onWakeUp={() => setAwake(true)}
-          />
+          {/* The persistent cat — hidden on module pages */}
+          {showCat && (
+            <QuantumCat
+              mode={mode}
+              qubitState={qubitState}
+              catPosition={catPosition}
+              onWakeUp={() => setAwake(true)}
+            />
+          )}
         </Suspense>
       </Canvas>
     </div>

@@ -230,8 +230,8 @@ export function SuperpositionOverlay({
                         emoji="🌊"
                         badgeName="Wave Master"
                         subtitle="You've mastered the fundamentals of Superposition."
-                        nextRoute="/learn/measurement"
-                        nextLabel="Next: Measurement →"
+                        nextRoute="/learn/bloch"
+                        nextLabel="Next: Bloch Sphere →"
                     />
                 </div>
             )}
